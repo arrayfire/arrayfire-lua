@@ -48,7 +48,6 @@ void ArrayMethods (lua_State * L)
 	luaL_newmetatable(L, "af_array"); // mt
 	lua_pushvalue(L, -1);	// mt, mt
 	lua_setfield(L, -2, "__index"); // mt = { __index = mt }
-
-	// Populate!
 	luaL_register(L, NULL, array_methods);
+	lua_pop(L, 1);	// (clear)
 }
