@@ -24,6 +24,9 @@
     <ClInclude Include="methods.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="funcs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="array_methods.cpp">
@@ -33,6 +36,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="array_creators.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

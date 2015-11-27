@@ -115,11 +115,13 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="funcs.h" />
     <ClInclude Include="methods.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="arrayfire.cpp" />
+    <ClCompile Include="array_creators.cpp" />
     <ClCompile Include="array_methods.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>

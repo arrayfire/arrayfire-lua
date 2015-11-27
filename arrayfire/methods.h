@@ -6,6 +6,6 @@ extern "C" {
 	#include <lauxlib.h>
 }
 
-void ArrayMethods (lua_State * L);
+int ArrayMethods (lua_State * L);
 
 #endif // METHODS_H
