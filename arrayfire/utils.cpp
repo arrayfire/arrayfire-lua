@@ -49,36 +49,27 @@ af_array GetArray (lua_State * L, int index)
 	return *(af_array *)lua_touserdata(L, index);
 }
 
-void * NewArray (lua_State * L)
+af_array * NewArray (lua_State * L)
 {
-	void * amem = lua_newuserdata(L, sizeof(af_array)); // amem
-
-	luaL_newmetatable(L, "af_array"); // amem, mt
-	lua_setmetatable(L, -2); // amem
-
-	return amem;
+	return (af_array *)lua_newuserdata(L, sizeof(af_array)); // ..., array
 }
 
 LuaDimsAndType::LuaDimsAndType (lua_State * L, int first)
 {
 	luaL_checktype(L, first + 1, LUA_TTABLE);
 
-	int n;
+	mType = (af_dtype)luaL_checkinteger(L, first + 2);
 
-	if (!lua_isnil(L, first)) n = lua_tointeger(L, first);
-
-	else n = lua_objlen(L, first + 1);
+	int n = luaL_checkint(L, first);
 
 	for (int i = 0; i < n; ++i)
 	{
-		lua_rawgeti(L, first + 1, i + 1);	// ..., n?, t[, type], ..., dim
+		lua_rawgeti(L, first + 1, i + 1);	// ..., n, t, type, ..., dim
 
 		mDims.push_back(lua_tointeger(L, -1));
 
-		lua_pop(L, 1);	// ..., n?, t[, type], ...
+		lua_pop(L, 1);	// ..., n, t, type, ...
 	}
-
-	mType = GetDataType(L, first + 2);
 }
 
 template<typename T> void AddToVector (std::vector<char> & arr, T value)
@@ -116,7 +107,7 @@ template<typename T> void AddInt (std::vector<char> & arr, lua_State * L, int in
 	lua_pop(L, 1); // ..., arr, ...
 }
 
-LuaData::LuaData (lua_State * L, int index, af_dtype type) : mType(type)
+LuaData::LuaData (lua_State * L, int index, af_dtype type, bool copy) : mType(type)
 {
 	// Non-string: build up from Lua array.
 	if (!lua_isstring(L, index))
@@ -184,11 +175,15 @@ LuaData::LuaData (lua_State * L, int index, af_dtype type) : mType(type)
 		}
 	}
 
-	// Already a Lua string: make a copy.
+	// Already a Lua string: make a copy or simply point to it.
 	else
 	{
 		const char * str = lua_tostring(L, index);
 
-		mData.assign(str, str + lua_objlen(L, index));
+		if (copy) mData.assign(str, str + lua_objlen(L, index));
+
+		else mDataPtr = str;
 	}
+
+	if (!mDataPtr) mDataPtr = &mData.front();
 }

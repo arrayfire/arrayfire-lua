@@ -12,14 +12,13 @@ template<af_err (*OP)(bool *, const af_array)> int Predicate (lua_State * L)
 
 	af_err err = OP(&result, GetArray(L, 1));
 
-	lua_pushboolean(L, result);	// arr, result
-
-	PushResult(L, err);	// arr, result, err
+	lua_pushinteger(L, err);// arr, err
+	lua_pushboolean(L, result);	// arr, err, result
 
 	return 2;
 }
 
-#define PRED_REG(cond) { "is" #cond, Predicate<&af_is_##cond> }
+#define PRED_REG(cond) { "af_is_" #cond, Predicate<&af_is_##cond> }
 
 //
 static const struct luaL_Reg array_methods[] = {
@@ -45,9 +44,6 @@ static const struct luaL_Reg array_methods[] = {
 // Populate with array methods, metamethods
 int ArrayMethods (lua_State * L)
 {
-	luaL_newmetatable(L, "af_array"); // mt
-	lua_pushvalue(L, -1);	// mt, mt
-	lua_setfield(L, -2, "__index"); // mt = { __index = mt }
 	luaL_register(L, NULL, array_methods);
 
 	return 0;

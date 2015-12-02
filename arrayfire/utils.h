@@ -15,7 +15,7 @@ void PushResult (lua_State * L, af_err err);
 
 af_array GetArray (lua_State * L, int index);
 
-void * NewArray (lua_State * L);
+af_array * NewArray (lua_State * L);
 
 class LuaDimsAndType {
 	af_dtype mType;
@@ -32,11 +32,12 @@ public:
 class LuaData {
 	af_dtype mType;
 	std::vector<char> mData;
+	const char * mDataPtr;
 
 public:
-	LuaData (lua_State * L, int index, af_dtype type);
+	LuaData (lua_State * L, int index, af_dtype type, bool copy = false);
 
-	const char * GetData (void) const { return &mData.front(); }
+	const char * GetData (void) const { return mDataPtr; }
 	af_dtype GetType (void) const { return mType; }
 };
 

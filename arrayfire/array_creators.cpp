@@ -2,59 +2,74 @@
 #include "funcs.h"
 #include "utils.h"
 
-// stack = data, ndims, dims, type
+static void PushErr (lua_State * L, af_err err)
+{
+	lua_pushinteger(L, err);// ..., arr_ud, err
+	lua_insert(L, -2);	// ..., err, arr_ud
+}
+
 static int CreateArray (lua_State * L)
 {
+	lua_settop(L, 4);	// data, ndims, dims, type
+
 	LuaDimsAndType dt(L, 2);
 
-	void * amem = NewArray(L); // ..., arr
+	af_array * arr_ud = NewArray(L);// data, ndims, dims, type, arr_ud
 
 	LuaData arr(L, 1, dt.GetType());
 
 //	dim_t dims[] = { 2, 2 }; // ndims = 2
 
-	PushResult(L, af_create_array((af_array *)amem, arr.GetData(), dt.GetNDims(), dt.GetDims(), arr.GetType())); // ..., arr, code
+	af_err err = af_create_array(arr_ud, arr.GetData(), dt.GetNDims(), dt.GetDims(), arr.GetType());
 
+	PushErr(L, err);// data, ndims, dims, type, err, arr_ud
+	
 	return 2;
 }
 
-// stack = ndims, dims, type
 static int CreateHandle (lua_State * L)
 {
+	lua_settop(L, 3);	// ndims, dims, type
+
 	LuaDimsAndType dt(L, 2);
 
-	void * amem = NewArray(L); // arr
+	af_array * arr_ud = NewArray(L);// ndims, dims, type, arr_ud
 
-	PushResult(L, af_create_handle((af_array *)amem, dt.GetNDims(), dt.GetDims(), GetDataType(L, 3))); // arr, code
+	af_err err = af_create_handle(arr_ud, dt.GetNDims(), dt.GetDims(), GetDataType(L, 3));
+
+	PushErr(L, err);// ndims, dims, type, err, arr_ud
 
 	return 2;
 }
 
-// stack = data, ndims, dims, type
 static int DeviceArray (lua_State * L)
 {
+	lua_settop(L, 4);	// data, ndims, dims, type
+
 	LuaDimsAndType dt(L, 2);
 
-	void * amem = NewArray(L); // ..., arr
+	af_array * parr = NewArray(L);	// data, ndims, dims, type, parr
 
 	LuaData arr(L, 1, dt.GetType());
 
-	PushResult(L, af_device_array((af_array *)amem, arr.GetData(), dt.GetNDims(), dt.GetDims(), arr.GetType())); // arr, code
+	af_err err = af_device_array(parr, arr.GetData(), dt.GetNDims(), dt.GetDims(), arr.GetType());
+
+	PushErr(L, err);// data, ndims, dims, type, err, arr_ud
 
 	return 2;
 }
 
 //
 static const struct luaL_Reg create_funcs[] = {
-	{ "create_array", CreateArray },
-	{ "create_handle", CreateHandle },
-	{ "device_array", DeviceArray },
+	{ "af_create_array", CreateArray },
+	{ "af_create_handle", CreateHandle },
+	{ "af_device_array", DeviceArray },
 	{ NULL, NULL }
 };
 
 int CreateArrayFuncs (lua_State * L)
 {
-	luaL_register(L, "af", create_funcs);
+	luaL_register(L, NULL, create_funcs);
 
 	return 0;
 }

@@ -113,7 +113,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
 		PushString(L, lpCmdLine);	// require, path
 
-		if (lua_pcall(L, 1, LUA_MULTRET, 0)) printf("%s\n", lua_tostring(L, -1));
+		if (lua_pcall(L, 1, 0, 0)) printf("%s\n", lua_tostring(L, -1));
 
 		lua_close(L);
 	}
