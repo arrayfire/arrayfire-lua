@@ -107,6 +107,19 @@ template<typename T> void AddInt (std::vector<char> & arr, lua_State * L, int in
 	lua_pop(L, 1); // ..., arr, ...
 }
 
+template<typename T> void AddComplex(std::vector<char> & arr, lua_State * L, int index, int pos)
+{
+	lua_rawgeti(L, index, pos + 1);	// ..., arr, ... complex
+	lua_rawgeti(L, -1, 1);	// ..., arr, ..., complex, real
+	lua_rawgeti(L, -2, 2);	// ..., arr, ..., complex, real, imag
+
+	std::complex<T> comp(Float<T>(L, -2), Float<T>(L, -1));
+
+	AddToVector(arr, comp);
+
+	lua_pop(L, 3);	// ..., arr, ...
+}
+
 LuaData::LuaData (lua_State * L, int index, af_dtype type, bool copy) : mType(type)
 {
 	// Non-string: build up from Lua array.
@@ -145,13 +158,13 @@ LuaData::LuaData (lua_State * L, int index, af_dtype type, bool copy) : mType(ty
 				AddFloat<float>(mData, L, index, i);
 				break;
 			case c32:
-				// ?
+				AddComplex<float>(mData, L, index, i);
 				break;
 			case f64:
 				AddFloat<double>(mData, L, index, i);
 				break;
 			case c64:
-				// ?
+				AddComplex<double>(mData, L, index, i);
 				break;
 			case b8:
 				AddInt<char>(mData, L, index, i);
