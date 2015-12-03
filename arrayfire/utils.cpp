@@ -54,21 +54,21 @@ af_array * NewArray (lua_State * L)
 	return (af_array *)lua_newuserdata(L, sizeof(af_array)); // ..., array
 }
 
-LuaDimsAndType::LuaDimsAndType (lua_State * L, int first)
+LuaDimsAndType::LuaDimsAndType (lua_State * L, int first, bool def_type)
 {
 	luaL_checktype(L, first + 1, LUA_TTABLE);
 
-	mType = (af_dtype)luaL_checkinteger(L, first + 2);
+	mType = def_type ? f32 : (af_dtype)luaL_checkinteger(L, first + 2);
 
 	int n = luaL_checkint(L, first);
 
 	for (int i = 0; i < n; ++i)
 	{
-		lua_rawgeti(L, first + 1, i + 1);	// ..., n, t, type, ..., dim
+		lua_rawgeti(L, first + 1, i + 1);	// ..., n, t, [type,] ..., dim
 
 		mDims.push_back(lua_tointeger(L, -1));
 
-		lua_pop(L, 1);	// ..., n, t, type, ...
+		lua_pop(L, 1);	// ..., n, t, [type,] ...
 	}
 }
 

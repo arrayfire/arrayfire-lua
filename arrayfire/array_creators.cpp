@@ -2,10 +2,12 @@
 #include "funcs.h"
 #include "utils.h"
 
-static void PushErr (lua_State * L, af_err err)
+static int PushErr (lua_State * L, af_err err)
 {
-	lua_pushinteger(L, err);// ..., arr_ud, err
-	lua_insert(L, -2);	// ..., err, arr_ud
+	lua_pushinteger(L, err);// ..., ret, err
+	lua_insert(L, -2);	// ..., err, ret
+
+	return 2;
 }
 
 template<af_err (*func)(af_array *, const void *, unsigned int, const dim_t *, af_dtype)> int Create (lua_State * L)
@@ -18,13 +20,9 @@ template<af_err (*func)(af_array *, const void *, unsigned int, const dim_t *, a
 
 	LuaData arr(L, 1, dt.GetType());
 
-	//	dim_t dims[] = { 2, 2 }; // ndims = 2
-
 	af_err err = func(arr_ud, arr.GetData(), dt.GetNDims(), dt.GetDims(), arr.GetType());
 
-	PushErr(L, err);// data, ndims, dims, type, err, arr_ud
-
-	return 2;
+	return PushErr(L, err);	// data, ndims, dims, type, err, arr_ud
 }
 
 template<af_err (*func)(af_array *, const af_array, const int)> int Diag (lua_State * L)
@@ -35,15 +33,8 @@ template<af_err (*func)(af_array *, const af_array, const int)> int Diag (lua_St
 
 	af_err err = func(arr_ud, GetArray(L, 1), lua_tointeger(L, 2));
 
-	PushErr(L, err);// arr, num, err, arr_ud
-
-	return 2;
+	return PushErr(L, err);	// arr, num, err, arr_ud
 }
-/*
-
-AFAPI af_err 	af_range(af_array *out, const unsigned ndims, const dim_t *const dims, const int seq_dim, const af_dtype type)
-// ^^^ Can use some swapping?
-*/
 
 template<af_err (*func)(af_array *, const unsigned, const dim_t *, const af_dtype)> int DimsAndType (lua_State * L)
 {
@@ -55,9 +46,7 @@ template<af_err (*func)(af_array *, const unsigned, const dim_t *, const af_dtyp
 
 	af_err err = func(arr_ud, dt.GetNDims(), dt.GetDims(), GetDataType(L, 3));
 
-	PushErr(L, err);// ndims, dims, type, err, arr_ud
-
-	return 2;
+	return PushErr(L, err);	// ndims, dims, type, err, arr_ud
 }
 
 template<af_err (*func)(af_array *, const af_array, bool)> int Triangle (lua_State * L)
@@ -68,9 +57,7 @@ template<af_err (*func)(af_array *, const af_array, bool)> int Triangle (lua_Sta
 
 	af_err err = func(arr_ud, GetArray(L, 1), lua_toboolean(L, 2));
 
-	PushErr(L, err);// arr, is_unit_diag, err, arr_ud
-
-	return 2;
+	return PushErr(L, err);	// arr, is_unit_diag, err, arr_ud
 }
 
 static void * GetMemory (lua_State * L, int index)
@@ -82,16 +69,59 @@ static void * GetMemory (lua_State * L, int index)
 
 //
 static const struct luaL_Reg create_funcs[] = {
-	/*
-	AFAPI af_err 	af_constant (af_array *arr, const double val, const unsigned ndims, const dim_t *const dims, const af_dtype type)
-
-	AFAPI af_err 	af_constant_complex (af_array *arr, const double real, const double imag, const unsigned ndims, const dim_t *const dims, const af_dtype type)
-
-	AFAPI af_err 	af_constant_long (af_array *arr, const intl val, const unsigned ndims, const dim_t *const dims)
-
-	AFAPI af_err 	af_constant_ulong (af_array *arr, const uintl val, const unsigned ndims, const dim_t *const dims)
-	*/
 	{
+		"af_constant", [](lua_State * L)
+		{
+			lua_settop(L, 4);	// val, ndims, dims, type
+
+			LuaDimsAndType dt(L, 2);
+
+			af_array * arr_ud = NewArray(L);// val, ndims, dims, type, arr_ud
+
+			af_err err = af_constant(arr_ud, lua_tonumber(L, 1), dt.GetNDims(), dt.GetDims(), dt.GetType());
+
+			return PushErr(L, err);	// val, ndims, dims, type, err, arr_ud
+		}
+	}, {
+		"af_constant_complex", [](lua_State * L)
+		{
+			lua_settop(L, 5);	// real, imag, ndims, dims, type
+
+			LuaDimsAndType dt(L, 3);
+
+			af_array * arr_ud = NewArray(L);// real, imag, ndims, dims, type, arr_ud
+
+			af_err err = af_constant_complex(arr_ud, lua_tonumber(L, 1), lua_tonumber(L, 2), dt.GetNDims(), dt.GetDims(), dt.GetType());
+
+			return PushErr(L, err);	// real, imag, ndims, dims, type, err, arr_ud
+		}
+	}, {
+		"af_constant_long", [](lua_State * L)
+		{
+			lua_settop(L, 3);	// val, ndims, dims
+
+			LuaDimsAndType dims(L, 2, true);// Just dims, no type
+
+			af_array * arr_ud = NewArray(L);// val, ndims, dims, arr_ud
+
+			af_err err = af_constant_long (arr_ud, (intl)lua_tointeger(L, 1), dims.GetNDims(), dims.GetDims());
+
+			return PushErr(L, err);	// val, ndims, dims, err, arr_ud
+		}
+	}, {
+		"af_constant_ulong", [](lua_State * L)
+		{
+			lua_settop(L, 3);	// val, ndims, dims
+
+			LuaDimsAndType dims(L, 2, true);// Just dims, no type
+
+			af_array * arr_ud = NewArray(L);// val, ndims, dims, arr_ud
+
+			af_err err = af_constant_ulong (arr_ud, (uintl)lua_tointeger(L, 1), dims.GetNDims(), dims.GetDims());
+
+			return PushErr(L, err);	// val, ndims, dims, err, arr_ud
+		}
+	}, {
 		"af_create_array", Create<&af_create_array>
 	}, {
 		"af_create_handle", DimsAndType<&af_create_handle>
@@ -112,9 +142,7 @@ static const struct luaL_Reg create_funcs[] = {
 
 			lua_pushinteger(L, seed);	// seed
 
-			PushErr(L, err);// err, seed
-
-			return 2;
+			return PushErr(L, err);	// err, seed
 		}
 	}, {
 		"af_identity", DimsAndType<&af_identity>
@@ -123,16 +151,14 @@ static const struct luaL_Reg create_funcs[] = {
 		{
 			lua_settop(L, 5);	// ndims, dims, t_ndims, tdims, type
 
-		//	LuaDims dims(L, 1);
+			LuaDimsAndType dims(L, 1, false);	// Just dims, no type
 			LuaDimsAndType t_dt(L, 3);
 
 			af_array * arr_ud = NewArray(L);// ndims, dims, t_ndims, tdims, type, arr_ud
 
-		//	af_err err = af_iota(af_array *out, const unsigned ndims, const dim_t *const dims, const unsigned t_ndims, const dim_t *const tdims, const af_dtype type)
+			af_err err = af_iota(arr_ud, dims.GetNDims(), dims.GetDims(), t_dt.GetNDims(), t_dt.GetDims(), t_dt.GetType());
 
-		//	PushErr(L, err);// ndims, dims, t_ndims, tdims, type, err, arr_ud
-
-			return 2;
+			return PushErr(L, err);	// ndims, dims, t_ndims, tdims, type, err, arr_ud
 		}
 	}, {
 		"af_load_image", [](lua_State * L)
@@ -143,22 +169,18 @@ static const struct luaL_Reg create_funcs[] = {
 
 			af_err err = af_load_image(arr_ud, lua_tostring(L, 1), lua_toboolean(L, 2));
 
-			PushErr(L, err);// filename, is_color, err, arr_ud
-
-			return 2;
+			return PushErr(L, err);	// filename, is_color, err, arr_ud
 		}
 	}, {
 		"af_load_image_memory", [](lua_State * L)
 		{
 			lua_settop(L, 1);	// ptr
 
-			af_array * arr_ud = NewArray(L);// data, ndims, dims, type, parr
+			af_array * arr_ud = NewArray(L);// ptr, arr_ud
 
 			af_err err = af_load_image_memory(arr_ud, GetMemory(L, 1));
 
-			PushErr(L, err);// ptr, err, arr_ud
-
-			return 2;
+			return PushErr(L, err);	// ptr, err, arr_ud
 		}
 	}, {
 		"af_lower", Triangle<&af_lower>
@@ -166,6 +188,20 @@ static const struct luaL_Reg create_funcs[] = {
 		"af_randn", DimsAndType<&af_randn>
 	}, {
 		"af_randu", DimsAndType<&af_randu>
+	}, {
+		"af_range", [](lua_State * L)
+		{
+			lua_settop(L, 4);	// ndims, dims, seq_dim, type
+			lua_insert(L, 3);	// ndims, dims, type, seq_dim
+
+			LuaDimsAndType dt(L, 1);
+				
+			af_array * arr_ud = NewArray(L);// data, ndims, dims, type, arr_ud
+
+			af_err err = af_range(arr_ud, dt.GetNDims(), dt.GetDims(), lua_tointeger(L, 4), dt.GetType());
+
+			return PushErr(L, err);	// data, ndims, dims, type, err, arr_ud
+		}
 	}, {
 		"af_set_seed", [](lua_State * L)
 		{

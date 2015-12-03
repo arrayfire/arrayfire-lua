@@ -22,7 +22,7 @@ class LuaDimsAndType {
 	std::vector<dim_t> mDims;
 
 public:
-	LuaDimsAndType (lua_State * L, int first);
+	LuaDimsAndType (lua_State * L, int first, bool def_type = false);
 
 	int GetNDims (void) const { return mDims.size(); }
 	const dim_t * GetDims (void) const { return &mDims.front(); }
