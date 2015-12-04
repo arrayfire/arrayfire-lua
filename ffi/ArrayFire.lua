@@ -3,7 +3,7 @@
 local ffi  = require( "ffi" )
 
 local name, path = "af", os.getenv("AF_PATH") .. "/"
-local is_32_bit = ffi.abi("32bit")
+local is_32_bit = ffi.abi("32bit") -- used to typedef dim_t
 
 
 if ArrayFireMode == "cl" or ArrayFireMode == "cuda" then
@@ -19,7 +19,6 @@ local libs = ffi_ArrayFireLibs or {
 }
 
 local lib  = ffi_ArrayFire_lib or libs[ ffi.os ][ ffi.arch ]
-
 local af   = ffi.load( lib )
 
 ffi.cdef([[
@@ -301,12 +300,72 @@ ffi.cdef([[
 	af_err af_upper (af_array *, const af_array, bool);
 
 	/* Backends */
+
 	/* Computer Vision */
+	af_err af_dog (af_array *, const af_array, const int, const int);
+	af_err af_fast (af_features *, const af_array, const float, const unsigned, const bool, const float, const unsigned);
+	af_err af_gloh (af_features *, af_array *, const af_array, const unsigned, const float, const float, const float, const bool, const float, const float);
+	af_err af_harris (af_features *, const af_array, const unsigned, const float, const float, const unsigned, const float);
+	af_err af_orb (af_features *, af_array *, const af_array, const float, const unsigned, const float, const unsigned, const bool);
+	af_err af_sift (af_features *, af_array *, const af_array, const unsigned, const float, const float, const float, const bool, const float, const float);
+	af_err af_susan (af_features *, const af_array, const unsigned, const float, const float, const float, const unsigned);
+
 	/* Image Processing */
+	af_err af_bilateral (af_array *, const af_array, const float, const float, const bool);
+	af_err af_color_space ( af_array *, const af_array, const af_cspace_t, const af_cspace_t);
+	af_err af_dilate (af_array *, const af_array, const af_array);
+	af_err af_dilate3 (af_array *, const af_array, const af_array);
+	af_err af_erode (af_array *, const af_array, const af_array);
+	af_err af_erode3 (af_array *, const af_array, const af_array);
+	af_err af_gaussian_kernel (af_array *, const int, const int, const double, const double);
+	af_err af_gray2rgb (af_array *, const af_array, const float, const float, const float);
+	af_err af_hist_equal (af_array *, const af_array, const af_array);
+	af_err af_histogram (af_array *, const af_array, const unsigned, const double, const double);
+	af_err af_hsv2rgb (af_array *, const af_array);
+	af_err af_minfilt (af_array *, const af_array, const dim_t, const dim_t, const af_border_type);
+	af_err af_mean_shift (af_array *, const af_array, const float, const float, const unsigned, const bool);
+	af_err af_medfilt (af_array *, const af_array, const dim_t, const dim_t, const af_border_type);
+	af_err af_maxfilt (af_array *, const af_array, const dim_t, const dim_t, const af_border_type);
+	af_err af_regions (af_array *, const af_array, const af_connectivity, const af_dtype);
+	af_err af_resize (af_array *, const af_array, const dim_t, const dim_t, const af_interp_type);
+	af_err af_rgb2gray (af_array *, const af_array, const float, const float, const float);
+	af_err af_rgb2hsv (af_array *, const af_array);
+	af_err af_rgb2ycbcr (af_array *, const af_array, const af_ycc_std);	
+	af_err af_rotate (af_array *, const af_array, const float, const bool, const af_interp_type);
+	af_err af_sat (af_array *, const af_array);
+	af_err af_scale (af_array *, const af_array, const float, const float, const dim_t, const dim_t, const af_interp_type);
+	af_err af_skew (af_array *, const af_array, const float, const float, const dim_t, const dim_t, const af_interp_type, const bool);
+	af_err af_sobel_operator (af_array *, af_array *, const af_array, const unsigned);
+	af_err af_transform (af_array *, const af_array, const af_array, const dim_t, const dim_t, const af_interp_type, const bool);
+	af_err af_translate (af_array *, const af_array, const float, const float, const dim_t, const dim_t, const af_interp_type);
+	af_err af_unwrap (af_array *, const af_array, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const bool);
+	af_err af_wrap (af_array *, const af_array, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const bool);
+	af_err af_ycbcr2rgb (af_array *, const af_array, const af_ycc_std);
+
 	/* Interface */
+
 	/* IO */
+
 	/* Linear Algebra */
-	
+	af_err af_cholesky (af_array *, int *, const af_array, const bool);
+	af_err af_cholesky_inplace (int *, const af_array, const bool);
+	af_err af_det (double *, double *, const af_array);
+	af_err af_dot (af_array *, const af_array, const af_array, const af_mat_prop, const af_mat_prop);
+	af_err af_inverse (af_array *, const af_array, const af_array, const af_mat_prop);
+	af_err af_lu (af_array *, af_array *, af_array *, const af_array);
+	af_err af_lu_inplace (af_array *, af_array, const bool);		
+	af_err af_matmul (af_array *, const af_array, const af_array, const af_mat_prop, const af_mat_prop);
+	af_err af_norm (double *, const af_array, const af_norm_type, const double, const double);
+	af_err af_qr (af_array *, af_array *, af_array *, const af_array);
+	af_err af_qr_inplace ( af_array *, af_array);
+	af_err af_rank (unsigned *, const af_array, const double);
+	af_err af_solve (af_array *, const af_array, const af_array, const af_mat_prop);
+	af_err af_solve_lu (af_array *, const af_array, const af_array, const af_array, const af_mat_prop);
+	af_err af_svd (af_array *, af_array *, af_array *, const af_array);
+	af_err af_svd_inplace (af_array *, af_array *, af_array *, const af_array);
+	af_err af_transpose (af_array *, af_array, const bool);
+	af_err af_transpose_inplace (af_array, const bool);
+
 	/* Mathematics */
 	af_err af_abs (af_array *, const af_array);
 	af_err af_acos (af_array *, const af_array);
@@ -372,7 +431,51 @@ ffi.cdef([[
 	af_err af_sub (af_array *, const af_array, const af_array, const bool);
 
 	/* Signal Processing */
+	af_err af_approx1 (af_array *, const af_array, const af_array, const af_interp_type, const float);
+	af_err af_approx2 (af_array *, const af_array, const af_array, const af_array, const af_interp_type, const float);
+	af_err af_convolve1 (af_array *, const af_array, const af_array, const af_conv_mode, af_conv_domain);
+	af_err af_convolve2 (af_array *, const af_array, const af_array, const af_conv_mode, af_conv_domain);
+	af_err af_convolve2_sep (af_array *, const af_array, const af_array, const af_array, const af_conv_mode);	
+	af_err af_convolve3 (af_array *, const af_array, const af_array, const af_conv_mode, af_conv_domain);
+	af_err af_fir (af_array *, const af_array, const af_array);
+	af_err af_ifft (af_array *, const af_array, const double, const dim_t);
+	af_err af_ifft_inplace (af_array, const double);
+	af_err af_ifft2 (af_array *, const af_array, const double, const dim_t, const dim_t);
+	af_err af_ifft2_inplace (af_array, const double);
+	af_err af_ifft3 (af_array *, const af_array, const double, const dim_t, const dim_t, const dim_t);	
+	af_err af_ifft3_inplace (af_array, const double);
+	af_err af_iir (af_array *, const af_array, const af_array, const af_array);
+	af_err af_fft (af_array *, const af_array, const double, const dim_t);	
+	af_err af_fft_convolve2	(af_array *, const af_array, const af_array, const af_conv_mode);
+	af_err af_fft_convolve3	(af_array *, const af_array, const af_array, const af_conv_mode);	
+	af_err af_fft_c2r (af_array *, const af_array, const double, const bool);
+	af_err af_fft_inplace (af_array, const double);
+	af_err af_fft_r2c (af_array *, const af_array, const double, const dim_t);
+	af_err af_fft2 (af_array *, const af_array, const double, const dim_t, const dim_t);	
+	af_err af_fft2_c2r (af_array *, const af_array, const double, const bool);
+	af_err af_fft2_inplace (af_array, const double);
+	af_err af_fft2_r2c (af_array *, const af_array, const double, const dim_t, const dim_t);
+	af_err af_fft3 (af_array *, const af_array, const double, const dim_t, const dim_t, const dim_t);	
+	af_err af_fft3_c2r (af_array *, const af_array, const double, const bool);
+	af_err af_fft3_inplace (af_array, const double);
+	af_err af_fft3_r2c (af_array *, const af_array, const double, const dim_t, const dim_t, const dim_t);
+
 	/* Statistics */
+	af_err af_corrcoef (double *, double *, const af_array, const af_array);
+	af_err af_cov (	af_array *, const af_array, const af_array, const bool);
+	af_err af_median (af_array *, const af_array, const dim_t);
+	af_err af_median_all (double *, double *, const af_array);
+	af_err af_mean (af_array *, const af_array, const dim_t);
+	af_err af_mean_all (double *, double *, const af_array);
+	af_err af_mean_all_weighted (double *, double *, const af_array, const af_array);	
+	af_err af_mean_weighted (af_array *, const af_array, const af_array, const dim_t);
+	af_err af_stdev (af_array *, const af_array, const dim_t);
+	af_err af_stdev_all (double *, double *, const af_array);
+	af_err af_var (af_array *, const af_array, const bool, const dim_t);
+	af_err af_var_all (double *, double *, const af_array, const bool);	
+	af_err af_var_all_weighted (double *, double *, const af_array, const af_array);
+	af_err af_var_weighted (af_array *, const af_array, const af_array, const dim_t);
+
 	/* Vector */
 
 	/* Array Methods */
@@ -402,10 +505,15 @@ ffi.cdef([[
 	af_err af_write_array (af_array, const void *, const size_t, af_source);
 
 	/* Assign / Index */
+
 	/* Device */
+
 	/* Helper */
+
 	/* Move / Reorder */
+
 	/* Draw */
+
 	/* Window */
 	
 ]])
