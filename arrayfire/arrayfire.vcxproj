@@ -116,6 +116,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="funcs.h" />
+    <ClInclude Include="graphics.h" />
     <ClInclude Include="methods.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
@@ -133,6 +134,8 @@
     <ClCompile Include="funcs\SignalProcessing.cpp" />
     <ClCompile Include="funcs\Statistics.cpp" />
     <ClCompile Include="funcs\Vector.cpp" />
+    <ClCompile Include="graphics\Draw.cpp" />
+    <ClCompile Include="graphics\Window.cpp" />
     <ClCompile Include="methods\AssignIndex.cpp" />
     <ClCompile Include="methods\Device.cpp" />
     <ClCompile Include="methods\Helper.cpp" />

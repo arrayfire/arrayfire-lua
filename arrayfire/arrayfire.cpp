@@ -1,4 +1,5 @@
 #include "funcs.h"
+#include "graphics.h"
 #include "methods.h"
 
 void Register (lua_State * L, lua_CFunction func)
@@ -39,6 +40,10 @@ extern "C" __declspec(dllexport) int luaopen_arrayfire (lua_State * L)
 	Register(L, &Device);
 	Register(L, &Helper);
 	Register(L, &MoveReorder);
+
+	// Graphics functions
+	Register(L, &Draw);
+	Register(L, &Window);
 
 	return 1;
 }
