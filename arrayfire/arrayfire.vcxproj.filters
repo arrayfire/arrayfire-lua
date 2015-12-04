@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Functions">
+      <UniqueIdentifier>{54c07baa-ddcd-44e4-8102-9fdd828abbd5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Methods">
+      <UniqueIdentifier>{a805b45a-a3f0-4132-85e0-f33161455424}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -40,6 +46,48 @@
     </ClCompile>
     <ClCompile Include="array_creators.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="methods\AssignIndex.cpp">
+      <Filter>Source Files\Methods</Filter>
+    </ClCompile>
+    <ClCompile Include="methods\Device.cpp">
+      <Filter>Source Files\Methods</Filter>
+    </ClCompile>
+    <ClCompile Include="methods\Helper.cpp">
+      <Filter>Source Files\Methods</Filter>
+    </ClCompile>
+    <ClCompile Include="methods\MoveReorder.cpp">
+      <Filter>Source Files\Methods</Filter>
+    </ClCompile>
+    <ClCompile Include="funcs\Backends.cpp">
+      <Filter>Source Files\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="funcs\ComputerVision.cpp">
+      <Filter>Source Files\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="funcs\ImageProcessing.cpp">
+      <Filter>Source Files\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="funcs\Interface.cpp">
+      <Filter>Source Files\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="funcs\IO.cpp">
+      <Filter>Source Files\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="funcs\LinearAlgebra.cpp">
+      <Filter>Source Files\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="funcs\Math.cpp">
+      <Filter>Source Files\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="funcs\SignalProcessing.cpp">
+      <Filter>Source Files\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="funcs\Statistics.cpp">
+      <Filter>Source Files\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="funcs\Vector.cpp">
+      <Filter>Source Files\Functions</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

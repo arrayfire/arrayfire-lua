@@ -123,6 +123,20 @@
     <ClCompile Include="arrayfire.cpp" />
     <ClCompile Include="array_creators.cpp" />
     <ClCompile Include="array_methods.cpp" />
+    <ClCompile Include="funcs\Backends.cpp" />
+    <ClCompile Include="funcs\ComputerVision.cpp" />
+    <ClCompile Include="funcs\ImageProcessing.cpp" />
+    <ClCompile Include="funcs\Interface.cpp" />
+    <ClCompile Include="funcs\IO.cpp" />
+    <ClCompile Include="funcs\LinearAlgebra.cpp" />
+    <ClCompile Include="funcs\Math.cpp" />
+    <ClCompile Include="funcs\SignalProcessing.cpp" />
+    <ClCompile Include="funcs\Statistics.cpp" />
+    <ClCompile Include="funcs\Vector.cpp" />
+    <ClCompile Include="methods\AssignIndex.cpp" />
+    <ClCompile Include="methods\Device.cpp" />
+    <ClCompile Include="methods\Helper.cpp" />
+    <ClCompile Include="methods\MoveReorder.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

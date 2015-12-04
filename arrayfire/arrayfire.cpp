@@ -20,11 +20,25 @@ extern "C" __declspec(dllexport) int luaopen_arrayfire (lua_State * L)
 {
 	lua_createtable(L, 0, 0);	// af
 
+	// Library functions
 	Register(L, &CreateArrayFuncs);
-	// TODO: Other functions!
+	Register(L, &Backends);
+	Register(L, &ComputerVision);
+	Register(L, &ImageProcessing);
+	Register(L, &Interface);
+	Register(L, &IO);
+	Register(L, &LinearAlgebra);
+	Register(L, &Math);
+	Register(L, &SignalProcessing);
+	Register(L, &Statistics);
+	Register(L, &Vector);
 
+	// Array methods
 	Register(L, &ArrayMethods);
-	// TODO: Other objects!
+	Register(L, &AssignIndex);
+	Register(L, &Device);
+	Register(L, &Helper);
+	Register(L, &MoveReorder);
 
 	return 1;
 }
