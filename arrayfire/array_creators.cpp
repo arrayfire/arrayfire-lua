@@ -2,14 +2,6 @@
 #include "funcs.h"
 #include "utils.h"
 
-static int PushErr (lua_State * L, af_err err)
-{
-	lua_pushinteger(L, err);// ..., ret, err
-	lua_insert(L, -2);	// ..., err, ret
-
-	return 2;
-}
-
 template<af_err (*func)(af_array *, const void *, unsigned int, const dim_t *, af_dtype)> int Create (lua_State * L)
 {
 	lua_settop(L, 4);	// data, ndims, dims, type
@@ -58,13 +50,6 @@ template<af_err (*func)(af_array *, const af_array, bool)> int Triangle (lua_Sta
 	af_err err = func(arr_ud, GetArray(L, 1), lua_toboolean(L, 2));
 
 	return PushErr(L, err);	// arr, is_unit_diag, err, arr_ud
-}
-
-static void * GetMemory (lua_State * L, int index)
-{
-	if (lua_type(L, index) == LUA_TSTRING) return (void *)lua_tostring(L, index);
-
-	else return lua_touserdata(L, index);
 }
 
 //

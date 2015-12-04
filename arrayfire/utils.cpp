@@ -44,6 +44,21 @@ void PushResult (lua_State * L, af_err err)
 
 #undef RESULT_CODE
 
+int PushErr(lua_State * L, af_err err, int nret)
+{
+	lua_pushinteger(L, err);// ..., ret1, [ret2, ...], err
+	lua_insert(L, -(nret + 1));	// ..., err, ret1[, ret2, ...]
+
+	return nret + 1;
+}
+
+void * GetMemory (lua_State * L, int index)
+{
+	if (lua_type(L, index) == LUA_TSTRING) return (void *)lua_tostring(L, index);
+
+	else return lua_touserdata(L, index);
+}
+
 af_array GetArray (lua_State * L, int index)
 {
 	return *(af_array *)lua_touserdata(L, index);

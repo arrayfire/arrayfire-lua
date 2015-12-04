@@ -6,11 +6,35 @@ extern "C" {
 	#include <lauxlib.h>
 }
 
-template<af_err (*OP)(bool *, const af_array)> int Predicate (lua_State * L)
+template<af_err (*func)(af_array *, af_array)> int ArrayToArray (lua_State * L)
 {
+	lua_settop(L, 1);	// in
+
+	af_array * arr_ud = NewArray(L);// in, arr_ud
+
+	af_err err = func(arr_ud, GetArray(L, 1));
+
+	return PushErr(L, err);	// in, err, arr_ud
+}
+
+template<af_err (*func)(af_array)> int ArrayOnly (lua_State * L)
+{
+	lua_settop(L, 1);	// in
+
+	af_err err = func(GetArray(L, 1));
+
+	lua_pushinteger(L, err);// in, err
+
+	return 1;
+}
+
+template<af_err (*func)(bool *, const af_array)> int Predicate (lua_State * L)
+{
+	lua_settop(L, 1);	// arr
+
 	bool result;
 
-	af_err err = OP(&result, GetArray(L, 1));
+	af_err err = func(&result, GetArray(L, 1));
 
 	lua_pushinteger(L, err);// arr, err
 	lua_pushboolean(L, result);	// arr, err, result
@@ -22,6 +46,98 @@ template<af_err (*OP)(bool *, const af_array)> int Predicate (lua_State * L)
 
 //
 static const struct luaL_Reg array_methods[] = {
+	{
+		"af_copy_array", ArrayToArray<&af_copy_array>
+	}, {
+		"af_eval", ArrayOnly<&af_eval>
+	}, {
+		"af_get_data_ref_count", [](lua_State * L)
+		{
+			lua_settop(L, 1);	// arr
+
+			int count;
+
+			af_err err = af_get_data_ref_count(&count, GetArray(L, 1));
+
+			lua_pushinteger(L, err);// arr, err
+			lua_pushinteger(L, count);	// arr, err, count
+
+			return 2;
+		}
+	}, {
+		"af_get_data_ptr", [](lua_State * L)
+		{
+			lua_settop(L, 2);	// data, arr
+
+			int count;
+
+			af_err err = af_get_data_ptr(lua_touserdata(L, 1), GetArray(L, 2));
+
+			lua_pushinteger(L, err);// arr, err
+
+			return 1;
+		}
+	}, {
+		"af_get_dims", [](lua_State * L)
+		{
+			lua_settop(L, 1);	// in
+
+			dim_t d1, d2, d3, d4;
+
+			af_err err = af_get_dims(&d1, &d2, &d3, &d4, GetArray(L, 1));
+
+			lua_pushinteger(L, err);// in, err
+			lua_pushinteger(L, d1);	// in, err, d1
+			lua_pushinteger(L, d2);	// in, err, d1, d2
+			lua_pushinteger(L, d3);	// in, err, d1, d2, d3
+			lua_pushinteger(L, d4);	// in, err, d1, d2, d3, d4
+
+			return 5;
+		}
+	}, {
+		"af_get_elements", [](lua_State * L)
+		{
+			lua_settop(L, 1);	// arr
+
+			dim_t elems;
+
+			af_err err = af_get_elements(&elems, GetArray(L, 1));
+
+			lua_pushinteger(L, err);// arr, err
+			lua_pushinteger(L, elems);	// arr, err, elems
+
+			return 2;
+		}
+	}, {
+		"af_get_numdims", [](lua_State * L)
+		{
+			lua_settop(L, 1);	// arr
+
+			unsigned int ndims;
+
+			af_err err = af_get_numdims(&ndims, GetArray(L, 1));
+
+			lua_pushinteger(L, err);// arr, err
+			lua_pushinteger(L, ndims);	// arr, err, ndims
+
+			return 2;
+		}
+	}, {
+		"af_get_type", [](lua_State * L)
+		{
+			lua_settop(L, 1);	// arr
+
+			af_dtype type;
+
+			af_err err = af_get_type(&type, GetArray(L, 1));
+
+			lua_pushinteger(L, err);// arr, err
+			lua_pushinteger(L, type);	// arr, err, type
+
+			return 2;
+		}
+	},
+
 	PRED_REG(empty),
 	PRED_REG(scalar),
 	PRED_REG(vector),
@@ -35,7 +151,24 @@ static const struct luaL_Reg array_methods[] = {
 	PRED_REG(floating),
 	PRED_REG(integer),
 	PRED_REG(bool),
-	// TODO: Other methods
+
+	{
+		"af_release_array", ArrayOnly<&af_release_array>
+	}, {
+		"af_retain_array", ArrayToArray<&af_retain_array>
+	}, {
+		"af_write_array", [](lua_State * L)
+		{
+			lua_settop(L, 4);	// arr, data, bytes, src
+
+			af_err err = af_write_array(GetArray(L, 1), GetMemory(L, 2), lua_tointeger(L, 3), (af_source)lua_tointeger(L, 4));
+
+			lua_pushinteger(L, err);// arr, data, bytes, src, err
+
+			return 1;
+		}
+	},
+
 	{ NULL, NULL }
 };
 
@@ -48,37 +181,3 @@ int ArrayMethods (lua_State * L)
 
 	return 0;
 }
-
-/*
-AFAPI af_err 	af_copy_array (af_array *arr, const af_array in)
- 	Deep copy an array to another. More...
- 
-AFAPI af_err 	af_get_data_ref_count (int *use_count, const af_array in)
- 	Get the use count of af_array More...
- 
-AFAPI af_err 	af_write_array (af_array arr, const void *data, const size_t bytes, af_source src)
- 	Copy data from a C pointer (host/device) to an existing array. More...
- 
-AFAPI af_err 	af_get_data_ptr (void *data, const af_array arr)
- 	Copy data from an af_array to a C pointer. More...
- 
-AFAPI af_err 	af_release_array (af_array arr)
- 	Reduce the reference count of the af_array. More...
- 
-AFAPI af_err 	af_retain_array (af_array *out, const af_array in)
- 	Increments an af_array reference count. More...
- 
-AFAPI af_err 	af_eval (af_array in)
- 	Evaluate any expressions in the Array. More...
- 
-AFAPI af_err 	af_get_elements (dim_t *elems, const af_array arr)
- 	Gets the number of elements in an array. More...
- 
-AFAPI af_err 	af_get_type (af_dtype *type, const af_array arr)
- 	Gets the type of an array. More...
- 
-AFAPI af_err 	af_get_dims (dim_t *d0, dim_t *d1, dim_t *d2, dim_t *d3, const af_array arr)
- 	Gets the dimseions of an array. More...
- 
-AFAPI af_err 	af_get_numdims (unsigned *result, const af_array arr)
-*/

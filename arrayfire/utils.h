@@ -13,6 +13,10 @@ af_dtype GetDataType (lua_State * L, int index);
 
 void PushResult (lua_State * L, af_err err);
 
+int PushErr (lua_State * L, af_err err, int nret = 1);
+
+void * GetMemory (lua_State * L, int index);
+
 af_array GetArray (lua_State * L, int index);
 
 af_array * NewArray (lua_State * L);
