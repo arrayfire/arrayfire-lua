@@ -277,6 +277,30 @@ ffi.cdef([[
 	typedef long long intl;
 	typedef unsigned long long uintl;
 
+	typedef struct af_seq {
+		double begin, end;
+		double step;
+	} af_seq;
+
+	typedef struct af_index_t{
+		union {
+			af_array arr;   ///< The af_array used for indexing
+			af_seq   seq;   ///< The af_seq used for indexing
+		} idx;
+
+		bool     isSeq;     ///< If true the idx value represents a seq
+		bool     isBatch;   ///< If true the seq object is a batch parameter
+	} af_index_t;
+
+	typedef struct {
+		int row;
+		int col;
+		const char* title;
+		af_colormap cmap;
+	} af_cell;
+
+	typedef unsigned long long af_window;
+
 	/* Constructors */
 	af_err af_create_array (af_array *, const void * const, const unsigned, const dim_t * const, const af_dtype);
 	af_err af_create_handle (af_array *, const unsigned, const dim_t * const, const af_dtype);
@@ -300,7 +324,12 @@ ffi.cdef([[
 	af_err af_upper (af_array *, const af_array, bool);
 
 	/* Backends */
-
+/*
+AFAPI af_err 	af_get_available_backends (int *backends)
+AFAPI af_err 	af_get_backend_count (unsigned *num_backends)
+AFAPI af_err 	af_get_backend_id (af_backend *backend, const af_array in)
+AFAPI af_err 	af_set_backend (const af_backend bknd)
+*/
 	/* Computer Vision */
 	af_err af_dog (af_array *, const af_array, const int, const int);
 	af_err af_fast (af_features *, const af_array, const float, const unsigned, const bool, const float, const unsigned);
@@ -343,8 +372,24 @@ ffi.cdef([[
 	af_err af_ycbcr2rgb (af_array *, const af_array, const af_ycc_std);
 
 	/* Interface */
+/*
+AFAPI af_err 	afcu_get_stream (cudaStream_t *stream, int id)
+AFAPI af_err 	afcu_get_native_id (int *nativeid, int id)
+AFAPI af_err 	afcl_get_context (cl_context *ctx, const bool retain)
+AFAPI af_err 	afcl_get_queue (cl_command_queue *queue, const bool retain)
+AFAPI af_err 	afcl_get_device_id (cl_device_id *id)
+*/
 
 	/* IO */
+	af_err af_delete_image_memory (void *);
+	af_err af_load_image (af_array *, const char *, const bool);
+	af_err af_load_image_memory (af_array *, const void *);
+	af_err af_read_array_index (af_array *, const char *, const unsigned);
+	af_err af_read_array_key (af_array *, const char *, const char *);
+	af_err af_read_array_key_check (int *, const char *, const char *);
+	af_err af_save_array (int *, const char *, const af_array, const char *, const bool);
+	af_err af_save_image (const char *, const af_array);
+	af_err af_save_image_memory (void ** ptr, const af_array, const af_image_format);
 
 	/* Linear Algebra */
 	af_err af_cholesky (af_array *, int *, const af_array, const bool);
@@ -477,6 +522,45 @@ ffi.cdef([[
 	af_err af_var_weighted (af_array *, const af_array, const af_array, const dim_t);
 
 	/* Vector */
+	af_err af_accum (af_array *, const af_array, const int);
+	af_err af_all_true (af_array *, const af_array, const int);
+	af_err af_any_true (af_array *, const af_array, const int);
+	af_err af_count (af_array *, const af_array, const int);
+	af_err af_diff1 (af_array *, const af_array, const int);
+	af_err af_diff2 (af_array *, const af_array, const int);
+	af_err af_max (af_array *, const af_array, const int);
+	af_err af_min (af_array *, const af_array, const int);
+	af_err af_product (af_array *, const af_array, const int);
+	af_err af_sum (af_array *, const af_array, const int);
+
+	af_err af_all_true_all (double *, double *, const af_array);
+	af_err af_any_true_all (double *, double *, const af_array);
+	af_err af_count_all (double *, double *, const af_array);
+	af_err af_max_all (double *, double *, const af_array);
+	af_err af_min_all (double *, double *, const af_array);
+	af_err af_product_all (double *, double *, const af_array);
+	af_err af_sum_all (double *, double *, const af_array);
+
+	af_err af_imax (af_array *, af_array *, const af_array, const int);
+	af_err af_imin (af_array *, af_array *, const af_array, const int);
+	af_err af_gradient (af_array *, af_array *, const af_array);
+
+	af_err af_imax_all (double *, double *, unsigned *, const af_array);
+	af_err af_imin_all (double *, double *, unsigned *, const af_array);
+
+	af_err af_product_nan (af_array *, const af_array, const int, const double);
+	af_err af_sum_nan (af_array *, const af_array, const int, const double);
+
+	af_err af_product_nan_all (double *, double *, const af_array, const double);
+	af_err af_sum_nan_all (double *, double *, const af_array, const double);
+
+	af_err af_set_intersect (af_array *, const af_array, const af_array, const bool);
+	af_err af_set_union (af_array *, const af_array, const af_array, const bool);
+	af_err af_set_unique (af_array *, const af_array, const bool);
+	af_err af_sort (af_array *, const af_array, const unsigned, const bool);
+	af_err af_sort_by_key (af_array *, af_array *, const af_array, const af_array, const unsigned, const bool);
+	af_err af_sort_index (af_array *, af_array *, const af_array, const unsigned, const bool);
+	af_err af_where (af_array *, const af_array);
 
 	/* Array Methods */
 	af_err af_copy_array (af_array *, const af_array);
@@ -505,17 +589,61 @@ ffi.cdef([[
 	af_err af_write_array (af_array, const void *, const size_t, af_source);
 
 	/* Assign / Index */
+	af_err af_assign_gen (af_array *, const af_array, const dim_t, const af_index_t *, const af_array);
+	af_err af_assign_seq (af_array *, const af_array, const unsigned, const af_seq * const, const af_array);
+	af_err af_index (af_array *, const af_array, const unsigned, const af_seq * const);
+	af_err af_index_gen (af_array *, const af_array, const dim_t, const af_index_t *);
+	af_err af_lookup (af_array *, const af_array, const af_array, const unsigned);
 
 	/* Device */
+	af_err af_alloc_device (void **, const dim_t);
+	af_err af_alloc_pinned (void **, const dim_t);
+	af_err af_device_gc ();
+	af_err af_device_info (char *, char *, char *, char *);
+	af_err af_device_mem_info (size_t *, size_t *, size_t *, size_t *);
+	af_err af_free_device (void *);
+	af_err af_get_device (int *);
+	af_err af_get_device_count (int *);
+	af_err af_get_device_ptr (void **, const af_array);
+	af_err af_get_dbl_support (bool *, const int);
+	af_err af_get_mem_step_size (size_t *);
+	af_err af_info ();
+	af_err af_lock_device_ptr (const af_array);
+	af_err af_set_device (const int);
+	af_err af_set_mem_step_size (const size_t);
+	af_err af_sync (const int);
+	af_err af_unlock_device_ptr (const af_array);
 
 	/* Helper */
+	af_err af_cast (af_array *, const af_array, const af_dtype);
+	af_err af_isinf (af_array *, const af_array);
+	af_err af_iszero (af_array *, const af_array);
 
 	/* Move / Reorder */
+	af_err af_flat (af_array *, const af_array);
+	af_err af_flip (af_array *, const af_array, const unsigned);
+	af_err af_join (af_array *, const int, const af_array, const af_array);
+	af_err af_join_many (af_array *, const int, const unsigned, const af_array *);
+	af_err af_moddims (af_array *, const af_array, const unsigned, const dim_t *);
+	af_err af_reorder (af_array *, const af_array, const unsigned, const unsigned, const unsigned, const unsigned);
+	af_err af_shift (af_array *, const af_array, const int, const int, const int, const int);
+	af_err af_tile (af_array *, const af_array, const unsigned, const unsigned, const unsigned, const unsigned);
+	af_err af_transpose (af_array *, af_array, const bool);
+	af_err af_transpose_inplace (af_array, const bool);
 
 	/* Draw */
+	af_err af_draw_hist (const af_window, const af_array, const double, const double, const af_cell *);
+	af_err af_draw_image (const af_window, const af_array, const af_cell *);
+	af_err af_draw_plot (const af_window, const af_array, const af_array, const af_cell *);
 
 	/* Window */
-	
+	af_err af_destroy_window (const af_window);
+	af_err af_grid (const af_window, const int, const int);
+	af_err af_is_window_closed (bool *, const af_window);
+	af_err af_set_position (const af_window, const unsigned, const unsigned);
+	af_err af_set_size (const af_window, const unsigned, const unsigned);
+	af_err af_set_title (const af_window, const char * const);
+	af_err af_show (const af_window);
 ]])
 
 return af
