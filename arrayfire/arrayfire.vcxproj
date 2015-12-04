@@ -131,7 +131,7 @@
     <ClCompile Include="funcs\Interface.cpp" />
     <ClCompile Include="funcs\IO.cpp" />
     <ClCompile Include="funcs\LinearAlgebra.cpp" />
-    <ClCompile Include="funcs\Math.cpp" />
+    <ClCompile Include="funcs\Mathematics.cpp" />
     <ClCompile Include="funcs\SignalProcessing.cpp" />
     <ClCompile Include="funcs\Statistics.cpp" />
     <ClCompile Include="funcs\Vector.cpp" />
