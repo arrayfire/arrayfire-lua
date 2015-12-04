@@ -118,6 +118,7 @@
     <ClInclude Include="funcs.h" />
     <ClInclude Include="graphics.h" />
     <ClInclude Include="methods.h" />
+    <ClInclude Include="out_in_template.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>

@@ -1,20 +1,10 @@
 #include <arrayfire.h>
 #include "methods.h"
+#include "out_in_template.h"
 #include "utils.h"
 
 extern "C" {
 	#include <lauxlib.h>
-}
-
-template<af_err (*func)(af_array *, af_array)> int ArrayToArray (lua_State * L)
-{
-	lua_settop(L, 1);	// in
-
-	af_array * arr_ud = NewArray(L);// in, arr_ud
-
-	af_err err = func(arr_ud, GetArray(L, 1));
-
-	return PushErr(L, err);	// in, err, arr_ud
 }
 
 template<af_err (*func)(af_array)> int ArrayOnly (lua_State * L)
@@ -47,7 +37,7 @@ template<af_err (*func)(bool *, const af_array)> int Predicate (lua_State * L)
 //
 static const struct luaL_Reg array_methods[] = {
 	{
-		"af_copy_array", ArrayToArray<&af_copy_array>
+		"af_copy_array", OutIn<&af_copy_array>
 	}, {
 		"af_eval", ArrayOnly<&af_eval>
 	}, {
@@ -155,7 +145,7 @@ static const struct luaL_Reg array_methods[] = {
 	{
 		"af_release_array", ArrayOnly<&af_release_array>
 	}, {
-		"af_retain_array", ArrayToArray<&af_retain_array>
+		"af_retain_array", OutIn<&af_retain_array>
 	}, {
 		"af_write_array", [](lua_State * L)
 		{
