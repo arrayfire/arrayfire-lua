@@ -9,8 +9,6 @@
 	af_err af_reorder (af_array *, const af_array, const unsigned, const unsigned, const unsigned, const unsigned);
 	af_err af_shift (af_array *, const af_array, const int, const int, const int, const int);
 	af_err af_tile (af_array *, const af_array, const unsigned, const unsigned, const unsigned, const unsigned);
-	af_err af_transpose (af_array *, af_array, const bool);
-	af_err af_transpose_inplace (af_array, const bool);
 */
 static const struct luaL_Reg move_reorder_methods[] = {
 	{ NULL, NULL }

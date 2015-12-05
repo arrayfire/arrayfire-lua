@@ -326,18 +326,20 @@ ffi.cdef([[
 	af_err af_upper (af_array *, const af_array, bool);
 
 	/* Backends */
-/*
-AFAPI af_err 	af_get_available_backends (int *backends)
-AFAPI af_err 	af_get_backend_count (unsigned *num_backends)
-AFAPI af_err 	af_get_backend_id (af_backend *backend, const af_array in)
-AFAPI af_err 	af_set_backend (const af_backend bknd)
-*/
+	af_err af_get_available_backends (int *);
+	af_err af_get_backend_count (unsigned *);
+	af_err af_get_backend_id (af_backend *, const af_array);
+	af_err af_set_backend (const af_backend);
+
 	/* Computer Vision */
 	af_err af_dog (af_array *, const af_array, const int, const int);
 	af_err af_fast (af_features *, const af_array, const float, const unsigned, const bool, const float, const unsigned);
 	af_err af_gloh (af_features *, af_array *, const af_array, const unsigned, const float, const float, const float, const bool, const float, const float);
+	af_err af_hamming_matcher (af_array *, af_array *, const af_array, const af_array, const dim_t, const unsigned);
 	af_err af_harris (af_features *, const af_array, const unsigned, const float, const float, const unsigned, const float);
+	af_err af_match_template (af_array *, const af_array, const af_array, const af_match_type);
 	af_err af_orb (af_features *, af_array *, const af_array, const float, const unsigned, const float, const unsigned, const bool);
+	af_err af_nearest_neighbour (af_array *, af_array *, const af_array, const af_array, const dim_t, const unsigned, const af_match_type);
 	af_err af_sift (af_features *, af_array *, const af_array, const unsigned, const float, const float, const float, const bool, const float, const float);
 	af_err af_susan (af_features *, const af_array, const unsigned, const float, const float, const float, const unsigned);
 
@@ -385,13 +387,11 @@ AFAPI af_err 	af_set_backend (const af_backend bknd)
 	af_err af_ycbcr2rgb (af_array *, const af_array, const af_ycc_std);
 
 	/* Interface */
-/*
-AFAPI af_err 	afcu_get_stream (cudaStream_t *stream, int id)
-AFAPI af_err 	afcu_get_native_id (int *nativeid, int id)
-AFAPI af_err 	afcl_get_context (cl_context *ctx, const bool retain)
-AFAPI af_err 	afcl_get_queue (cl_command_queue *queue, const bool retain)
-AFAPI af_err 	afcl_get_device_id (cl_device_id *id)
-*/
+	af_err afcl_get_context (cl_context *, const bool);
+	af_err afcl_get_device_id (cl_device_id *);
+	af_err afcu_get_native_id (int *, int);
+	af_err afcl_get_queue (cl_command_queue *, const bool);
+	af_err afcu_get_stream (cudaStream_t *, int);
 
 	/* IO */
 	af_err af_delete_image_memory (void *);
@@ -415,7 +415,7 @@ AFAPI af_err 	afcl_get_device_id (cl_device_id *id)
 	af_err af_matmul (af_array *, const af_array, const af_array, const af_mat_prop, const af_mat_prop);
 	af_err af_norm (double *, const af_array, const af_norm_type, const double, const double);
 	af_err af_qr (af_array *, af_array *, af_array *, const af_array);
-	af_err af_qr_inplace ( af_array *, af_array);
+	af_err af_qr_inplace (af_array *, af_array);
 	af_err af_rank (unsigned *, const af_array, const double);
 	af_err af_solve (af_array *, const af_array, const af_array, const af_mat_prop);
 	af_err af_solve_lu (af_array *, const af_array, const af_array, const af_array, const af_mat_prop);
@@ -641,14 +641,12 @@ AFAPI af_err 	afcl_get_device_id (cl_device_id *id)
 	af_err af_reorder (af_array *, const af_array, const unsigned, const unsigned, const unsigned, const unsigned);
 	af_err af_shift (af_array *, const af_array, const int, const int, const int, const int);
 	af_err af_tile (af_array *, const af_array, const unsigned, const unsigned, const unsigned, const unsigned);
-	af_err af_transpose (af_array *, af_array, const bool);
-	af_err af_transpose_inplace (af_array, const bool);
 
 	/* Draw */
 	af_err af_draw_hist (const af_window, const af_array, const double, const double, const af_cell *);
 	af_err af_draw_image (const af_window, const af_array, const af_cell *);
 	af_err af_draw_plot (const af_window, const af_array, const af_array, const af_cell *);
-//	af_err af_draw_plot3 (const af_window, const af_array, const af_cell *);
+	af_err af_draw_plot3 (const af_window, const af_array, const af_cell *);
 //	af_err af_draw_surface (const af_window, const af_array, const af_array, const af_array, const af_cell *);
 
 	/* Window */

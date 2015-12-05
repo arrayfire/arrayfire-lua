@@ -36,11 +36,27 @@ static const struct luaL_Reg computer_vision_funcs[] = {
 
 			return PushErr(L, err);	// arr, thr, arc_length, non_max, feature_ratio, edge, err, features_ud
 		}
-	}, 
-	/*{
-		"af_gloh", SIFT<&af_gloh>
-		}, */
+	},
+
+#if AF_API_VERSION >= 32
 	{
+		"af_gloh", SIFT<&af_gloh>
+	},
+#endif
+
+	{
+		"af_hamming_matcher", [](lua_State * L)
+		{
+			lua_settop(L, 4);	// query, train, dist_dim, n_dist
+
+			af_array * idx_ud = NewArray(L);// query, train, dist_dim, n_dist, arr_ud
+			af_array * dist_ud = NewArray(L);	// query, train, dist_dim, n_dist, arr_ud, dist_ud
+
+			af_err err = af_hamming_matcher(idx_ud, dist_ud, GetArray(L, 1), GetArray(L, 2), (const dim_t)lua_tointeger(L, 3), (const unsigned)lua_tointeger(L, 4));
+
+			return PushErr(L, err, 2);	// query, train, dist_dim, n_dist, err, arr_ud, dist_ud
+		}
+	},	{
 		"af_harris", [](lua_State * L)
 		{
 			lua_settop(L, 6);	// arr, max_corners, min_response, sigma, block_size, k_thr
@@ -50,6 +66,29 @@ static const struct luaL_Reg computer_vision_funcs[] = {
 			af_err err = af_harris(features_ud, GetArray(L, 1), (const unsigned)lua_tointeger(L, 2), (const float)lua_tonumber(L, 3), (const float)lua_tonumber(L, 4), (const unsigned)lua_tointeger(L, 5), (const float)lua_tonumber(L, 6));
 
 			return PushErr(L, err);	// arr, max_corners, min_response, sigma, block_size, k_thr, err, features_ud
+		}
+	}, {
+		"af_match_template", [](lua_State * L)
+		{
+			lua_settop(L, 3);	// search_img, template_img, m_type
+
+			af_array * arr_ud = NewArray(L);// search_img, template_img, m_type, arr_ud
+
+			af_err err = af_match_template(arr_ud, GetArray(L, 1), GetArray(L, 2), (const af_match_type)lua_tointeger(L, 3));
+
+			return PushErr(L, err);	// search_img, template_img, m_type, err, arr_ud
+		}
+	}, {
+		"af_nearest_neighbour", [](lua_State * L)
+		{
+			lua_settop(L, 5);	// query, train, dist_dim, n_dist, dist_type
+
+			af_array * idx_ud = NewArray(L);// query, train, dist_dim, n_dist, dist_type, arr_ud
+			af_array * dist_ud = NewArray(L);	// query, train, dist_dim, n_dist, dist_type, arr_ud, dist_ud
+
+			af_err err = af_nearest_neighbour(idx_ud, dist_ud, GetArray(L, 1), GetArray(L, 2), (const dim_t)lua_tointeger(L, 3), (const unsigned)lua_tointeger(L, 4), (const af_match_type)lua_tointeger(L, 5));
+
+			return PushErr(L, err, 2);	// query, train, dist_dim, n_dist, dist_type, err, arr_ud, dist_ud
 		}
 	}, {
 		"af_orb", [](lua_State * L)

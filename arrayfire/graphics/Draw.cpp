@@ -1,11 +1,8 @@
 #include "../graphics.h"
 #include "../utils.h"
 
-/*
-	af_err af_draw_plot3 (const af_window, const af_array, const af_cell *);
-	af_err af_draw_surface (const af_window, const af_array, const af_array, const af_array, const af_cell *);
-*/
-//
+// TODO: Cell stuff!
+
 static const struct luaL_Reg draw_funcs[] = {
 	{
 		"af_draw_hist", [](lua_State * L)
@@ -46,33 +43,39 @@ static const struct luaL_Reg draw_funcs[] = {
 
 			return 1;
 		}
-	}/*, {
+	},
+
+#if AF_API_VERSION >= 32
+	{
 		"af_draw_plot3", [](lua_State * L)
 		{
 			lua_settop(L, 3);	// window, P, props
 
 			// TODO: const af_cell *...
+			af_cell cell = { 0 };
 
-			af_err err = af_draw_plot3((af_window)lua_tointeger(L, 1), GetArray(L, 2), nullptr);
+			af_err err = af_draw_plot3((af_window)lua_tointeger(L, 1), GetArray(L, 2), &cell);
 
 			lua_pushinteger(L, err);// window, x, y, props, err
 
 			return 1;
 		}
-	}, , {
+	}, {
 		"af_draw_surface", [](lua_State * L)
 		{
-			lua_settop(L, 4);	// window, xvals, yvals, S, props
+			lua_settop(L, 5);	// window, xvals, yvals, S, props
 
 			// TODO: const af_cell *...
+			af_cell cell = { 0 };
+		// ARGH, NOT EXPORTED :(
+		//	af_err err = af_draw_surface((af_window)lua_tointeger(L, 1), GetArray(L, 2), GetArray(L, 3), GetArray(L, 4), &cell);
 
-			af_err err = af_draw_surface((af_window)lua_tointeger(L, 1), GetArray(L, 2), GetArray(L, 3), GetArray(L, 4), nullptr);
-
-			lua_pushinteger(L, err);// window, x, y, props, err
+		//	lua_pushinteger(L, err);// window, x, y, props, err
 
 			return 1;
 		}
-	}*/,
+	},
+#endif
 
 	{ NULL, NULL }
 };
