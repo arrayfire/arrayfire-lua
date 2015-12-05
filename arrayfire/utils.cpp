@@ -64,9 +64,19 @@ af_array GetArray (lua_State * L, int index)
 	return *(af_array *)lua_touserdata(L, index);
 }
 
+af_features GetFeatures (lua_State * L, int index)
+{
+	return *(af_features *)lua_touserdata(L, index);
+}
+
 af_array * NewArray (lua_State * L)
 {
 	return (af_array *)lua_newuserdata(L, sizeof(af_array)); // ..., array
+}
+
+af_features * NewFeatures(lua_State * L)
+{
+	return (af_features *)lua_newuserdata(L, sizeof(af_features));	// ..., features
 }
 
 LuaDimsAndType::LuaDimsAndType (lua_State * L, int first, bool def_type)

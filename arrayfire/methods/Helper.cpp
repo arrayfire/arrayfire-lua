@@ -1,14 +1,32 @@
 #include "../methods.h"
+#include "../out_in_template.h"
+#include "../utils.h"
 
-/*
-	af_err af_cast (af_array *, const af_array, const af_dtype);
-	af_err af_isinf (af_array *, const af_array);
-	af_err af_iszero (af_array *, const af_array);
-*/
+//
+static const struct luaL_Reg helper_methods[] = {
+	{
+		"af_cast", [](lua_State * L)
+		{
+			lua_settop(L, 2);	// arr, type
+
+			af_array * arr_ud = NewArray(L);// arr, type, arr_ud
+
+			af_err err = af_cast(arr_ud, GetArray(L, 1), (af_dtype)lua_tointeger(L, 2));
+
+			return PushErr(L, err);	// arr, type, err, arr_ud
+		}
+	}, {
+		"af_isinf", OutIn<&af_isinf>
+	}, {
+		"af_iszero", OutIn<&af_iszero>
+	},
+
+	{ NULL, NULL }
+};
 
 int Helper (lua_State * L)
 {
-	//	luaL_register(L, NULL, array_methods);
+	luaL_register(L, NULL, helper_methods);
 
 	return 0;
 }

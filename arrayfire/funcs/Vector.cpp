@@ -41,10 +41,13 @@
 	af_err af_sort_index (af_array *, af_array *, const af_array, const unsigned, const bool);
 	af_err af_where (af_array *, const af_array);
 */
+static const struct luaL_Reg vector_funcs[] = {
+	{ NULL, NULL }
+};
 
 int Vector (lua_State * L)
 {
-	//	luaL_register(L, NULL, array_methods);
+	luaL_register(L, NULL, vector_funcs);
 
 	return 0;
 }

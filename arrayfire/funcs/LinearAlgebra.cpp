@@ -1,10 +1,5 @@
 #include "../funcs.h"
 
-
-static const struct luaL_Reg la_funcs[] = {
-	{ NULL, NULL }
-};
-
 /*
 	af_err af_cholesky (af_array *, int *, const af_array, const bool);
 	af_err af_cholesky_inplace (int *, const af_array, const bool);
@@ -25,10 +20,13 @@ static const struct luaL_Reg la_funcs[] = {
 	af_err af_transpose (af_array *, af_array, const bool);
 	af_err af_transpose_inplace (af_array, const bool);
 */
+static const struct luaL_Reg linear_algebra_funcs[] = {
+	{ NULL, NULL }
+};
 
 int LinearAlgebra (lua_State * L)
 {
-	luaL_register(L, NULL, la_funcs);
+	luaL_register(L, NULL, linear_algebra_funcs);
 
 	return 0;
 }

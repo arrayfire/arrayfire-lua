@@ -31,7 +31,10 @@
 	af_err af_unwrap (af_array *, const af_array, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const bool);
 	af_err af_wrap (af_array *, const af_array, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const bool);
 	af_err af_ycbcr2rgb (af_array *, const af_array, const af_ycc_std);
-*/
+	*/
+static const struct luaL_Reg image_processing_funcs[] = {
+		{ NULL, NULL }
+};
 
 int ImageProcessing (lua_State * L)
 {

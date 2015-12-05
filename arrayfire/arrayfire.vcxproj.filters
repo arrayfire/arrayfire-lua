@@ -104,5 +104,8 @@
     <ClCompile Include="funcs\Mathematics.cpp">
       <Filter>Source Files\Functions</Filter>
     </ClCompile>
+    <ClCompile Include="methods\Features.cpp">
+      <Filter>Source Files\Methods</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

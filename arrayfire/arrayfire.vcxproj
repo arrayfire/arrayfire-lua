@@ -139,6 +139,7 @@
     <ClCompile Include="graphics\Window.cpp" />
     <ClCompile Include="methods\AssignIndex.cpp" />
     <ClCompile Include="methods\Device.cpp" />
+    <ClCompile Include="methods\Features.cpp" />
     <ClCompile Include="methods\Helper.cpp" />
     <ClCompile Include="methods\MoveReorder.cpp" />
     <ClCompile Include="utils.cpp" />

@@ -7,10 +7,13 @@
 	af_err af_index_gen (af_array *, const af_array, const dim_t, const af_index_t *);
 	af_err af_lookup (af_array *, const af_array, const af_array, const unsigned);
 */
+static const struct luaL_Reg assign_index_methods[] = {
+	{ NULL, NULL }
+};
 
 int AssignIndex (lua_State * L)
 {
-	//	luaL_register(L, NULL, array_methods);
+	luaL_register(L, NULL, assign_index_methods);
 
 	return 0;
 }

@@ -19,10 +19,13 @@
 	af_err af_sync (const int);
 	af_err af_unlock_device_ptr (const af_array);
 */
+static const struct luaL_Reg device_methods[] = {
+	{ NULL, NULL }
+};
 
 int Device (lua_State * L)
 {
-	//	luaL_register(L, NULL, array_methods);
+	luaL_register(L, NULL, device_methods);
 
 	return 0;
 }

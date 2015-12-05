@@ -277,6 +277,8 @@ ffi.cdef([[
 	typedef long long intl;
 	typedef unsigned long long uintl;
 
+	typedef void * af_features;
+
 	typedef struct af_seq {
 		double begin, end;
 		double step;
@@ -338,6 +340,17 @@ AFAPI af_err 	af_set_backend (const af_backend bknd)
 	af_err af_orb (af_features *, af_array *, const af_array, const float, const unsigned, const float, const unsigned, const bool);
 	af_err af_sift (af_features *, af_array *, const af_array, const unsigned, const float, const float, const float, const bool, const float, const float);
 	af_err af_susan (af_features *, const af_array, const unsigned, const float, const float, const float, const unsigned);
+
+	/* Features */
+	af_err af_create_features (af_features *, dim_t);
+	af_err af_get_features_num (dim_t *, const af_features);
+	af_err af_get_features_orientation (af_array *, const af_features);
+	af_err af_get_features_score (af_array *, const af_features);
+	af_err af_get_features_size (af_array *, const af_features);
+	af_err af_get_features_xpos (af_array *, const af_features);
+	af_err af_get_features_ypos (af_array *, const af_features);
+	af_err af_release_features (af_features);
+	af_err af_retain_features (af_features *, const af_features);
 
 	/* Image Processing */
 	af_err af_bilateral (af_array *, const af_array, const float, const float, const bool);
@@ -635,6 +648,8 @@ AFAPI af_err 	afcl_get_device_id (cl_device_id *id)
 	af_err af_draw_hist (const af_window, const af_array, const double, const double, const af_cell *);
 	af_err af_draw_image (const af_window, const af_array, const af_cell *);
 	af_err af_draw_plot (const af_window, const af_array, const af_array, const af_cell *);
+//	af_err af_draw_plot3 (const af_window, const af_array, const af_cell *);
+//	af_err af_draw_surface (const af_window, const af_array, const af_array, const af_array, const af_cell *);
 
 	/* Window */
 	af_err af_destroy_window (const af_window);

@@ -16,10 +16,13 @@
 	af_err af_var_all_weighted (double *, double *, const af_array, const af_array);
 	af_err af_var_weighted (af_array *, const af_array, const af_array, const dim_t);
 */
+static const struct luaL_Reg statistics_funcs[] = {
+	{ NULL, NULL }
+};
 
 int Statistics (lua_State * L)
 {
-	//	luaL_register(L, NULL, array_methods);
+	luaL_register(L, NULL, statistics_funcs);
 
 	return 0;
 }

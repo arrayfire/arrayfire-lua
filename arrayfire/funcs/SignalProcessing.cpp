@@ -30,10 +30,13 @@
 	af_err af_fft3_inplace (af_array, const double);
 	af_err af_fft3_r2c (af_array *, const af_array, const double, const dim_t, const dim_t, const dim_t);
 */
+static const struct luaL_Reg signal_processing_funcs[] = {
+	{ NULL, NULL }
+};
 
 int SignalProcessing (lua_State * L)
 {
-	//	luaL_register(L, NULL, array_methods);
+	luaL_register(L, NULL, signal_processing_funcs);
 
 	return 0;
 }

@@ -11,10 +11,13 @@
 	af_err af_save_image (const char *, const af_array);
 	af_err af_save_image_memory (void ** ptr, const af_array, const af_image_format);
 */
+static const struct luaL_Reg io_funcs[] = {
+	{ NULL, NULL }
+};
 
 int IO (lua_State * L)
 {
-	//	luaL_register(L, NULL, array_methods);
+	luaL_register(L, NULL, io_funcs);
 
 	return 0;
 }

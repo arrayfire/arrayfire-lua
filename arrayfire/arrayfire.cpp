@@ -38,6 +38,7 @@ extern "C" __declspec(dllexport) int luaopen_arrayfire (lua_State * L)
 	Register(L, &ArrayMethods);
 	Register(L, &AssignIndex);
 	Register(L, &Device);
+	Register(L, &Features);
 	Register(L, &Helper);
 	Register(L, &MoveReorder);
 

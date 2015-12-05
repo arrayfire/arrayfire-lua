@@ -12,10 +12,13 @@
 	af_err af_transpose (af_array *, af_array, const bool);
 	af_err af_transpose_inplace (af_array, const bool);
 */
+static const struct luaL_Reg move_reorder_methods[] = {
+	{ NULL, NULL }
+};
 
 int MoveReorder (lua_State * L)
 {
-//	luaL_register(L, NULL, array_methods);
+	luaL_register(L, NULL, move_reorder_methods);
 
 	return 0;
 }
