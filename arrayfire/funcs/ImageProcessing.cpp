@@ -1,44 +1,58 @@
 #include "../funcs.h"
+#include "../out_in_template.h"
+#include "../out_in2_template.h"
+#include "../out2_in_template.h"
+#include "../out2_in2_template.h"
 
-/*
-	af_err af_bilateral (af_array *, const af_array, const float, const float, const bool);
-	af_err af_color_space ( af_array *, const af_array, const af_cspace_t, const af_cspace_t);
-	af_err af_dilate (af_array *, const af_array, const af_array);
-	af_err af_dilate3 (af_array *, const af_array, const af_array);
-	af_err af_erode (af_array *, const af_array, const af_array);
-	af_err af_erode3 (af_array *, const af_array, const af_array);
-	af_err af_gaussian_kernel (af_array *, const int, const int, const double, const double);
-	af_err af_gray2rgb (af_array *, const af_array, const float, const float, const float);
-	af_err af_hist_equal (af_array *, const af_array, const af_array);
-	af_err af_histogram (af_array *, const af_array, const unsigned, const double, const double);
-	af_err af_hsv2rgb (af_array *, const af_array);
-	af_err af_minfilt (af_array *, const af_array, const dim_t, const dim_t, const af_border_type);
-	af_err af_mean_shift (af_array *, const af_array, const float, const float, const unsigned, const bool);
-	af_err af_medfilt (af_array *, const af_array, const dim_t, const dim_t, const af_border_type);
-	af_err af_maxfilt (af_array *, const af_array, const dim_t, const dim_t, const af_border_type);
-	af_err af_regions (af_array *, const af_array, const af_connectivity, const af_dtype);
-	af_err af_resize (af_array *, const af_array, const dim_t, const dim_t, const af_interp_type);
-	af_err af_rgb2gray (af_array *, const af_array, const float, const float, const float);
-	af_err af_rgb2hsv (af_array *, const af_array);
-	af_err af_rgb2ycbcr (af_array *, const af_array, const af_ycc_std);	
-	af_err af_rotate (af_array *, const af_array, const float, const bool, const af_interp_type);
-	af_err af_sat (af_array *, const af_array);
-	af_err af_scale (af_array *, const af_array, const float, const float, const dim_t, const dim_t, const af_interp_type);
-	af_err af_skew (af_array *, const af_array, const float, const float, const dim_t, const dim_t, const af_interp_type, const bool);
-	af_err af_sobel_operator (af_array *, af_array *, const af_array, const unsigned);
-	af_err af_transform (af_array *, const af_array, const af_array, const dim_t, const dim_t, const af_interp_type, const bool);
-	af_err af_translate (af_array *, const af_array, const float, const float, const dim_t, const dim_t, const af_interp_type);
-	af_err af_unwrap (af_array *, const af_array, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const bool);
-	af_err af_wrap (af_array *, const af_array, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const bool);
-	af_err af_ycbcr2rgb (af_array *, const af_array, const af_ycc_std);
-	*/
 static const struct luaL_Reg image_processing_funcs[] = {
-		{ NULL, NULL }
+	OUTIN_ARG3(bilateral, float, float, bool),
+	OUTIN_ARG2(color_space, af_cspace_t, af_cspace_t),
+	OUTIN2(dilate),
+	OUTIN2(dilate3),
+	OUTIN2(erode),
+	OUTIN2(erode3),
+	{
+		"af_gaussian_kernel", [](lua_State * L)
+		{
+			lua_settop(L, 4);	// row, col, sigma_r, sigma_c
+
+			af_array * arr_ud = NewArray(L);// row, col, sigma_r, sigma_c, arr_ud
+
+			af_err err = af_gaussian_kernel(arr_ud, I(L, 1), I(L, 2), D(L, 3), D(L, 4));
+
+			return PushErr(L, err);	// row, col, sigma_r, sigma_c, err, arr_ud
+		}
+	},
+	OUTIN_ARG3(gray2rgb, float, float, float),
+	OUTIN2(hist_equal),
+	OUTIN_ARG3(histogram, unsigned, double, double),
+	OUTIN(hsv2rgb),
+	OUTIN_ARG3(maxfilt, dim_t, dim_t, af_border_type),
+	OUTIN_ARG4(mean_shift, float, float, unsigned, bool),
+	OUTIN_ARG3(medfilt, dim_t, dim_t, af_border_type),
+	OUTIN_ARG3(minfilt, dim_t, dim_t, af_border_type),
+	OUTIN(rgb2hsv),
+	OUTIN_ARG2(regions, af_connectivity, af_dtype),
+	OUTIN_ARG3(resize, dim_t, dim_t, af_interp_type),
+	OUTIN_ARG3(rgb2gray, float, float, float),
+	OUTIN_ARG(rgb2ycbcr, af_ycc_std),
+	OUTIN_ARG3(rotate, float, bool, af_interp_type),
+	OUTIN(sat),
+	OUTIN_ARG5(scale, float, float, dim_t, dim_t, af_interp_type),
+	OUTIN_ARG6(skew, float, float, dim_t, dim_t, af_interp_type, bool),
+	OUT2IN_ARG(sobel_operator, unsigned),
+	OUTIN2_ARG4(transform, dim_t, dim_t, af_interp_type, bool),
+	OUTIN_ARG5(translate, float, float, dim_t, dim_t, af_interp_type),
+	OUTIN_ARG7(unwrap, dim_t, dim_t, dim_t, dim_t, dim_t, dim_t, bool),
+	OUTIN_ARG9(wrap, dim_t, dim_t, dim_t, dim_t, dim_t, dim_t, dim_t, dim_t, bool),
+	OUTIN_ARG(ycbcr2rgb, af_ycc_std),
+
+	{ NULL, NULL }
 };
 
 int ImageProcessing (lua_State * L)
 {
-	//	luaL_register(L, NULL, array_methods);
+	luaL_register(L, NULL, image_processing_funcs);
 
 	return 0;
 }

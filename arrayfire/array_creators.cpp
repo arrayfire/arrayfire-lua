@@ -1,6 +1,7 @@
 #include <arrayfire.h>
 #include "funcs.h"
 #include "utils.h"
+#include "out_in_template.h"
 
 template<af_err (*func)(af_array *, const void *, unsigned int, const dim_t *, af_dtype)> int Create (lua_State * L)
 {
@@ -17,17 +18,6 @@ template<af_err (*func)(af_array *, const void *, unsigned int, const dim_t *, a
 	return PushErr(L, err);	// data, ndims, dims, type, err, arr_ud
 }
 
-template<af_err (*func)(af_array *, const af_array, const int)> int Diag (lua_State * L)
-{
-	lua_settop(L, 2);	// arr, num
-
-	af_array * arr_ud = NewArray(L);// arr, num, arr_ud
-
-	af_err err = func(arr_ud, GetArray(L, 1), lua_tointeger(L, 2));
-
-	return PushErr(L, err);	// arr, num, err, arr_ud
-}
-
 template<af_err (*func)(af_array *, const unsigned, const dim_t *, const af_dtype)> int DimsAndType (lua_State * L)
 {
 	lua_settop(L, 3);	// ndims, dims, type
@@ -41,16 +31,22 @@ template<af_err (*func)(af_array *, const unsigned, const dim_t *, const af_dtyp
 	return PushErr(L, err);	// ndims, dims, type, err, arr_ud
 }
 
-template<af_err (*func)(af_array *, const af_array, bool)> int Triangle (lua_State * L)
+template<typename T, af_err (*func)(af_array *, const T, const unsigned, const dim_t *)> int Long (lua_State * L)
 {
-	lua_settop(L, 2);	// arr, is_unit_diag
+	lua_settop(L, 3);	// val, ndims, dims
 
-	af_array * arr_ud = NewArray(L);// arr, is_unit_diag, arr_ud
+	LuaDimsAndType dims(L, 2, true);// Just dims, no type
 
-	af_err err = func(arr_ud, GetArray(L, 1), lua_toboolean(L, 2));
+	af_array * arr_ud = NewArray(L);// val, ndims, dims, arr_ud
 
-	return PushErr(L, err);	// arr, is_unit_diag, err, arr_ud
+	af_err err = af_constant_ulong (arr_ud, Arg<T>(L, 1), dims.GetNDims(), dims.GetDims());
+
+	return PushErr(L, err);	// val, ndims, dims, err, arr_ud
 }
+
+#define CREATE(name) { "af_"#name, Create<&af_##name> }
+#define DIMS_AND_TYPE(name) { "af_"#name, DimsAndType<&af_##name> }
+#define LONG(name, t) { "af_"#name, Long<t, &af_##name> }
 
 //
 static const struct luaL_Reg create_funcs[] = {
@@ -63,7 +59,7 @@ static const struct luaL_Reg create_funcs[] = {
 
 			af_array * arr_ud = NewArray(L);// val, ndims, dims, type, arr_ud
 
-			af_err err = af_constant(arr_ud, lua_tonumber(L, 1), dt.GetNDims(), dt.GetDims(), dt.GetType());
+			af_err err = af_constant(arr_ud, D(L, 1), dt.GetNDims(), dt.GetDims(), dt.GetType());
 
 			return PushErr(L, err);	// val, ndims, dims, type, err, arr_ud
 		}
@@ -76,47 +72,19 @@ static const struct luaL_Reg create_funcs[] = {
 
 			af_array * arr_ud = NewArray(L);// real, imag, ndims, dims, type, arr_ud
 
-			af_err err = af_constant_complex(arr_ud, lua_tonumber(L, 1), lua_tonumber(L, 2), dt.GetNDims(), dt.GetDims(), dt.GetType());
+			af_err err = af_constant_complex(arr_ud, D(L, 1), D(L, 2), dt.GetNDims(), dt.GetDims(), dt.GetType());
 
 			return PushErr(L, err);	// real, imag, ndims, dims, type, err, arr_ud
 		}
-	}, {
-		"af_constant_long", [](lua_State * L)
-		{
-			lua_settop(L, 3);	// val, ndims, dims
-
-			LuaDimsAndType dims(L, 2, true);// Just dims, no type
-
-			af_array * arr_ud = NewArray(L);// val, ndims, dims, arr_ud
-
-			af_err err = af_constant_long (arr_ud, (intl)lua_tointeger(L, 1), dims.GetNDims(), dims.GetDims());
-
-			return PushErr(L, err);	// val, ndims, dims, err, arr_ud
-		}
-	}, {
-		"af_constant_ulong", [](lua_State * L)
-		{
-			lua_settop(L, 3);	// val, ndims, dims
-
-			LuaDimsAndType dims(L, 2, true);// Just dims, no type
-
-			af_array * arr_ud = NewArray(L);// val, ndims, dims, arr_ud
-
-			af_err err = af_constant_ulong (arr_ud, (uintl)lua_tointeger(L, 1), dims.GetNDims(), dims.GetDims());
-
-			return PushErr(L, err);	// val, ndims, dims, err, arr_ud
-		}
-	}, {
-		"af_create_array", Create<&af_create_array>
-	}, {
-		"af_create_handle", DimsAndType<&af_create_handle>
-	}, {
-		"af_device_array", Create<&af_device_array>
-	}, {
-		"af_diag_create", Diag<&af_diag_create>
-	}, {
-		"af_diag_extract", Diag<&af_diag_extract>
-	}, {
+	},
+	LONG(constant_long, intl),
+	LONG(constant_ulong, uintl),
+	CREATE(create_array),
+	DIMS_AND_TYPE(create_handle),
+	CREATE(device_array),
+	OUTIN_ARG(diag_create, int),
+	OUTIN_ARG(diag_extract, int),
+	{
 		"af_get_seed", [](lua_State * L)
 		{
 			lua_settop(L, 0);	// (empty)
@@ -129,9 +97,9 @@ static const struct luaL_Reg create_funcs[] = {
 
 			return PushErr(L, err);	// err, seed
 		}
-	}, {
-		"af_identity", DimsAndType<&af_identity>
-	}, {
+	},
+	DIMS_AND_TYPE(identity),
+	{
 		"af_iota", [](lua_State * L)
 		{
 			lua_settop(L, 5);	// ndims, dims, t_ndims, tdims, type
@@ -145,35 +113,11 @@ static const struct luaL_Reg create_funcs[] = {
 
 			return PushErr(L, err);	// ndims, dims, t_ndims, tdims, type, err, arr_ud
 		}
-	}, {
-		"af_load_image", [](lua_State * L)
-		{
-			lua_settop(L, 2);	// filename, is_color
-
-			af_array * arr_ud = NewArray(L);// filename, is_color, arr_ud
-
-			af_err err = af_load_image(arr_ud, lua_tostring(L, 1), lua_toboolean(L, 2));
-
-			return PushErr(L, err);	// filename, is_color, err, arr_ud
-		}
-	}, {
-		"af_load_image_memory", [](lua_State * L)
-		{
-			lua_settop(L, 1);	// ptr
-
-			af_array * arr_ud = NewArray(L);// ptr, arr_ud
-
-			af_err err = af_load_image_memory(arr_ud, GetMemory(L, 1));
-
-			return PushErr(L, err);	// ptr, err, arr_ud
-		}
-	}, {
-		"af_lower", Triangle<&af_lower>
-	}, {
-		"af_randn", DimsAndType<&af_randn>
-	}, {
-		"af_randu", DimsAndType<&af_randu>
-	}, {
+	},
+	OUTIN_ARG(lower, bool),
+	DIMS_AND_TYPE(randn),
+	DIMS_AND_TYPE(randu),
+	{
 		"af_range", [](lua_State * L)
 		{
 			lua_settop(L, 4);	// ndims, dims, seq_dim, type
@@ -192,20 +136,21 @@ static const struct luaL_Reg create_funcs[] = {
 		{
 			lua_settop(L, 1);	// seed
 
-			af_err err = af_set_seed(lua_tointeger(L, 1));
+			af_err err = af_set_seed(Arg<uintl>(L, 1));
 
 			lua_pushinteger(L, err);// seed, err
 
 			return 1;
 		}
-	}, {
-		"af_upper", Triangle<&af_upper>
 	},
+	OUTIN_ARG(upper, bool),
 
 	{ NULL, NULL }
 };
 
-// load_image_native?
+#undef CREATE
+#undef DIMS_AND_TYPE
+#undef LONG
 
 int CreateArrayFuncs (lua_State * L)
 {

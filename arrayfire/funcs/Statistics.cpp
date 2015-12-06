@@ -1,22 +1,24 @@
 #include "../funcs.h"
+#include "../doubles_template.h"
+#include "../out_in_template.h"
+#include "../out_in2_template.h"
 
-/*
-	af_err af_corrcoef (double *, double *, const af_array, const af_array);
-	af_err af_cov (	af_array *, const af_array, const af_array, const bool);
-	af_err af_median (af_array *, const af_array, const dim_t);
-	af_err af_median_all (double *, double *, const af_array);
-	af_err af_mean (af_array *, const af_array, const dim_t);
-	af_err af_mean_all (double *, double *, const af_array);
-	af_err af_mean_all_weighted (double *, double *, const af_array, const af_array);	
-	af_err af_mean_weighted (af_array *, const af_array, const af_array, const dim_t);
-	af_err af_stdev (af_array *, const af_array, const dim_t);
-	af_err af_stdev_all (double *, double *, const af_array);
-	af_err af_var (af_array *, const af_array, const bool, const dim_t);
-	af_err af_var_all (double *, double *, const af_array, const bool);	
-	af_err af_var_all_weighted (double *, double *, const af_array, const af_array);
-	af_err af_var_weighted (af_array *, const af_array, const af_array, const dim_t);
-*/
 static const struct luaL_Reg statistics_funcs[] = {
+	DDIN2(corrcoef),
+	OUTIN2_ARG(cov, bool),
+	OUTIN_ARG(mean, dim_t),
+	DDIN(mean_all),
+	DDIN2(mean_all_weighted),
+	OUTIN2_ARG(mean_weighted, dim_t),
+	OUTIN_ARG(median, dim_t),
+	DDIN(median_all),
+	OUTIN_ARG(stdev, dim_t),
+	DDIN(stdev_all),
+	OUTIN_ARG2(var, bool, dim_t),
+	DDIN_ARG(var_all, bool),
+	DDIN2(var_all_weighted),
+	OUTIN2_ARG(var_weighted, dim_t),
+
 	{ NULL, NULL }
 };
 

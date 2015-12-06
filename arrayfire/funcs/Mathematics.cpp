@@ -1,88 +1,76 @@
 #include "../funcs.h"
 #include "../out_in_template.h"
+#include "../out_in2_template.h"
 
-template<af_err (*func)(af_array *, const af_array, const af_array, const bool)> int TwoArgs (lua_State * L)
-{
-	lua_settop(L, 3);	// lhs, rhs, batch
-
-	af_array * arr_ud = NewArray(L);// lhs, rhs, batch, arr_ud
-
-	af_err err = func(arr_ud, GetArray(L, 1), GetArray(L, 2), lua_toboolean(L, 3));
-
-	return PushErr(L, err);	// lhs, rhs, batch, err, arr_ud
-}
-
-#define OUT_IN(name) { "af_" #name, OutIn<&af_##name> }
-#define TWO_ARGS(name) { "af_"#name, TwoArgs<&af_##name> }
+#define TWO_ARGS(name) OUTIN2_ARG(name, bool)
 
 //
 static const struct luaL_Reg math_funcs[] = {
-	OUT_IN(abs),
-	OUT_IN(acos),
-	OUT_IN(acosh),
+	OUTIN(abs),
+	OUTIN(acos),
+	OUTIN(acosh),
 	TWO_ARGS(add),
 	TWO_ARGS(and),
-	OUT_IN(arg),
-	OUT_IN(asin),
-	OUT_IN(asinh),
-	OUT_IN(atan),
-	OUT_IN(atanh),
+	OUTIN(arg),
+	OUTIN(asin),
+	OUTIN(asinh),
+	OUTIN(atan),
+	OUTIN(atanh),
 	TWO_ARGS(atan2),
 	TWO_ARGS(bitand),
 	TWO_ARGS(bitor),
 	TWO_ARGS(bitshiftl),
 	TWO_ARGS(bitshiftr),
 	TWO_ARGS(bitxor),
-	OUT_IN(cbrt),
-	OUT_IN(ceil),
-	OUT_IN(conjg),
-	OUT_IN(cos),
-	OUT_IN(cosh),
-	OUT_IN(cplx),
+	OUTIN(cbrt),
+	OUTIN(ceil),
+	OUTIN(conjg),
+	OUTIN(cos),
+	OUTIN(cosh),
+	OUTIN(cplx),
 	TWO_ARGS(cplx2),
 	TWO_ARGS(div),
 	TWO_ARGS(eq),
-	OUT_IN(erf),
-	OUT_IN(erfc),
-	OUT_IN(exp),
-	OUT_IN(expm1),
-	OUT_IN(factorial),
-	OUT_IN(floor),
+	OUTIN(erf),
+	OUTIN(erfc),
+	OUTIN(exp),
+	OUTIN(expm1),
+	OUTIN(factorial),
+	OUTIN(floor),
 	TWO_ARGS(ge),
 	TWO_ARGS(gt),
 	TWO_ARGS(hypot),
-	OUT_IN(imag),
+	OUTIN(imag),
 	TWO_ARGS(le),
-	OUT_IN(lgamma),
-	OUT_IN(log),
-	OUT_IN(log10),
-	OUT_IN(log1p),
+	OUTIN(lgamma),
+	OUTIN(log),
+	OUTIN(log10),
+	OUTIN(log1p),
 	TWO_ARGS(maxof),
 	TWO_ARGS(minof),
 	TWO_ARGS(mod),
 	TWO_ARGS(mul),
 	TWO_ARGS(neq),
-	OUT_IN(not),
+	OUTIN(not),
 	TWO_ARGS(or),
 	TWO_ARGS(pow),
-	OUT_IN(real),
+	OUTIN(real),
 	TWO_ARGS(rem),
 	TWO_ARGS(root),
-	OUT_IN(round),
-	OUT_IN(sign),
-	OUT_IN(sin),
-	OUT_IN(sinh),
-	OUT_IN(sqrt),
+	OUTIN(round),
+	OUTIN(sign),
+	OUTIN(sin),
+	OUTIN(sinh),
+	OUTIN(sqrt),
 	TWO_ARGS(sub),
-	OUT_IN(tan),
-	OUT_IN(tanh),
-	OUT_IN(trunc),
-	OUT_IN(tgamma),
+	OUTIN(tan),
+	OUTIN(tanh),
+	OUTIN(trunc),
+	OUTIN(tgamma),
 
 	{ NULL, NULL }
 };
 
-#undef OUT_IN
 #undef TWO_ARGS
 
 int Mathematics (lua_State * L)

@@ -1,7 +1,28 @@
 #include "../graphics.h"
 #include "../utils.h"
+#include "../args_template.h"
 
-// TODO: Cell stuff!
+class LuaCell {
+	af_cell mCell;
+
+public:
+	af_cell * GetCell (void) { return &mCell; }
+
+	LuaCell (lua_State * L)
+	{
+		lua_getfield(L, -1, "row");	// ..., row
+		lua_getfield(L, -2, "col");	// ..., row, col
+		lua_getfield(L, -3, "title");	// ..., row, col, title
+		lua_getfield(L, -4, "cmap");// ..., row, col, title, cmap
+
+		mCell.row = I(L, -4);
+		mCell.col = I(L, -3);
+		mCell.title = lua_tostring(L, -2);
+		mCell.cmap = Arg<af_colormap>(L, -1);
+
+		lua_pop(L, 4);	// ...
+	}
+};
 
 static const struct luaL_Reg draw_funcs[] = {
 	{
@@ -9,9 +30,9 @@ static const struct luaL_Reg draw_funcs[] = {
 		{
 			lua_settop(L, 5);	// window, arr, min, max, props
 
-			// TODO: const af_cell *...
+			LuaCell cell(L);
 
-			af_err err = af_draw_hist((af_window)lua_tointeger(L, 1), GetArray(L, 2), lua_tonumber(L, 3), lua_tonumber(L, 4), nullptr);
+			af_err err = af_draw_hist(Arg<af_window>(L, 1), GetArray(L, 2), D(L, 3), D(L, 4), cell.GetCell());
 
 			lua_pushinteger(L, err);// window, arr, min, max, props, err
 
@@ -22,9 +43,9 @@ static const struct luaL_Reg draw_funcs[] = {
 		{
 			lua_settop(L, 3);	// window, arr, props
 
-			// TODO: const af_cell *...
+			LuaCell cell(L);
 
-			af_err err = af_draw_image((af_window)lua_tointeger(L, 1), GetArray(L, 2), nullptr);
+			af_err err = af_draw_image(Arg<af_window>(L, 1), GetArray(L, 2), cell.GetCell());
 
 			lua_pushinteger(L, err);// window, arr, props, err
 
@@ -35,9 +56,9 @@ static const struct luaL_Reg draw_funcs[] = {
 		{
 			lua_settop(L, 4);	// window, x, y, props
 
-			// TODO: const af_cell *...
+			LuaCell cell(L);
 
-			af_err err = af_draw_plot((af_window)lua_tointeger(L, 1), GetArray(L, 2), GetArray(L, 3), nullptr);
+			af_err err = af_draw_plot(Arg<af_window>(L, 1), GetArray(L, 2), GetArray(L, 3), cell.GetCell());
 
 			lua_pushinteger(L, err);// window, x, y, props, err
 
@@ -51,10 +72,9 @@ static const struct luaL_Reg draw_funcs[] = {
 		{
 			lua_settop(L, 3);	// window, P, props
 
-			// TODO: const af_cell *...
-			af_cell cell = { 0 };
+			LuaCell cell(L);
 
-			af_err err = af_draw_plot3((af_window)lua_tointeger(L, 1), GetArray(L, 2), &cell);
+			af_err err = af_draw_plot3(Arg<af_window>(L, 1), GetArray(L, 2), cell.GetCell());
 
 			lua_pushinteger(L, err);// window, x, y, props, err
 
@@ -65,10 +85,9 @@ static const struct luaL_Reg draw_funcs[] = {
 		{
 			lua_settop(L, 5);	// window, xvals, yvals, S, props
 
-			// TODO: const af_cell *...
-			af_cell cell = { 0 };
+			LuaCell cell(L);
 		// ARGH, NOT EXPORTED :(
-		//	af_err err = af_draw_surface((af_window)lua_tointeger(L, 1), GetArray(L, 2), GetArray(L, 3), GetArray(L, 4), &cell);
+		//	af_err err = af_draw_surface(Arg<af_window>(L, 1), GetArray(L, 2), GetArray(L, 3), GetArray(L, 4), cell.GetCell());
 
 		//	lua_pushinteger(L, err);// window, x, y, props, err
 

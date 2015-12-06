@@ -1,11 +1,12 @@
 #include <arrayfire.h>
 #include "../graphics.h"
+#include "../args_template.h"
 
-template<af_err (*func)(const af_window, const unsigned, const unsigned)> int TwoUnsigned (lua_State * L)
+template<typename T, af_err (*func)(const af_window, const T, const T)> int TwoT (lua_State * L)
 {
 	lua_settop(L, 3);	// window, u1, u2
 
-	af_err err = func((const af_window)lua_tointeger(L, 1), (const unsigned)lua_tointeger(L, 2), (const unsigned)lua_tointeger(L, 3));
+	af_err err = func(Arg<af_window>(L, 1), Arg<T>(L, 2), Arg<T>(L, 3));
 
 	lua_pushinteger(L, err);// window, u1, u2, err
 
@@ -18,23 +19,14 @@ static const struct luaL_Reg window_funcs[] = {
 		{
 			lua_settop(L, 1);	// window
 
-			af_err err = af_destroy_window((const af_window)lua_tointeger(L, 1));
+			af_err err = af_destroy_window(Arg<af_window>(L, 1));
 
 			lua_pushinteger(L, err);// window, err
 
 			return 1;
 		}
 	}, {
-		"af_grid", [](lua_State * L)
-		{
-			lua_settop(L, 3);	// window, rows, cols
-
-			af_err err = af_grid((const af_window)lua_tointeger(L, 1), (const int)lua_tointeger(L, 2), (const int)lua_tointeger(L, 3));
-
-			lua_pushinteger(L, err);// window, rows, cols, err
-
-			return 1;
-		}
+		"af_grid", TwoT<int, &af_grid>
 	}, {
 		"af_is_window_closed", [](lua_State * L)
 		{
@@ -42,7 +34,7 @@ static const struct luaL_Reg window_funcs[] = {
 
 			bool is_closed;
 
-			af_err err = af_is_window_closed(&is_closed, (const af_window)lua_tointeger(L, 1));
+			af_err err = af_is_window_closed(&is_closed, Arg<af_window>(L, 1));
 
 			lua_pushinteger(L, err);// window, err
 			lua_pushboolean(L, is_closed);	// window, err, is_closed
@@ -50,15 +42,15 @@ static const struct luaL_Reg window_funcs[] = {
 			return 2;
 		}
 	}, {
-		"af_set_position", TwoUnsigned<&af_set_position>
+		"af_set_position", TwoT<unsigned, &af_set_position>
 	}, {
-		"af_set_size", TwoUnsigned<&af_set_size>
+		"af_set_size", TwoT<unsigned, &af_set_size>
 	}, {
 		"af_set_title", [](lua_State * L)
 		{
 			lua_settop(L, 2);	// window, title
 
-			af_err err = af_set_title((const af_window)lua_tointeger(L, 1), lua_tostring(L, 2));
+			af_err err = af_set_title(Arg<af_window>(L, 1), lua_tostring(L, 2));
 
 			lua_pushinteger(L, err);// window, title, err
 
@@ -69,7 +61,7 @@ static const struct luaL_Reg window_funcs[] = {
 		{
 			lua_settop(L, 1);	// window
 
-			af_err err = af_show((const af_window)lua_tointeger(L, 1));
+			af_err err = af_show(Arg<af_window>(L, 1));
 
 			lua_pushinteger(L, err);// window, err
 

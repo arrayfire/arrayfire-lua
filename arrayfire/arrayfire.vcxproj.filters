@@ -42,6 +42,33 @@
     <ClInclude Include="out_in_template.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="args_template.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="out2_in2_template.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="out_in2_template.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="in_template.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="out_in3_template.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="out2_in_template.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="doubles_template.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="out_template.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="from_template.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="array_methods.cpp">
@@ -106,6 +133,9 @@
     </ClCompile>
     <ClCompile Include="methods\Features.cpp">
       <Filter>Source Files\Methods</Filter>
+    </ClCompile>
+    <ClCompile Include="args.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

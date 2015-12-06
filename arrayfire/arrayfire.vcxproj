@@ -115,13 +115,23 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="args_template.h" />
+    <ClInclude Include="doubles_template.h" />
+    <ClInclude Include="from_template.h" />
     <ClInclude Include="funcs.h" />
     <ClInclude Include="graphics.h" />
+    <ClInclude Include="in_template.h" />
     <ClInclude Include="methods.h" />
+    <ClInclude Include="out2_in2_template.h" />
+    <ClInclude Include="out2_in_template.h" />
+    <ClInclude Include="out_in2_template.h" />
+    <ClInclude Include="out_in3_template.h" />
     <ClInclude Include="out_in_template.h" />
+    <ClInclude Include="out_template.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="args.cpp" />
     <ClCompile Include="arrayfire.cpp" />
     <ClCompile Include="array_creators.cpp" />
     <ClCompile Include="array_methods.cpp" />

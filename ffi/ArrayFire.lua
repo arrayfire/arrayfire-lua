@@ -356,7 +356,7 @@ ffi.cdef([[
 
 	/* Image Processing */
 	af_err af_bilateral (af_array *, const af_array, const float, const float, const bool);
-	af_err af_color_space ( af_array *, const af_array, const af_cspace_t, const af_cspace_t);
+	af_err af_color_space (af_array *, const af_array, const af_cspace_t, const af_cspace_t);
 	af_err af_dilate (af_array *, const af_array, const af_array);
 	af_err af_dilate3 (af_array *, const af_array, const af_array);
 	af_err af_erode (af_array *, const af_array, const af_array);
@@ -366,10 +366,10 @@ ffi.cdef([[
 	af_err af_hist_equal (af_array *, const af_array, const af_array);
 	af_err af_histogram (af_array *, const af_array, const unsigned, const double, const double);
 	af_err af_hsv2rgb (af_array *, const af_array);
-	af_err af_minfilt (af_array *, const af_array, const dim_t, const dim_t, const af_border_type);
+	af_err af_maxfilt (af_array *, const af_array, const dim_t, const dim_t, const af_border_type);
 	af_err af_mean_shift (af_array *, const af_array, const float, const float, const unsigned, const bool);
 	af_err af_medfilt (af_array *, const af_array, const dim_t, const dim_t, const af_border_type);
-	af_err af_maxfilt (af_array *, const af_array, const dim_t, const dim_t, const af_border_type);
+	af_err af_minfilt (af_array *, const af_array, const dim_t, const dim_t, const af_border_type);
 	af_err af_regions (af_array *, const af_array, const af_connectivity, const af_dtype);
 	af_err af_resize (af_array *, const af_array, const dim_t, const dim_t, const af_interp_type);
 	af_err af_rgb2gray (af_array *, const af_array, const float, const float, const float);
@@ -409,7 +409,7 @@ ffi.cdef([[
 	af_err af_cholesky_inplace (int *, const af_array, const bool);
 	af_err af_det (double *, double *, const af_array);
 	af_err af_dot (af_array *, const af_array, const af_array, const af_mat_prop, const af_mat_prop);
-	af_err af_inverse (af_array *, const af_array, const af_array, const af_mat_prop);
+	af_err af_inverse (af_array *, const af_array, const af_mat_prop);
 	af_err af_lu (af_array *, af_array *, af_array *, const af_array);
 	af_err af_lu_inplace (af_array *, af_array, const bool);		
 	af_err af_matmul (af_array *, const af_array, const af_array, const af_mat_prop, const af_mat_prop);
@@ -521,12 +521,12 @@ ffi.cdef([[
 	/* Statistics */
 	af_err af_corrcoef (double *, double *, const af_array, const af_array);
 	af_err af_cov (	af_array *, const af_array, const af_array, const bool);
-	af_err af_median (af_array *, const af_array, const dim_t);
-	af_err af_median_all (double *, double *, const af_array);
 	af_err af_mean (af_array *, const af_array, const dim_t);
 	af_err af_mean_all (double *, double *, const af_array);
 	af_err af_mean_all_weighted (double *, double *, const af_array, const af_array);	
 	af_err af_mean_weighted (af_array *, const af_array, const af_array, const dim_t);
+	af_err af_median (af_array *, const af_array, const dim_t);
+	af_err af_median_all (double *, double *, const af_array);
 	af_err af_stdev (af_array *, const af_array, const dim_t);
 	af_err af_stdev_all (double *, double *, const af_array);
 	af_err af_var (af_array *, const af_array, const bool, const dim_t);
@@ -615,6 +615,7 @@ ffi.cdef([[
 	af_err af_device_info (char *, char *, char *, char *);
 	af_err af_device_mem_info (size_t *, size_t *, size_t *, size_t *);
 	af_err af_free_device (void *);
+	af_err af_free_pinned (void *);
 	af_err af_get_device (int *);
 	af_err af_get_device_count (int *);
 	af_err af_get_device_ptr (void **, const af_array);

@@ -1,49 +1,68 @@
 #include "../funcs.h"
+#include "../doubles_template.h"
+#include "../out_in_template.h"
+#include "../out_in2_template.h"
+#include "../out2_in_template.h"
+#include "../out2_in2_template.h"
 
-/*
-	af_err af_accum (af_array *, const af_array, const int);
-	af_err af_all_true (af_array *, const af_array, const int);
-	af_err af_any_true (af_array *, const af_array, const int);
-	af_err af_count (af_array *, const af_array, const int);
-	af_err af_diff1 (af_array *, const af_array, const int);
-	af_err af_diff2 (af_array *, const af_array, const int);
-	af_err af_max (af_array *, const af_array, const int);
-	af_err af_min (af_array *, const af_array, const int);
-	af_err af_product (af_array *, const af_array, const int);
-	af_err af_sum (af_array *, const af_array, const int);
+template<af_err (*func)(double *, double *, unsigned *, const af_array)> int IAll (lua_State * L)
+{
+	lua_settop(L, 1);	// arr
 
-	af_err af_all_true_all (double *, double *, const af_array);
-	af_err af_any_true_all (double *, double *, const af_array);
-	af_err af_count_all (double *, double *, const af_array);
-	af_err af_max_all (double *, double *, const af_array);
-	af_err af_min_all (double *, double *, const af_array);
-	af_err af_product_all (double *, double *, const af_array);
-	af_err af_sum_all (double *, double *, const af_array);
+	double d1, d2;
+	unsigned value;
 
-	af_err af_imax (af_array *, af_array *, const af_array, const int);
-	af_err af_imin (af_array *, af_array *, const af_array, const int);
-	af_err af_gradient (af_array *, af_array *, const af_array);
+	af_err err = func(&d1, &d2, &value, GetArray(L, 1));
 
-	af_err af_imax_all (double *, double *, unsigned *, const af_array);
-	af_err af_imin_all (double *, double *, unsigned *, const af_array);
+	lua_pushinteger(L, err);// arr, err
+	lua_pushnumber(L, d1);	// arr, err, d1
+	lua_pushnumber(L, d2);	// arr, err, d1, d2
+	lua_pushinteger(L, value);	// arr, err, d1, d2, value
 
-	af_err af_product_nan (af_array *, const af_array, const int, const double);
-	af_err af_sum_nan (af_array *, const af_array, const int, const double);
+	return 4;
+}
 
-	af_err af_product_nan_all (double *, double *, const af_array, const double);
-	af_err af_sum_nan_all (double *, double *, const af_array, const double);
+#define IALL(name) { "af_"#name, IAll<&af_##name> }
 
-	af_err af_set_intersect (af_array *, const af_array, const af_array, const bool);
-	af_err af_set_union (af_array *, const af_array, const af_array, const bool);
-	af_err af_set_unique (af_array *, const af_array, const bool);
-	af_err af_sort (af_array *, const af_array, const unsigned, const bool);
-	af_err af_sort_by_key (af_array *, af_array *, const af_array, const af_array, const unsigned, const bool);
-	af_err af_sort_index (af_array *, af_array *, const af_array, const unsigned, const bool);
-	af_err af_where (af_array *, const af_array);
-*/
 static const struct luaL_Reg vector_funcs[] = {
+	OUTIN_ARG(accum, int),
+	OUTIN_ARG(all_true, int),
+	DDIN(all_true_all),
+	OUTIN_ARG(any_true, int),
+	DDIN(any_true_all),
+	OUTIN_ARG(count, int),
+	DDIN(count_all),
+	OUTIN_ARG(diff1, int),
+	OUTIN_ARG(diff2, int),
+	OUT2IN(gradient),
+	OUT2IN_ARG(imax, int),
+	IALL(imax_all),
+	OUT2IN_ARG(imin, int),
+	IALL(imin_all),
+	OUTIN_ARG(max, int),
+	DDIN(max_all),
+	OUTIN_ARG(min, int),
+	DDIN(min_all),
+	OUTIN_ARG(product, int),
+	DDIN(product_all),
+	OUTIN_ARG2(product_nan, int, double),
+	DDIN_ARG(product_nan_all, double),
+	OUTIN2_ARG(set_intersect, bool),
+	OUTIN2_ARG(set_union, bool),
+	OUTIN_ARG(set_unique, bool),
+	OUTIN_ARG2(sort, unsigned, bool),
+	OUT2IN2_ARG2(sort_by_key, unsigned, bool),
+	OUT2IN_ARG2(sort_index, unsigned, bool),
+	OUTIN_ARG(sum, int),
+	DDIN(sum_all),
+	OUTIN_ARG2(sum_nan, int, double),
+	DDIN_ARG(sum_nan_all, double),
+	OUTIN(where),
+
 	{ NULL, NULL }
 };
+
+#undef IALL
 
 int Vector (lua_State * L)
 {

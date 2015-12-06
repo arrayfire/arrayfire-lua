@@ -1,65 +1,21 @@
 #include <arrayfire.h>
 #include "methods.h"
+#include "from_template.h"
+#include "in_template.h"
 #include "out_in_template.h"
 #include "utils.h"
 
-extern "C" {
-	#include <lauxlib.h>
-}
-
-template<af_err (*func)(af_array)> int ArrayOnly (lua_State * L)
-{
-	lua_settop(L, 1);	// in
-
-	af_err err = func(GetArray(L, 1));
-
-	lua_pushinteger(L, err);// in, err
-
-	return 1;
-}
-
-template<af_err (*func)(bool *, const af_array)> int Predicate (lua_State * L)
-{
-	lua_settop(L, 1);	// arr
-
-	bool result;
-
-	af_err err = func(&result, GetArray(L, 1));
-
-	lua_pushinteger(L, err);// arr, err
-	lua_pushboolean(L, result);	// arr, err, result
-
-	return 2;
-}
-
-#define PRED_REG(cond) { "af_is_" #cond, Predicate<&af_is_##cond> }
+#define PRED_REG(cond) FROM_NONE(is_##cond, bool)
 
 //
 static const struct luaL_Reg array_methods[] = {
+	OUTIN(copy_array),
+	IN_NONE(eval),
+	FROM_NONE(get_data_ref_count, int),
 	{
-		"af_copy_array", OutIn<&af_copy_array>
-	}, {
-		"af_eval", ArrayOnly<&af_eval>
-	}, {
-		"af_get_data_ref_count", [](lua_State * L)
-		{
-			lua_settop(L, 1);	// arr
-
-			int count;
-
-			af_err err = af_get_data_ref_count(&count, GetArray(L, 1));
-
-			lua_pushinteger(L, err);// arr, err
-			lua_pushinteger(L, count);	// arr, err, count
-
-			return 2;
-		}
-	}, {
 		"af_get_data_ptr", [](lua_State * L)
 		{
 			lua_settop(L, 2);	// data, arr
-
-			int count;
 
 			af_err err = af_get_data_ptr(lua_touserdata(L, 1), GetArray(L, 2));
 
@@ -84,50 +40,10 @@ static const struct luaL_Reg array_methods[] = {
 
 			return 5;
 		}
-	}, {
-		"af_get_elements", [](lua_State * L)
-		{
-			lua_settop(L, 1);	// arr
-
-			dim_t elems;
-
-			af_err err = af_get_elements(&elems, GetArray(L, 1));
-
-			lua_pushinteger(L, err);// arr, err
-			lua_pushinteger(L, elems);	// arr, err, elems
-
-			return 2;
-		}
-	}, {
-		"af_get_numdims", [](lua_State * L)
-		{
-			lua_settop(L, 1);	// arr
-
-			unsigned int ndims;
-
-			af_err err = af_get_numdims(&ndims, GetArray(L, 1));
-
-			lua_pushinteger(L, err);// arr, err
-			lua_pushinteger(L, ndims);	// arr, err, ndims
-
-			return 2;
-		}
-	}, {
-		"af_get_type", [](lua_State * L)
-		{
-			lua_settop(L, 1);	// arr
-
-			af_dtype type;
-
-			af_err err = af_get_type(&type, GetArray(L, 1));
-
-			lua_pushinteger(L, err);// arr, err
-			lua_pushinteger(L, type);	// arr, err, type
-
-			return 2;
-		}
 	},
-
+	FROM_NONE(get_elements, dim_t),
+	FROM_NONE(get_numdims, unsigned),
+	FROM_NONE(get_type, af_dtype),
 	PRED_REG(empty),
 	PRED_REG(scalar),
 	PRED_REG(vector),
@@ -141,17 +57,14 @@ static const struct luaL_Reg array_methods[] = {
 	PRED_REG(floating),
 	PRED_REG(integer),
 	PRED_REG(bool),
-
+	IN_NONE(release_array),
+	OUTIN(retain_array),
 	{
-		"af_release_array", ArrayOnly<&af_release_array>
-	}, {
-		"af_retain_array", OutIn<&af_retain_array>
-	}, {
 		"af_write_array", [](lua_State * L)
 		{
 			lua_settop(L, 4);	// arr, data, bytes, src
 
-			af_err err = af_write_array(GetArray(L, 1), GetMemory(L, 2), lua_tointeger(L, 3), (af_source)lua_tointeger(L, 4));
+			af_err err = af_write_array(GetArray(L, 1), GetMemory(L, 2), Arg<size_t>(L, 3), Arg<af_source>(L, 4));
 
 			lua_pushinteger(L, err);// arr, data, bytes, src, err
 

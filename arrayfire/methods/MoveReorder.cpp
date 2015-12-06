@@ -1,16 +1,63 @@
 #include "../methods.h"
+#include "../utils.h"
+#include "../out_in_template.h"
 
-/*
-	af_err af_flat (af_array *, const af_array);
-	af_err af_flip (af_array *, const af_array, const unsigned);
-	af_err af_join (af_array *, const int, const af_array, const af_array);
-	af_err af_join_many (af_array *, const int, const unsigned, const af_array *);
-	af_err af_moddims (af_array *, const af_array, const unsigned, const dim_t *);
-	af_err af_reorder (af_array *, const af_array, const unsigned, const unsigned, const unsigned, const unsigned);
-	af_err af_shift (af_array *, const af_array, const int, const int, const int, const int);
-	af_err af_tile (af_array *, const af_array, const unsigned, const unsigned, const unsigned, const unsigned);
-*/
 static const struct luaL_Reg move_reorder_methods[] = {
+	OUTIN(flat),
+	OUTIN_ARG(flip, unsigned),
+	{
+		"af_join", [](lua_State * L)
+		{
+			lua_settop(L, 3);	// dim, first, second
+
+			af_array * arr_ud = NewArray(L);// dim, first, second, arr_ud
+
+			af_err err = af_join(arr_ud, I(L, 1), GetArray(L, 2), GetArray(L, 3));
+
+			return PushErr(L, err);	// dim, first, second, err, arr_ud
+		}
+	}, {
+		"af_joinmany", [](lua_State * L)
+		{
+			lua_settop(L, 3);	// num, narrays, inputs
+
+			af_array * arr_ud = NewArray(L);// num, narrays, inputs, arr_ud
+
+			unsigned count = U(L, 2);
+
+			std::vector<af_array> arrays(count);
+
+			for (unsigned i = 1; i <= count; ++i)
+			{
+				lua_rawgeti(L, 3, i);	// num, narrays, inputs, arr_ud, array
+
+				arrays.push_back(GetArray(L, 5));
+
+				lua_pop(L, 1);	// num, arrays, inputs, arr_ud
+			}
+
+			af_err err = af_join_many(arr_ud, I(L, 1), count, &arrays.front());
+
+			return PushErr(L, err);	// num, arrays, inputs, err, arr_ud
+		}
+	}, {
+		"af_moddims", [](lua_State * L)
+		{
+			lua_settop(L, 3);	// arr, ndims, dims
+
+			LuaDimsAndType dims(L, 2, true);
+
+			af_array * arr_ud = NewArray(L);// arr, ndims, dims, arr_ud
+
+			af_err err = af_moddims(arr_ud, GetArray(L, 2), dims.GetNDims(), dims.GetDims());
+
+			return PushErr(L, err);	// arr, ndims, dims, err, arr_ud
+		}
+	},
+	OUTIN_ARG4(reorder, unsigned, unsigned, unsigned, unsigned),
+	OUTIN_ARG4(shift, int, int, int, int),
+	OUTIN_ARG4(tile, unsigned, unsigned, unsigned, unsigned),
+
 	{ NULL, NULL }
 };
 
