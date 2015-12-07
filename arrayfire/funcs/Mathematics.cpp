@@ -58,6 +58,9 @@ static const struct luaL_Reg math_funcs[] = {
 	TWO_ARGS(rem),
 	TWO_ARGS(root),
 	OUTIN(round),
+#if AF_API_VERSION >= 31
+	OUTIN(sigmoid),
+#endif
 	OUTIN(sign),
 	OUTIN(sin),
 	OUTIN(sinh),

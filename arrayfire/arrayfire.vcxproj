@@ -144,6 +144,7 @@
     <ClCompile Include="funcs\Mathematics.cpp" />
     <ClCompile Include="funcs\SignalProcessing.cpp" />
     <ClCompile Include="funcs\Statistics.cpp" />
+    <ClCompile Include="funcs\Util.cpp" />
     <ClCompile Include="funcs\Vector.cpp" />
     <ClCompile Include="graphics\Draw.cpp" />
     <ClCompile Include="graphics\Window.cpp" />

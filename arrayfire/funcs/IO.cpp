@@ -3,6 +3,7 @@
 #include "../out_template.h"
 
 static const struct luaL_Reg io_funcs[] = {
+#if AF_API_VERSION >= 31
 	{
 		"af_delete_image_memory", [](lua_State * L)
 		{
@@ -15,7 +16,9 @@ static const struct luaL_Reg io_funcs[] = {
 			return 1;
 		}
 	},
+#endif
 	OUT_ARG2(load_image, const char *, bool),
+#if AF_API_VERSION >= 31
 	{
 		"af_load_image_memory", [](lua_State * L)
 		{
@@ -28,6 +31,21 @@ static const struct luaL_Reg io_funcs[] = {
 			return PushErr(L, err);	// ptr, err, arr_ud
 		}
 	},
+#endif
+#if AF_API_VERSION >= 32
+	{
+		"af_load_image_native", [](lua_State * L)
+		{
+			lua_settop(L, 1);	// filename
+
+			af_array * arr_ud = NewArray(L);// filename, arr_ud
+
+			af_err err = af_load_image_native(arr_ud, S(L, 1));
+
+			return PushErr(L, err);	// filename, err, arr_ud
+		}
+	},
+#endif
 	OUT_ARG2(read_array_index, const char *, unsigned),
 	OUT_ARG2(read_array_key, const char *, const char *),
 	{
@@ -69,7 +87,9 @@ static const struct luaL_Reg io_funcs[] = {
 
 			return 1;
 		}
-	}, {
+	},
+#if AF_API_VERSION >= 31
+	{
 		"af_save_image_memory", [](lua_State * L)
 		{
 			lua_settop(L, 2);	// arr, format
@@ -84,11 +104,24 @@ static const struct luaL_Reg io_funcs[] = {
 			return 2;
 		}
 	},
+#endif
+#if AF_API_VERSION >= 32
+	{
+		"af_save_image_native", [](lua_State * L)
+		{
+			lua_settop(L, 2);	// filename, arr
+
+			af_err err = af_save_image_native(S(L, 1), GetArray(L, 2));
+
+			lua_pushinteger(L, err);// filename, arr, err
+
+			return 1;
+		}
+	},
+#endif
 
 	{ NULL, NULL }
 };
-
-// TODO: 3.2
 
 int IO (lua_State * L)
 {

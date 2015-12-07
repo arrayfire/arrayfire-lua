@@ -32,6 +32,7 @@ extern "C" __declspec(dllexport) int luaopen_arrayfire (lua_State * L)
 	Register(L, &Mathematics);
 	Register(L, &SignalProcessing);
 	Register(L, &Statistics);
+	Register(L, &Util);
 	Register(L, &Vector);
 
 	// Array methods

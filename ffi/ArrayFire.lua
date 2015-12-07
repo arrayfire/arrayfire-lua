@@ -15,8 +15,8 @@ local libs = ffi_ArrayFireLibs or {
    -- Linux   = { x86 = path .. "lib" .. name, x64 = path .. "lib" .. name, arm = "bin/Linux/arm/lib" .. name }
 }
 
-local lib  = ffi_ArrayFire_lib or libs[ ffi.os ][ ffi.arch ]
-local af   = ffi.load( lib )
+local lib = ffi_ArrayFire_lib or libs[ ffi.os ][ ffi.arch ]
+local af  = ffi.load( lib )
 
 ffi.cdef[[ af_err af_get_version (int *, int *, int *); ]]
 
@@ -24,7 +24,7 @@ local major, minor, patch = ffi.new("int[1]"), ffi.new("int[1]"), ffi.new("int[1
 
 af.af_get_version(major, minor, patch)
 
-local MinVer = ffi_ArrayFire_minver or (major[0] * 10 + minor[0])
+local Version, Patch = major[0] * 10 + minor[0], patch[0]
 local UsesCUDA = name == "af" or name == "afcuda"
 local UsesOpenCL = name == "af" or name == "afcl"
 
@@ -326,6 +326,13 @@ $MINVER(32)$
 	} af_backend;
 $/MINVER$
 
+	// Below enum is purely added for example purposes
+	// it doesn't and shoudn't be used anywhere in the
+	// code. No Guarantee's provided if it is used.
+	typedef enum {
+		AF_ID = 0
+	} af_someenum_t;
+
 	typedef ]] .. (is_32_bit and "int" or "long long") .. [[ dim_t;
 	
 	typedef long long intl;
@@ -333,6 +340,16 @@ $/MINVER$
 
 	typedef void * af_features;
 
+	typedef struct af_cfloat {
+		float real;
+		float imag;
+	} af_cfloat;
+
+	typedef struct af_cdouble {
+		double real;
+		double imag;
+	} af_cdouble;
+	
 	typedef struct af_seq {
 		double begin, end;
 		double step;
@@ -357,6 +374,14 @@ $/MINVER$
 
 	typedef unsigned long long af_window;
 
+$USES_CUDA$
+	// TODO: cudaStream_t
+$/USES_CUDA$
+
+$USES_OPENCL$
+	// TODO: cl_context, cl_device_id, cl_command_queue
+$/USES_OPEN_CL$
+	
 	/* Constructors */
 	af_err af_create_array (af_array *, const void * const, const unsigned, const dim_t * const, const af_dtype);
 	af_err af_create_handle (af_array *, const unsigned, const dim_t * const, const af_dtype);
@@ -380,22 +405,35 @@ $/MINVER$
 	af_err af_upper (af_array *, const af_array, bool);
 
 	/* Backends */
+$MINVER(32)$
 	af_err af_get_available_backends (int *);
 	af_err af_get_backend_count (unsigned *);
 	af_err af_get_backend_id (af_backend *, const af_array);
 	af_err af_set_backend (const af_backend);
+$/MINVER$
 
 	/* Computer Vision */
+$MINVER(31)$
 	af_err af_dog (af_array *, const af_array, const int, const int);
+$/MINVER$
 	af_err af_fast (af_features *, const af_array, const float, const unsigned, const bool, const float, const unsigned);
+$MINVER(32)$
 	af_err af_gloh (af_features *, af_array *, const af_array, const unsigned, const float, const float, const float, const bool, const float, const float);
+$/MINVER$
 	af_err af_hamming_matcher (af_array *, af_array *, const af_array, const af_array, const dim_t, const unsigned);
+$MINVER(31)$
 	af_err af_harris (af_features *, const af_array, const unsigned, const float, const float, const unsigned, const float);
+$/MINVER$
+$MINVER(32)$
+	af_err af_homography (af_array *, int *, const af_array, const af_array, const af_array, const af_array, const af_homography_type, const float, const unsigned, const af_dtype);
+$/MINVER$
 	af_err af_match_template (af_array *, const af_array, const af_array, const af_match_type);
 	af_err af_orb (af_features *, af_array *, const af_array, const float, const unsigned, const float, const unsigned, const bool);
+$MINVER(31)$
 	af_err af_nearest_neighbour (af_array *, af_array *, const af_array, const af_array, const dim_t, const unsigned, const af_match_type);
 	af_err af_sift (af_features *, af_array *, const af_array, const unsigned, const float, const float, const float, const bool, const float, const float);
 	af_err af_susan (af_features *, const af_array, const unsigned, const float, const float, const float, const unsigned);
+$/MINVER$
 
 	/* Features */
 	af_err af_create_features (af_features *, dim_t);
@@ -428,19 +466,26 @@ $/MINVER$
 	af_err af_resize (af_array *, const af_array, const dim_t, const dim_t, const af_interp_type);
 	af_err af_rgb2gray (af_array *, const af_array, const float, const float, const float);
 	af_err af_rgb2hsv (af_array *, const af_array);
-	af_err af_rgb2ycbcr (af_array *, const af_array, const af_ycc_std);	
+$MINVER(31)$
+	af_err af_rgb2ycbcr (af_array *, const af_array, const af_ycc_std);
+$/MINVER$
 	af_err af_rotate (af_array *, const af_array, const float, const bool, const af_interp_type);
+$MINVER(31)$
 	af_err af_sat (af_array *, const af_array);
+$/MINVER$
 	af_err af_scale (af_array *, const af_array, const float, const float, const dim_t, const dim_t, const af_interp_type);
 	af_err af_skew (af_array *, const af_array, const float, const float, const dim_t, const dim_t, const af_interp_type, const bool);
 	af_err af_sobel_operator (af_array *, af_array *, const af_array, const unsigned);
 	af_err af_transform (af_array *, const af_array, const af_array, const dim_t, const dim_t, const af_interp_type, const bool);
 	af_err af_translate (af_array *, const af_array, const float, const float, const dim_t, const dim_t, const af_interp_type);
+$MINVER(31)$
 	af_err af_unwrap (af_array *, const af_array, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const bool);
 	af_err af_wrap (af_array *, const af_array, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const dim_t, const bool);
 	af_err af_ycbcr2rgb (af_array *, const af_array, const af_ycc_std);
+$/MINVER$
 
 	/* Interface */
+$MINVER(32)$
 $USES_OPENCL$
 	af_err afcl_get_context (cl_context *, const bool);
 	af_err afcl_get_device_id (cl_device_id *);
@@ -451,17 +496,30 @@ $USES_CUDA$
 	af_err afcu_get_native_id (int *, int);
 	af_err afcu_get_stream (cudaStream_t *, int);
 $/USES_CUDA$
+$/MINVER$
 
 	/* IO */
+$MINVER(31)$
 	af_err af_delete_image_memory (void *);
+$/MINVER$
 	af_err af_load_image (af_array *, const char *, const bool);
+$MINVER(31)$
 	af_err af_load_image_memory (af_array *, const void *);
+$/MINVER$
+$MINVER(32)$
+	af_err af_load_image_native (af_array *, const char *);
+$/MINVER$
 	af_err af_read_array_index (af_array *, const char *, const unsigned);
 	af_err af_read_array_key (af_array *, const char *, const char *);
 	af_err af_read_array_key_check (int *, const char *, const char *);
 	af_err af_save_array (int *, const char *, const af_array, const char *, const bool);
 	af_err af_save_image (const char *, const af_array);
-	af_err af_save_image_memory (void ** ptr, const af_array, const af_image_format);
+$MINVER(31)$
+	af_err af_save_image_memory (void **, const af_array, const af_image_format);
+$/MINVER$
+$MINVER(32)$
+    af_err af_save_image_native (const char *, const af_array);
+$/MINVER$
 
 	/* Linear Algebra */
 	af_err af_cholesky (af_array *, int *, const af_array, const bool);
@@ -478,8 +536,10 @@ $/USES_CUDA$
 	af_err af_rank (unsigned *, const af_array, const double);
 	af_err af_solve (af_array *, const af_array, const af_array, const af_mat_prop);
 	af_err af_solve_lu (af_array *, const af_array, const af_array, const af_array, const af_mat_prop);
+$MINVER(31)$
 	af_err af_svd (af_array *, af_array *, af_array *, const af_array);
 	af_err af_svd_inplace (af_array *, af_array *, af_array *, const af_array);
+$/MINVER$
 	af_err af_transpose (af_array *, af_array, const bool);
 	af_err af_transpose_inplace (af_array, const bool);
 
@@ -536,6 +596,9 @@ $/USES_CUDA$
 	af_err af_rem (af_array *, const af_array, const af_array, const bool);
 	af_err af_root (af_array *, const af_array, const af_array, const bool);
 	af_err af_round (af_array *, const af_array);
+$MINVER(31)$
+	AFAPI af_err af_sigmoid (af_array *, const af_array);
+$/MINVER$
 	af_err af_sign (af_array *, const af_array);
 	af_err af_sin (af_array *, const af_array);
 	af_err af_sinh (af_array *, const af_array);
@@ -553,28 +616,37 @@ $/USES_CUDA$
 	af_err af_convolve2 (af_array *, const af_array, const af_array, const af_conv_mode, af_conv_domain);
 	af_err af_convolve2_sep (af_array *, const af_array, const af_array, const af_array, const af_conv_mode);	
 	af_err af_convolve3 (af_array *, const af_array, const af_array, const af_conv_mode, af_conv_domain);
-	af_err af_fir (af_array *, const af_array, const af_array);
-	af_err af_ifft (af_array *, const af_array, const double, const dim_t);
-	af_err af_ifft_inplace (af_array, const double);
-	af_err af_ifft2 (af_array *, const af_array, const double, const dim_t, const dim_t);
-	af_err af_ifft2_inplace (af_array, const double);
-	af_err af_ifft3 (af_array *, const af_array, const double, const dim_t, const dim_t, const dim_t);	
-	af_err af_ifft3_inplace (af_array, const double);
-	af_err af_iir (af_array *, const af_array, const af_array, const af_array);
 	af_err af_fft (af_array *, const af_array, const double, const dim_t);	
 	af_err af_fft_convolve2	(af_array *, const af_array, const af_array, const af_conv_mode);
-	af_err af_fft_convolve3	(af_array *, const af_array, const af_array, const af_conv_mode);	
+	af_err af_fft_convolve3	(af_array *, const af_array, const af_array, const af_conv_mode);
+$MINVER(31)$	
 	af_err af_fft_c2r (af_array *, const af_array, const double, const bool);
 	af_err af_fft_inplace (af_array, const double);
 	af_err af_fft_r2c (af_array *, const af_array, const double, const dim_t);
-	af_err af_fft2 (af_array *, const af_array, const double, const dim_t, const dim_t);	
+$/MINVER$
+	af_err af_fft2 (af_array *, const af_array, const double, const dim_t, const dim_t);
+$MINVER(31)$
 	af_err af_fft2_c2r (af_array *, const af_array, const double, const bool);
 	af_err af_fft2_inplace (af_array, const double);
 	af_err af_fft2_r2c (af_array *, const af_array, const double, const dim_t, const dim_t);
-	af_err af_fft3 (af_array *, const af_array, const double, const dim_t, const dim_t, const dim_t);	
+$/MINVER$
+	af_err af_fft3 (af_array *, const af_array, const double, const dim_t, const dim_t, const dim_t);
+$MINVER(31)$	
 	af_err af_fft3_c2r (af_array *, const af_array, const double, const bool);
 	af_err af_fft3_inplace (af_array, const double);
 	af_err af_fft3_r2c (af_array *, const af_array, const double, const dim_t, const dim_t, const dim_t);
+$/MINVER$
+	af_err af_fir (af_array *, const af_array, const af_array);
+	af_err af_ifft (af_array *, const af_array, const double, const dim_t);
+$MINVER(31)$
+	af_err af_ifft_inplace (af_array, const double);
+	af_err af_ifft2 (af_array *, const af_array, const double, const dim_t, const dim_t);
+	af_err af_ifft2_inplace (af_array, const double);
+$MINVER(31)$
+	af_err af_ifft3 (af_array *, const af_array, const double, const dim_t, const dim_t, const dim_t);
+$MINVER(31)$
+	af_err af_ifft3_inplace (af_array, const double);
+	af_err af_iir (af_array *, const af_array, const af_array, const af_array);
 
 	/* Statistics */
 	af_err af_corrcoef (double *, double *, const af_array, const af_array);
@@ -592,6 +664,13 @@ $/USES_CUDA$
 	af_err af_var_all_weighted (double *, double *, const af_array, const af_array);
 	af_err af_var_weighted (af_array *, const af_array, const af_array, const dim_t);
 
+	/* Util */
+    af_err af_print_array (af_array arr);
+$MINVER(31)$
+    af_err af_print_array_gen (const char *, const af_array, const int);
+	af_err af_array_to_string (char **, const char *, const af_array, const int, const bool);
+$/MINVER$
+	
 	/* Vector */
 	af_err af_accum (af_array *, const af_array, const int);
 	af_err af_all_true (af_array *, const af_array, const int);
@@ -613,8 +692,10 @@ $/USES_CUDA$
 	af_err af_min_all (double *, double *, const af_array);
 	af_err af_product (af_array *, const af_array, const int);
 	af_err af_product_all (double *, double *, const af_array);
+$MINVER(31)$
 	af_err af_product_nan (af_array *, const af_array, const int, const double);
 	af_err af_product_nan_all (double *, double *, const af_array, const double);
+$/MINVER$
 	af_err af_set_intersect (af_array *, const af_array, const af_array, const bool);
 	af_err af_set_union (af_array *, const af_array, const af_array, const bool);
 	af_err af_set_unique (af_array *, const af_array, const bool);
@@ -623,14 +704,18 @@ $/USES_CUDA$
 	af_err af_sort_index (af_array *, af_array *, const af_array, const unsigned, const bool);
 	af_err af_sum (af_array *, const af_array, const int);
 	af_err af_sum_all (double *, double *, const af_array);
+$MINVER(31)$
 	af_err af_sum_nan (af_array *, const af_array, const int, const double);
 	af_err af_sum_nan_all (double *, double *, const af_array, const double);
+$/MINVER$
 	af_err af_where (af_array *, const af_array);
 
 	/* Array Methods */
 	af_err af_copy_array (af_array *, const af_array);
 	af_err af_eval (af_array);
+$MINVER(31)$
 	af_err af_get_data_ref_count (int *, const af_array);
+$/MINVER$
 	af_err af_get_dims (dim_t *, dim_t *, dim_t *, dim_t *, const af_array);
 	af_err af_get_elements (dim_t *, const af_array);
 	af_err af_get_data_ptr (void *, const af_array);
@@ -656,10 +741,20 @@ $/USES_CUDA$
 	/* Assign / Index */
 	af_err af_assign_gen (af_array *, const af_array, const dim_t, const af_index_t *, const af_array);
 	af_err af_assign_seq (af_array *, const af_array, const unsigned, const af_seq * const, const af_array);
+$MINVER(32)$
+	af_err af_create_indexers (af_index_t **);
+$/MINVER$
 	af_err af_index (af_array *, const af_array, const unsigned, const af_seq * const);
 	af_err af_index_gen (af_array *, const af_array, const dim_t, const af_index_t *);
 	af_err af_lookup (af_array *, const af_array, const af_array, const unsigned);
-
+$MINVER(32)$
+	af_err af_release_indexers (af_index_t *);
+	af_err af_set_array_indexer (af_index_t *, const af_array, const dim_t);
+	af_err af_set_seq_indexer (af_index_t *, const af_seq *, const dim_t, const bool);
+	af_err af_set_seq_param_indexer (af_index_t *, const double, const double, const double, const dim_t, const bool);
+$/MINVER$
+	af_seq af_make_seq (double, double, double);
+	
 	/* Device */
 	af_err af_alloc_device (void **, const dim_t);
 	af_err af_alloc_pinned (void **, const dim_t);
@@ -674,11 +769,15 @@ $/USES_CUDA$
 	af_err af_get_dbl_support (bool *, const int);
 	af_err af_get_mem_step_size (size_t *);
 	af_err af_info ();
+$MINVER(31)$
 	af_err af_lock_device_ptr (const af_array);
+$/MINVER$
 	af_err af_set_device (const int);
 	af_err af_set_mem_step_size (const size_t);
 	af_err af_sync (const int);
+$MINVER(31)$
 	af_err af_unlock_device_ptr (const af_array);
+$/MINVER$
 
 	/* Helper */
 	af_err af_cast (af_array *, const af_array, const af_dtype);
@@ -702,21 +801,28 @@ $/USES_CUDA$
 $MINVER(32)$
 	af_err af_draw_plot3 (const af_window, const af_array, const af_cell *);
 $/MINVER(32)$
-//	af_err af_draw_surface (const af_window, const af_array, const af_array, const af_array, const af_cell *);
-	// ^^^ Not sure :P (symbol missing)
+$MINVER(32.1)$
+	af_err af_draw_surface (const af_window, const af_array, const af_array, const af_array, const af_cell *);
+$/MINVER$
 
 	/* Window */
 	af_err af_destroy_window (const af_window);
 	af_err af_grid (const af_window, const int, const int);
 	af_err af_is_window_closed (bool *, const af_window);
 	af_err af_set_position (const af_window, const unsigned, const unsigned);
+$MINVER(31)$
 	af_err af_set_size (const af_window, const unsigned, const unsigned);
+$/MINVER$
 	af_err af_set_title (const af_window, const char * const);
 	af_err af_show (const af_window);
-]]):gsub("%$MINVER%((%w+)%)%$(.-)%$/MINVER%$", function (s, code) -- strip too-new code
-	local ver = tonumber(s)
+]]):gsub("%$MINVER%((%d+)%.?(%d-)%)%$(.-)%$/MINVER%$", function (version, patch_id, code)
+	version, patch_id = tonumber(version), tonumber(patch_id) or -1
 
-	return (ver and ver >= MinVer) and code or ""
+	if Version >= version and (Version > version or Patch >= patch_id) then
+		return code
+	else
+		return ""
+	end
 end):gsub("%$USES_CUDA%$(.-)%$/USES_CUDA%$", function (code) -- strip CUDA if not supported
 	return UsesCUDA and code or ""
 end):gsub("%$USES_OpenCL%$(.-)%$/USES_OpenCL%$", function (code) -- strip OpenCL if not supported

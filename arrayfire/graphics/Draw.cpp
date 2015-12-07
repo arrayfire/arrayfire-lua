@@ -80,16 +80,20 @@ static const struct luaL_Reg draw_funcs[] = {
 
 			return 1;
 		}
-	}, {
+	},
+#endif
+
+#if AF_API_VERSION > 32	|| (AF_API_VERSION == 32 && AF_VERSION_PATCH >= 1)
+	{
 		"af_draw_surface", [](lua_State * L)
 		{
 			lua_settop(L, 5);	// window, xvals, yvals, S, props
 
 			LuaCell cell(L);
-		// ARGH, NOT EXPORTED :(
-		//	af_err err = af_draw_surface(Arg<af_window>(L, 1), GetArray(L, 2), GetArray(L, 3), GetArray(L, 4), cell.GetCell());
 
-		//	lua_pushinteger(L, err);// window, x, y, props, err
+			af_err err = af_draw_surface(Arg<af_window>(L, 1), GetArray(L, 2), GetArray(L, 3), GetArray(L, 4), cell.GetCell());
+
+			lua_pushinteger(L, err);// window, x, y, props, err
 
 			return 1;
 		}

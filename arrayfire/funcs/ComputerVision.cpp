@@ -28,9 +28,10 @@ template<typename T1, typename T2, typename T3, typename T4, typename T5, af_err
 }
 
 static const struct luaL_Reg computer_vision_funcs[] = {
+#if AF_API_VERSION >= 31
+	OUTIN_ARG2(dog, int, int),
+#endif
 	{
-		"af_dog", OutIn_Arg2<int, int, &af_dog>
-	}, {
 		"af_fast", FiveArgs<float, unsigned, bool, float, unsigned, &af_fast>
 	},
 
@@ -39,16 +40,39 @@ static const struct luaL_Reg computer_vision_funcs[] = {
 		"af_gloh", SIFT<&af_gloh>
 	},
 #endif
-
 	{
 		"af_hamming_matcher", Out2In2_Arg2<dim_t, unsigned, &af_hamming_matcher>
-	},	{
+	},
+#if AF_API_VERSION >= 31
+	{
 		"af_harris", FiveArgs<unsigned, float, float, unsigned, float, &af_harris>
-	}, {
+	},
+#endif
+#if AF_API_VERSION >= 32
+	{
+		"af_homography", [](lua_State * L)
+		{
+			lua_settop(L, 8);	// xsrc, ysrc, xdst, ydst, htype, inlier_thr, iterations, otype
+
+			af_array * arr_ud = NewArray(L);// xsrc, ysrc, xdst, ydst, htype, inlier_thr, iterations, otype, arr_ud
+
+			int inliers;
+
+			af_err err = af_homography(arr_ud, &inliers, GetArray(L, 1), GetArray(L, 2), GetArray(L, 3), GetArray(L, 4), Arg<af_homography_type>(L, 5), F(L, 6), U(L, 7), Arg<af_dtype>(L, 8));
+
+			lua_pushinteger(L, inliers);// xsrc, ysrc, xdst, ydst, htype, inlier_thr, iterations, otype, arr_ud, inliers
+
+			return PushErr(L, err, 2);	// xsrc, ysrc, xdst, ydst, htype, inlier_thr, iterations, otype, err, arr_ud, inliers
+		}
+	},
+#endif
+	{
 		"af_match_template", OutIn2_Arg<af_match_type, &af_match_template>
-	}, {
-		"af_nearest_neighbour", Out2In2_Arg3<dim_t, unsigned, af_match_type, &af_nearest_neighbour>
-	}, {
+	},
+#if AF_API_VERSION >= 31
+	OUT2IN2_ARG3(nearest_neighbour, dim_t, unsigned, af_match_type),
+#endif
+	{
 		"af_orb", [](lua_State * L)
 		{
 			lua_settop(L, 6);	// arr, fast_thr, max_feat, scl_factor, levels, blur_img
@@ -62,9 +86,12 @@ static const struct luaL_Reg computer_vision_funcs[] = {
 		}
 	}, {
 		"af_sift", SIFT<&af_sift>
-	}, {
+	},
+#if AF_API_VERSION >= 31
+	{
 		"af_susan", FiveArgs<unsigned, float, float, float, unsigned, &af_susan>
 	},
+#endif
 
 	{ NULL, NULL }
 };

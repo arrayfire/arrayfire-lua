@@ -35,17 +35,23 @@ static const struct luaL_Reg image_processing_funcs[] = {
 	OUTIN_ARG2(regions, af_connectivity, af_dtype),
 	OUTIN_ARG3(resize, dim_t, dim_t, af_interp_type),
 	OUTIN_ARG3(rgb2gray, float, float, float),
+#if AF_API_VERSION >= 31
 	OUTIN_ARG(rgb2ycbcr, af_ycc_std),
+#endif
 	OUTIN_ARG3(rotate, float, bool, af_interp_type),
+#if AF_API_VERSION >= 31
 	OUTIN(sat),
+#endif
 	OUTIN_ARG5(scale, float, float, dim_t, dim_t, af_interp_type),
 	OUTIN_ARG6(skew, float, float, dim_t, dim_t, af_interp_type, bool),
 	OUT2IN_ARG(sobel_operator, unsigned),
 	OUTIN2_ARG4(transform, dim_t, dim_t, af_interp_type, bool),
 	OUTIN_ARG5(translate, float, float, dim_t, dim_t, af_interp_type),
+#if AF_API_VERSION >= 31
 	OUTIN_ARG7(unwrap, dim_t, dim_t, dim_t, dim_t, dim_t, dim_t, bool),
 	OUTIN_ARG9(wrap, dim_t, dim_t, dim_t, dim_t, dim_t, dim_t, dim_t, dim_t, bool),
 	OUTIN_ARG(ycbcr2rgb, af_ycc_std),
+#endif
 
 	{ NULL, NULL }
 };

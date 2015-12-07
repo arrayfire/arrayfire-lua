@@ -11,6 +11,7 @@
 static const struct luaL_Reg array_methods[] = {
 	OUTIN(copy_array),
 	IN_NONE(eval),
+#if AF_API_VERSION >= 31
 	FROM_NONE(get_data_ref_count, int),
 	{
 		"af_get_data_ptr", [](lua_State * L)
@@ -23,7 +24,9 @@ static const struct luaL_Reg array_methods[] = {
 
 			return 1;
 		}
-	}, {
+	},
+#endif
+	{
 		"af_get_dims", [](lua_State * L)
 		{
 			lua_settop(L, 1);	// in

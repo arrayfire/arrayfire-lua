@@ -1,5 +1,6 @@
 #include "../funcs.h"
 #include "../utils.h"
+#include "../args_template.h"
 
 static const struct luaL_Reg backend_funcs[] = {
 #if AF_API_VERSION >= 32
@@ -50,7 +51,7 @@ static const struct luaL_Reg backend_funcs[] = {
 		{
 			lua_settop(L, 1);	// bknd
 
-			af_err err = af_set_backend((const af_backend)lua_tointeger(L, 1));
+			af_err err = af_set_backend(Arg<af_backend>(L, 1));
 
 			lua_pushinteger(L, err);// bknd, err
 

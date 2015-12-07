@@ -92,8 +92,10 @@ static const struct luaL_Reg linear_algebra_funcs[] = {
 	},
 	OUTIN2_ARG(solve, af_mat_prop),
 	OUTIN3_ARG(solve_lu, af_mat_prop),
+#if AF_API_VERSION >= 31
 	OUT3IN(svd),
 	OUT3IN(svd_inplace),
+#endif
 	OUTIN_ARG(transpose, bool),
 	IN_ARG(transpose_inplace, bool),
 

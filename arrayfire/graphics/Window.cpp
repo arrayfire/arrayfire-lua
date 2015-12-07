@@ -43,9 +43,13 @@ static const struct luaL_Reg window_funcs[] = {
 		}
 	}, {
 		"af_set_position", TwoT<unsigned, &af_set_position>
-	}, {
+	},
+#if AF_API_VERSION >= 31
+	{
 		"af_set_size", TwoT<unsigned, &af_set_size>
-	}, {
+	},
+#endif
+	{
 		"af_set_title", [](lua_State * L)
 		{
 			lua_settop(L, 2);	// window, title

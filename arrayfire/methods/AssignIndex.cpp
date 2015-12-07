@@ -9,9 +9,7 @@ template<> void Load (lua_State * L, af_seq & seq)
 	lua_getfield(L, -2, "end");	// ..., seq, begin, end
 	lua_getfield(L, -3, "step");// ..., seq, begin, end, step
 
-	seq.begin = D(L, -3);
-	seq.end = D(L, -2);
-	seq.step = D(L, -1);
+	seq = af_make_seq(D(L, -3), D(L, -2), D(L, -1));
 
 	lua_pop(L, 3);	// ..., seq
 }
@@ -88,17 +86,28 @@ template<typename T, typename E, af_err (*func)(af_array *, const af_array, cons
 static const struct luaL_Reg assign_index_methods[] = {
 	ASSIGN(assign_gen, dim_t, af_index_t),
 	ASSIGN(assign_seq, unsigned, af_seq),
+#if AF_API_VERSION >= 32
+// 	AFAPI af_err af_create_indexers(af_index_t** indexers);
+#endif
 	INDEX(index, unsigned, af_seq),
 	INDEX(index_gen, dim_t, af_index_t),
 	OUTIN2_ARG(lookup, unsigned),
+#if AF_API_VERSION >= 32
+//	AFAPI af_err af_release_indexers(af_index_t* indexers);
+//	AFAPI af_err af_set_array_indexer(af_index_t* indexer, const af_array idx, const dim_t dim);
+//	AFAPI af_err af_set_seq_indexer(af_index_t* indexer, const af_seq* idx, const dim_t dim, const bool is_batch);
+//	AFAPI af_err af_set_seq_param_indexer(af_index_t* indexer, const double begin, const double end, const double step, const dim_t dim, const bool is_batch);
+#endif
 
+#if 0
+	AFAPI af_seq af_make_seq(double begin, double end, double step);
+#endif
+	// TODO^^^^
 	{ NULL, NULL }
 };
 
 #undef ASSIGN
 #undef INDEX
-
-// TODO: 3.2 stuff...
 
 int AssignIndex (lua_State * L)
 {

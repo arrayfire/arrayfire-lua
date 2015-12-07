@@ -137,5 +137,8 @@
     <ClCompile Include="args.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="funcs\Util.cpp">
+      <Filter>Source Files\Functions</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

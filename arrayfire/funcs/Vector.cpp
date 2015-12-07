@@ -45,8 +45,10 @@ static const struct luaL_Reg vector_funcs[] = {
 	DDIN(min_all),
 	OUTIN_ARG(product, int),
 	DDIN(product_all),
+#if AF_API_VERSION >= 31
 	OUTIN_ARG2(product_nan, int, double),
 	DDIN_ARG(product_nan_all, double),
+#endif
 	OUTIN2_ARG(set_intersect, bool),
 	OUTIN2_ARG(set_union, bool),
 	OUTIN_ARG(set_unique, bool),
@@ -55,8 +57,10 @@ static const struct luaL_Reg vector_funcs[] = {
 	OUT2IN_ARG2(sort_index, unsigned, bool),
 	OUTIN_ARG(sum, int),
 	DDIN(sum_all),
+#if AF_API_VERSION >= 31
 	OUTIN_ARG2(sum_nan, int, double),
 	DDIN_ARG(sum_nan_all, double),
+#endif
 	OUTIN(where),
 
 	{ NULL, NULL }

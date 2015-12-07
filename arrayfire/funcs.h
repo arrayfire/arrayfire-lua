@@ -16,6 +16,7 @@ int LinearAlgebra (lua_State * L);
 int Mathematics (lua_State * L);
 int SignalProcessing (lua_State * L);
 int Statistics (lua_State * L);
+int Util (lua_State * L);
 int Vector (lua_State * L);
 
 #endif // FUNCS_H
