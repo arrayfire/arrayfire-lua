@@ -1,15 +1,38 @@
 #ifndef ARGS_TEMPLATE_H
 #define ARGS_TEMPLATE_H
 
-template<typename T> T Arg (lua_State * L, int index)
+#include <arrayfire.h>
+
+template <typename T> struct SelectType {
+	typedef T type;
+	typedef T * out_type;
+};
+
+#define TN(t) typename SelectType<t>::type
+#define TN_OUT(t) typename SelectType<t>::out_type
+
+template<typename T, typename R = T> R Arg (lua_State * L, int index)
 {
-	return (T)lua_tointeger(L, index);
+	return (R)lua_tointeger(L, index);
+}
+
+template<typename T> T Declare (lua_State * L)
+{
+	return T(0);
+}
+
+template<typename T, typename R = T *> R Out (T & value)
+{
+	return &value;
 }
 
 template<typename T> void Push (lua_State * L, T value)
 {
 	lua_pushinteger(L, value);	// ..., value
 }
+
+typedef struct { af_array * mUD; } ARRAY_PROXY;
+typedef struct { af_features * mUD; } FEATURES_PROXY;
 
 bool B (lua_State * L, int index);
 double D (lua_State * L, int index);

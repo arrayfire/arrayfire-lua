@@ -27,6 +27,22 @@ int OutIn_Arg (lua_State * L)
 	return PushErr(L, err);	// a, arg, err, arr_ud
 }
 
+/*
+template<typename O1, typename I1, typename I2, af_err (*func)(TN_OUT(O1), const TN(I1), const TN(I2))>
+int Out1_In2 (lua_State * L)
+{
+	lua_settop(L, 2);	// arg1, arg2
+
+	O1 out1 = Declare<O1>(L);	// arg1, arg2, out1?
+
+	af_err err = func(Out(out1), Arg<I1>(L, 1), Arg<I2>(L, 2));
+
+	Push(L, out1);	//  arg1, arg2, out1
+
+	return PushErr(L, err);	// arg1, arg2, err, out1
+}
+*/
+
 template<typename T1, typename T2, af_err (*func)(af_array *, const af_array, const T1, const T2)>
 int OutIn_Arg2 (lua_State * L)
 {
@@ -127,6 +143,7 @@ int OutIn_Arg9 (lua_State * L)
 
 #define OUTIN(name) { "af_"#name, OutIn<&af_##name> }
 #define OUTIN_ARG(name, t) { "af_"#name, OutIn_Arg<t, &af_##name> }
+// { "af_"#name, Out1_In2<ARRAY_PROXY, ARRAY_PROXY, t, &af_##name> }
 #define OUTIN_ARG2(name, t1, t2) { "af_"#name, OutIn_Arg2<t1, t2, &af_##name> }
 #define OUTIN_ARG3(name, t1, t2, t3) { "af_"#name, OutIn_Arg3<t1, t2, t3, &af_##name> }
 #define OUTIN_ARG4(name, t1, t2, t3, t4) { "af_"#name, OutIn_Arg4<t1, t2, t3, t4, &af_##name> }

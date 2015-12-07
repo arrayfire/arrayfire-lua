@@ -5,11 +5,8 @@ local ffi  = require( "ffi" )
 local name, path = "af", os.getenv("AF_PATH") .. "/"
 local is_32_bit = ffi.abi("32bit") -- used to typedef dim_t
 
-
-if ArrayFireMode == "cl" or ArrayFireMode == "cuda" then
+if ArrayFireMode == "cl" or ArrayFireMode == "cuda" or ArrayFireMode == "cpu" then
 	name = name .. ArrayFireMode
-else
-	name = name .. "cpu"
 end
 
 local libs = ffi_ArrayFireLibs or {
@@ -21,7 +18,17 @@ local libs = ffi_ArrayFireLibs or {
 local lib  = ffi_ArrayFire_lib or libs[ ffi.os ][ ffi.arch ]
 local af   = ffi.load( lib )
 
-ffi.cdef([[
+ffi.cdef[[ af_err af_get_version (int *, int *, int *); ]]
+
+local major, minor, patch = ffi.new("int[1]"), ffi.new("int[1]"), ffi.new("int[1]")
+
+af.af_get_version(major, minor, patch)
+
+local MinVer = ffi_ArrayFire_minver or (major[0] * 10 + minor[0])
+local UsesCUDA = name == "af" or name == "afcuda"
+local UsesOpenCL = name == "af" or name == "afcl"
+
+local def = ([[
 	typedef enum {
 		///
 		/// The function returned successfully
@@ -90,10 +97,12 @@ ffi.cdef([[
 		///
 		AF_ERR_NOT_CONFIGURED = 302,
 
+$MINVER(32)$
 		///
 		/// This build of ArrayFire is not compiled with "nonfree" algorithms
 		///
-		AFF_ERR_NONFREE       = 303,
+		AF_ERR_NONFREE       = 303,
+$/MINVER$
 
 		// 400-499 Errors for missing hardware features
 
@@ -107,6 +116,26 @@ ffi.cdef([[
 		/// not support graphics
 		///
 		AF_ERR_NO_GFX         = 402,
+
+		// 500-599 Errors specific to heterogenous API
+
+$MINVER(32)$
+		///
+		/// There was an error when loading the libraries
+		///
+		AF_ERR_LOAD_LIB       = 501,
+
+		///
+		/// There was an error when loading the symbols
+		///
+		AF_ERR_LOAD_SYM       = 502,
+
+		///
+		/// There was a mismatch between the input array and the active backend
+		///
+		AF_ERR_ARR_BKND_MISMATCH    = 503,
+$/MINVER$
+		
 		// 900-999 Errors from upstream libraries and runtimes
 
 		///
@@ -131,7 +160,11 @@ ffi.cdef([[
 		u32,    ///< 32-bit unsigned integral values
 		u8,     ///< 8-bit unsigned integral values
 		s64,    ///< 64-bit signed integral values
-		u64     ///< 64-bit unsigned integral values
+		u64,    ///< 64-bit unsigned integral values
+$MINVER(32)$
+		s16,    ///< 16-bit signed integral values
+		u16,    ///< 16-bit unsigned integral values
+$/MINVER$
 	} af_dtype;
 
 	typedef enum {
@@ -205,17 +238,21 @@ ffi.cdef([[
 		AF_SHD        ///< Match based on Sum of Hamming Distances (SHD)
 	} af_match_type;
 
+$MINVER(31)$
 	typedef enum {
 		AF_YCC_601 = 601,  ///< ITU-R BT.601 (formerly CCIR 601) standard
 		AF_YCC_709 = 709,  ///< ITU-R BT.709 standard
 		AF_YCC_2020 = 2020  ///< ITU-R BT.2020 standard
 	} af_ycc_std;
+$/MINVER$
 
 	typedef enum {
 		AF_GRAY = 0, ///< Grayscale
 		AF_RGB,      ///< 3-channel RGB
 		AF_HSV,      ///< 3-channel HSV
+$MINVER(31)$
 		AF_YCbCr     ///< 3-channel YCbCr
+$/MINVER$
 	} af_cspace_t;
 
 	typedef enum {
@@ -256,6 +293,7 @@ ffi.cdef([[
 		AF_COLORMAP_BLUE    = 6     ///< Blue hue map
 	} af_colormap;
 
+$MINVER(31)$
 	typedef enum {
 		AF_FIF_BMP          = 0,    ///< FreeImage Enum for Bitmap File
 		AF_FIF_ICO          = 1,    ///< FreeImage Enum for Windows Icon File
@@ -271,6 +309,22 @@ ffi.cdef([[
 		AF_FIF_JP2          = 31,   ///< FreeImage Enum for JPEG-2000 File
 		AF_FIF_RAW          = 34    ///< FreeImage Enum for RAW Camera Image File
 	} af_image_format;
+$/MINVER$
+
+$MINVER(32)$
+	typedef enum {
+		AF_HOMOGRAPHY_RANSAC = 0,   ///< Computes homography using RANSAC
+		AF_HOMOGRAPHY_LMEDS  = 1    ///< Computes homography using Least Median of Squares
+	} af_homography_type;
+
+	// These enums should be 2^x
+	typedef enum {
+		AF_BACKEND_DEFAULT = 0,  ///< Default backend order: OpenCL -> CUDA -> CPU
+		AF_BACKEND_CPU     = 1,  ///< CPU a.k.a sequential algorithms
+		AF_BACKEND_CUDA    = 2,  ///< CUDA Compute Backend
+		AF_BACKEND_OPENCL  = 4,  ///< OpenCL Compute Backend
+	} af_backend;
+$/MINVER$
 
 	typedef ]] .. (is_32_bit and "int" or "long long") .. [[ dim_t;
 	
@@ -387,11 +441,16 @@ ffi.cdef([[
 	af_err af_ycbcr2rgb (af_array *, const af_array, const af_ycc_std);
 
 	/* Interface */
+$USES_OPENCL$
 	af_err afcl_get_context (cl_context *, const bool);
 	af_err afcl_get_device_id (cl_device_id *);
-	af_err afcu_get_native_id (int *, int);
 	af_err afcl_get_queue (cl_command_queue *, const bool);
+$/USES_OPEN_CL$
+
+$USES_CUDA$
+	af_err afcu_get_native_id (int *, int);
 	af_err afcu_get_stream (cudaStream_t *, int);
+$/USES_CUDA$
 
 	/* IO */
 	af_err af_delete_image_memory (void *);
@@ -428,65 +487,64 @@ ffi.cdef([[
 	af_err af_abs (af_array *, const af_array);
 	af_err af_acos (af_array *, const af_array);
 	af_err af_acosh (af_array *, const af_array);
+	af_err af_add (af_array *, const af_array, const af_array, const bool);
+	af_err af_and (af_array *, const af_array, const af_array, const bool);
 	af_err af_arg (af_array *, const af_array);
 	af_err af_asin (af_array *, const af_array);
 	af_err af_asinh (af_array *, const af_array);
-	af_err af_atan (af_array *, const af_array);	
-	af_err af_atanh (af_array *, const af_array);	
-	af_err af_cbrt (af_array *, const af_array);
-	af_err af_ceil (af_array *, const af_array);
-	af_err af_conjg (af_array *, const af_array);
-	af_err af_cos (af_array *, const af_array);
-	af_err af_cosh (af_array *, const af_array);
-	af_err af_cplx (af_array *, const af_array);
-	af_err af_erf (af_array *, const af_array);	
-	af_err af_erfc (af_array *, const af_array);	
-	af_err af_exp (af_array *, const af_array);
-	af_err af_expm1 (af_array *, const af_array);	
-	af_err af_factorial (af_array *, const af_array);
-	af_err af_floor (af_array *, const af_array);
-	af_err af_imag (af_array *, const af_array);
-	af_err af_lgamma (af_array *, const af_array);
-	af_err af_log (af_array *, const af_array);	
-	af_err af_log10 (af_array *, const af_array);	
-	af_err af_log1p (af_array *, const af_array);
-	af_err af_not (af_array *, const af_array);
-	af_err af_real (af_array *, const af_array);
-	af_err af_round (af_array *, const af_array);
-	af_err af_sign (af_array *, const af_array);
-	af_err af_sin (af_array *, const af_array);
-	af_err af_sinh (af_array *, const af_array);			
-	af_err af_sqrt (af_array *, const af_array);
-	af_err af_tan (af_array *, const af_array);
-	af_err af_tanh (af_array *, const af_array);
-	af_err af_trunc (af_array *, const af_array);
-	af_err af_tgamma (af_array *, const af_array);
-
-	af_err af_add (af_array *, const af_array, const af_array, const bool);
-	af_err af_and (af_array *, const af_array, const af_array, const bool);
+	af_err af_atan (af_array *, const af_array);
+	af_err af_atanh (af_array *, const af_array);
 	af_err af_atan2 (af_array *, const af_array, const af_array, const bool);
 	af_err af_bitand (af_array *, const af_array, const af_array, const bool);	
 	af_err af_bitor (af_array *, const af_array, const af_array, const bool);
 	af_err af_bitshiftl (af_array *, const af_array, const af_array, const bool);	
 	af_err af_bitshiftr (af_array *, const af_array, const af_array, const bool);
 	af_err af_bitxor (af_array *, const af_array, const af_array, const bool);
+	af_err af_cbrt (af_array *, const af_array);
+	af_err af_ceil (af_array *, const af_array);
+	af_err af_conjg (af_array *, const af_array);
+	af_err af_cos (af_array *, const af_array);
+	af_err af_cosh (af_array *, const af_array);
+	af_err af_cplx (af_array *, const af_array);
 	af_err af_cplx2 (af_array *, const af_array, const af_array, const bool);
 	af_err af_div (af_array *, const af_array, const af_array, const bool);
 	af_err af_eq (af_array *, const af_array, const af_array, const bool);
+	af_err af_erf (af_array *, const af_array);	
+	af_err af_erfc (af_array *, const af_array);	
+	af_err af_exp (af_array *, const af_array);
+	af_err af_expm1 (af_array *, const af_array);	
+	af_err af_factorial (af_array *, const af_array);
+	af_err af_floor (af_array *, const af_array);
 	af_err af_ge (af_array *, const af_array, const af_array, const bool);
 	af_err af_gt (af_array *, const af_array, const af_array, const bool);
 	af_err af_hypot (af_array *, const af_array, const af_array, const bool);
+	af_err af_imag (af_array *, const af_array);
 	af_err af_le (af_array *, const af_array, const af_array, const bool);
+	af_err af_lgamma (af_array *, const af_array);
+	af_err af_log (af_array *, const af_array);	
+	af_err af_log10 (af_array *, const af_array);	
+	af_err af_log1p (af_array *, const af_array);
 	af_err af_maxof (af_array *, const af_array, const af_array, const bool);
 	af_err af_minof (af_array *, const af_array, const af_array, const bool);
 	af_err af_mod (af_array *, const af_array, const af_array, const bool);
 	af_err af_mul (af_array *, const af_array, const af_array, const bool);
 	af_err af_neq (af_array *, const af_array, const af_array, const bool);	
+	af_err af_not (af_array *, const af_array);
 	af_err af_or (af_array *, const af_array, const af_array, const bool);
 	af_err af_pow (af_array *, const af_array, const af_array, const bool);
+	af_err af_real (af_array *, const af_array);
 	af_err af_rem (af_array *, const af_array, const af_array, const bool);
 	af_err af_root (af_array *, const af_array, const af_array, const bool);
+	af_err af_round (af_array *, const af_array);
+	af_err af_sign (af_array *, const af_array);
+	af_err af_sin (af_array *, const af_array);
+	af_err af_sinh (af_array *, const af_array);
 	af_err af_sub (af_array *, const af_array, const af_array, const bool);
+	af_err af_sqrt (af_array *, const af_array);
+	af_err af_tan (af_array *, const af_array);
+	af_err af_tanh (af_array *, const af_array);
+	af_err af_trunc (af_array *, const af_array);
+	af_err af_tgamma (af_array *, const af_array);
 
 	/* Signal Processing */
 	af_err af_approx1 (af_array *, const af_array, const af_array, const af_interp_type, const float);
@@ -537,42 +595,36 @@ ffi.cdef([[
 	/* Vector */
 	af_err af_accum (af_array *, const af_array, const int);
 	af_err af_all_true (af_array *, const af_array, const int);
+	af_err af_all_true_all (double *, double *, const af_array);
 	af_err af_any_true (af_array *, const af_array, const int);
+	af_err af_any_true_all (double *, double *, const af_array);
 	af_err af_count (af_array *, const af_array, const int);
+	af_err af_count_all (double *, double *, const af_array);
 	af_err af_diff1 (af_array *, const af_array, const int);
 	af_err af_diff2 (af_array *, const af_array, const int);
-	af_err af_max (af_array *, const af_array, const int);
-	af_err af_min (af_array *, const af_array, const int);
-	af_err af_product (af_array *, const af_array, const int);
-	af_err af_sum (af_array *, const af_array, const int);
-
-	af_err af_all_true_all (double *, double *, const af_array);
-	af_err af_any_true_all (double *, double *, const af_array);
-	af_err af_count_all (double *, double *, const af_array);
-	af_err af_max_all (double *, double *, const af_array);
-	af_err af_min_all (double *, double *, const af_array);
-	af_err af_product_all (double *, double *, const af_array);
-	af_err af_sum_all (double *, double *, const af_array);
-
-	af_err af_imax (af_array *, af_array *, const af_array, const int);
-	af_err af_imin (af_array *, af_array *, const af_array, const int);
 	af_err af_gradient (af_array *, af_array *, const af_array);
-
+	af_err af_imax (af_array *, af_array *, const af_array, const int);
 	af_err af_imax_all (double *, double *, unsigned *, const af_array);
+	af_err af_imin (af_array *, af_array *, const af_array, const int);
 	af_err af_imin_all (double *, double *, unsigned *, const af_array);
-
+	af_err af_max (af_array *, const af_array, const int);
+	af_err af_max_all (double *, double *, const af_array);
+	af_err af_min (af_array *, const af_array, const int);
+	af_err af_min_all (double *, double *, const af_array);
+	af_err af_product (af_array *, const af_array, const int);
+	af_err af_product_all (double *, double *, const af_array);
 	af_err af_product_nan (af_array *, const af_array, const int, const double);
-	af_err af_sum_nan (af_array *, const af_array, const int, const double);
-
 	af_err af_product_nan_all (double *, double *, const af_array, const double);
-	af_err af_sum_nan_all (double *, double *, const af_array, const double);
-
 	af_err af_set_intersect (af_array *, const af_array, const af_array, const bool);
 	af_err af_set_union (af_array *, const af_array, const af_array, const bool);
 	af_err af_set_unique (af_array *, const af_array, const bool);
 	af_err af_sort (af_array *, const af_array, const unsigned, const bool);
 	af_err af_sort_by_key (af_array *, af_array *, const af_array, const af_array, const unsigned, const bool);
 	af_err af_sort_index (af_array *, af_array *, const af_array, const unsigned, const bool);
+	af_err af_sum (af_array *, const af_array, const int);
+	af_err af_sum_all (double *, double *, const af_array);
+	af_err af_sum_nan (af_array *, const af_array, const int, const double);
+	af_err af_sum_nan_all (double *, double *, const af_array, const double);
 	af_err af_where (af_array *, const af_array);
 
 	/* Array Methods */
@@ -647,8 +699,11 @@ ffi.cdef([[
 	af_err af_draw_hist (const af_window, const af_array, const double, const double, const af_cell *);
 	af_err af_draw_image (const af_window, const af_array, const af_cell *);
 	af_err af_draw_plot (const af_window, const af_array, const af_array, const af_cell *);
+$MINVER(32)$
 	af_err af_draw_plot3 (const af_window, const af_array, const af_cell *);
+$/MINVER(32)$
 //	af_err af_draw_surface (const af_window, const af_array, const af_array, const af_array, const af_cell *);
+	// ^^^ Not sure :P (symbol missing)
 
 	/* Window */
 	af_err af_destroy_window (const af_window);
@@ -658,6 +713,16 @@ ffi.cdef([[
 	af_err af_set_size (const af_window, const unsigned, const unsigned);
 	af_err af_set_title (const af_window, const char * const);
 	af_err af_show (const af_window);
-]])
+]]):gsub("%$MINVER%((%w+)%)%$(.-)%$/MINVER%$", function (s, code) -- strip too-new code
+	local ver = tonumber(s)
+
+	return (ver and ver >= MinVer) and code or ""
+end):gsub("%$USES_CUDA%$(.-)%$/USES_CUDA%$", function (code) -- strip CUDA if not supported
+	return UsesCUDA and code or ""
+end):gsub("%$USES_OpenCL%$(.-)%$/USES_OpenCL%$", function (code) -- strip OpenCL if not supported
+	return UsesOpenCL and code or ""
+end)
+
+ffi.cdef(def)
 
 return af
