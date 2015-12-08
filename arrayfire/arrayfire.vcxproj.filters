@@ -22,6 +22,9 @@
     <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{6b796e1b-829b-4b20-b3b6-96d908db721a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\template">
+      <UniqueIdentifier>{d5f75403-e2b9-4245-9090-453c0b71a26e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -39,48 +42,42 @@
     <ClInclude Include="graphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="out_in_template.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="template\args.h">
+      <Filter>Header Files\template</Filter>
     </ClInclude>
-    <ClInclude Include="args_template.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="template\doubles.h">
+      <Filter>Header Files\template</Filter>
     </ClInclude>
-    <ClInclude Include="out2_in2_template.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="template\from.h">
+      <Filter>Header Files\template</Filter>
     </ClInclude>
-    <ClInclude Include="out_in2_template.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="template\in.h">
+      <Filter>Header Files\template</Filter>
     </ClInclude>
-    <ClInclude Include="in_template.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="template\out.h">
+      <Filter>Header Files\template</Filter>
     </ClInclude>
-    <ClInclude Include="out_in3_template.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="template\out_in.h">
+      <Filter>Header Files\template</Filter>
     </ClInclude>
-    <ClInclude Include="out2_in_template.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="template\out_in2.h">
+      <Filter>Header Files\template</Filter>
     </ClInclude>
-    <ClInclude Include="doubles_template.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="template\out_in3.h">
+      <Filter>Header Files\template</Filter>
     </ClInclude>
-    <ClInclude Include="out_template.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="template\out2_in.h">
+      <Filter>Header Files\template</Filter>
     </ClInclude>
-    <ClInclude Include="from_template.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="template\out2_in2.h">
+      <Filter>Header Files\template</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="array_methods.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="arrayfire.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="utils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="array_creators.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="methods\AssignIndex.cpp">
@@ -139,6 +136,15 @@
     </ClCompile>
     <ClCompile Include="funcs\Util.cpp">
       <Filter>Source Files\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="methods\Create.cpp">
+      <Filter>Source Files\Methods</Filter>
+    </ClCompile>
+    <ClCompile Include="methods\Constructor.cpp">
+      <Filter>Source Files\Methods</Filter>
+    </ClCompile>
+    <ClCompile Include="methods\Methods.cpp">
+      <Filter>Source Files\Methods</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

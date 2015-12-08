@@ -1,8 +1,8 @@
 #include "../funcs.h"
-#include "../out_in_template.h"
-#include "../out_in2_template.h"
-#include "../out2_in_template.h"
-#include "../out2_in2_template.h"
+#include "../template/out_in.h"
+#include "../template/out_in2.h"
+#include "../template/out2_in.h"
+#include "../template/out2_in2.h"
 
 static const struct luaL_Reg image_processing_funcs[] = {
 	OUTIN_ARG3(bilateral, float, float, bool),

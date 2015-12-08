@@ -1,6 +1,6 @@
 #include "../graphics.h"
 #include "../utils.h"
-#include "../args_template.h"
+#include "../template/args.h"
 
 class LuaCell {
 	af_cell mCell;

@@ -1,14 +1,20 @@
 #include "utils.h"
+#include "template/args.h"
 
 af_dtype GetDataType (lua_State * L, int index)
 {
 	af_dtype types[] = {
 		f32, c32, f64, c64, b8, s32, u32, u8, s64, u64,
-		// s16, u16???
+#if AF_API_VERSION >= 32
+		s16, u16
+#endif
 	};
 
 	const char * names[] = {
-		"f32", "c32", "f64", "c64", "b8", "s32", "u32", "u8", "s64", "u64"
+		"f32", "c32", "f64", "c64", "b8", "s32", "u32", "u8", "s64", "u64",
+#if AF_API_VERSION >= 32
+		"s16", "u16"
+#endif
 	};
 
 	return types[luaL_checkoption(L, index, "f32", names)];
@@ -76,15 +82,68 @@ af_features GetFeatures (lua_State * L, int index)
 	return *(af_features *)lua_touserdata(L, index);
 }
 
-af_array * NewArray (lua_State * L)
+static void AddMetatable (lua_State * L, const char * name, lua_CFunction func)
 {
-	return (af_array *)lua_newuserdata(L, sizeof(af_array)); // ..., array
+	if (luaL_newmetatable(L, name))	// ..., object, mt
+	{
+		lua_pushcfunction(L, func);	// ..., object, mt, func
+		lua_setfield(L, -2, "__gc");// ..., object, mt = { __gc = func }
+	}
+
+	lua_setmetatable(L, -2);// ..., object
 }
 
-af_features * NewFeatures(lua_State * L)
+af_array * NewArray(lua_State * L)
 {
-	return (af_features *)lua_newuserdata(L, sizeof(af_features));	// ..., features
+	void * ptr = lua_newuserdata(L, sizeof(af_array)); // ..., array
+
+	AddMetatable(L, "af_array", [](lua_State * L)
+	{
+		lua_settop(L, 1);	// array
+
+		af_array ptr = GetArray(L, 1);
+
+		if (ptr) af_release_array(ptr);
+
+		ClearArray(L, 1);
+
+		return 0;
+	});
+
+	return (af_array *)ptr;
 }
+
+af_features * NewFeatures (lua_State * L)
+{
+	void * ptr = lua_newuserdata(L, sizeof(af_features));	// ..., features
+
+	AddMetatable(L, "af_features", [](lua_State * L)
+	{
+		lua_settop(L, 1);	// features
+
+		af_features ptr = GetFeatures(L, 1);
+
+		if (ptr) af_release_features(ptr);
+
+		ClearFeatures(L, 1);
+
+		return 0;
+	});
+
+	return (af_features *)ptr;
+}
+
+void ClearArray (lua_State * L, int index)
+{
+	*(af_array *)lua_touserdata(L, index) = NULL;
+}
+
+void ClearFeatures (lua_State * L, int index)
+{
+	*(af_features *)lua_touserdata(L, index) = NULL;
+}
+
+// ^^^ TODO: Indexers
 
 LuaDimsAndType::LuaDimsAndType (lua_State * L, int first, bool def_type)
 {
@@ -111,21 +170,11 @@ template<typename T> void AddToVector (std::vector<char> & arr, T value)
 	for (auto i = arr.size(); i < arr.size() + sizeof(T); ++i) arr[i] = *bytes++;
 }
 
-template<typename T> T Float (lua_State * L, int index)
-{
-	return (T)lua_tonumber(L, index);
-}
-
-template<typename T> T Int (lua_State * L, int index)
-{
-	return (T)lua_tointeger(L, index);
-}
-
 template<typename T> void AddFloat (std::vector<char> & arr, lua_State * L, int index, int pos)
 {
 	lua_rawgeti(L, index, pos + 1);	// ..., arr, ..., float
 
-	AddToVector(arr, Float<T>(L, -1));
+	AddToVector(arr, Arg<T>(L, -1));
 
 	lua_pop(L, 1); // ..., arr, ...
 }
@@ -134,18 +183,18 @@ template<typename T> void AddInt (std::vector<char> & arr, lua_State * L, int in
 {
 	lua_rawgeti(L, index, pos + 1);	// ..., arr, ..., int
 
-	AddToVector(arr, Int<T>(L, -1));
+	AddToVector(arr, Arg<T>(L, -1));
 
 	lua_pop(L, 1); // ..., arr, ...
 }
 
-template<typename T> void AddComplex(std::vector<char> & arr, lua_State * L, int index, int pos)
+template<typename T, typename C> void AddComplex (std::vector<char> & arr, lua_State * L, int index, int pos)
 {
 	lua_rawgeti(L, index, pos + 1);	// ..., arr, ... complex
 	lua_rawgeti(L, -1, 1);	// ..., arr, ..., complex, real
 	lua_rawgeti(L, -2, 2);	// ..., arr, ..., complex, real, imag
 
-	std::complex<T> comp(Float<T>(L, -2), Float<T>(L, -1));
+	C comp(Arg<T>(L, -2), Arg<T>(L, -1));
 
 	AddToVector(arr, comp);
 
@@ -165,7 +214,12 @@ LuaData::LuaData (lua_State * L, int index, af_dtype type, bool copy) : mType(ty
 		case u8:
 			mData.reserve(count);
 			break;
-		// Docs list an s16, u16... ??
+#if AF_API_VERSION >= 32
+		case s16:
+		case u16:
+			mData.reserve(count * 2);
+			break;
+#endif
 		case f32:
 		case s32:
 		case u32:
@@ -190,17 +244,23 @@ LuaData::LuaData (lua_State * L, int index, af_dtype type, bool copy) : mType(ty
 				AddFloat<float>(mData, L, index, i);
 				break;
 			case c32:
-				AddComplex<float>(mData, L, index, i);
+				AddComplex<float, af::af_cfloat>(mData, L, index, i);
 				break;
 			case f64:
 				AddFloat<double>(mData, L, index, i);
 				break;
 			case c64:
-				AddComplex<double>(mData, L, index, i);
+				AddComplex<double, af::af_cdouble>(mData, L, index, i);
 				break;
 			case b8:
 				AddInt<char>(mData, L, index, i);
 				break;
+#if AF_API_VERSION >= 32
+			case s16:
+				break;
+			case u16:
+				break;
+#endif
 			case s32:
 				AddInt<int>(mData, L, index, i);
 				break;

@@ -1,6 +1,6 @@
 #include <arrayfire.h>
 #include "../graphics.h"
-#include "../args_template.h"
+#include "../template/args.h"
 
 template<typename T, af_err (*func)(const af_window, const T, const T)> int TwoT (lua_State * L)
 {

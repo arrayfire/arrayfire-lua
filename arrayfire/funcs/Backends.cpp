@@ -1,6 +1,6 @@
 #include "../funcs.h"
 #include "../utils.h"
-#include "../args_template.h"
+#include "../template/args.h"
 
 static const struct luaL_Reg backend_funcs[] = {
 #if AF_API_VERSION >= 32

@@ -1,6 +1,6 @@
 #include "../funcs.h"
 #include "../utils.h"
-#include "../out_template.h"
+#include "../template/out.h"
 
 static const struct luaL_Reg io_funcs[] = {
 #if AF_API_VERSION >= 31

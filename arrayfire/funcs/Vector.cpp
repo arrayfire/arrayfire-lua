@@ -1,9 +1,9 @@
 #include "../funcs.h"
-#include "../doubles_template.h"
-#include "../out_in_template.h"
-#include "../out_in2_template.h"
-#include "../out2_in_template.h"
-#include "../out2_in2_template.h"
+#include "../template/doubles.h"
+#include "../template/out_in.h"
+#include "../template/out_in2.h"
+#include "../template/out2_in.h"
+#include "../template/out2_in2.h"
 
 template<af_err (*func)(double *, double *, unsigned *, const af_array)> int IAll (lua_State * L)
 {

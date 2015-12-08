@@ -1,6 +1,6 @@
 #include "../funcs.h"
-#include "../out_in_template.h"
-#include "../out_in2_template.h"
+#include "../template/out_in.h"
+#include "../template/out_in2.h"
 
 #define TWO_ARGS(name) OUTIN2_ARG(name, bool)
 

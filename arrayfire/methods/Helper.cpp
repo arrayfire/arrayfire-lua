@@ -1,5 +1,5 @@
 #include "../methods.h"
-#include "../out_in_template.h"
+#include "../template/out_in.h"
 
 //
 static const struct luaL_Reg helper_methods[] = {

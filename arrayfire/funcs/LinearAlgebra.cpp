@@ -1,10 +1,10 @@
 #include "../funcs.h"
 #include "../utils.h"
-#include "../doubles_template.h"
-#include "../in_template.h"
-#include "../out_in_template.h"
-#include "../out_in2_template.h"
-#include "../out_in3_template.h"
+#include "../template/doubles.h"
+#include "../template/in.h"
+#include "../template/out_in.h"
+#include "../template/out_in2.h"
+#include "../template/out_in3.h"
 
 template<af_err (*func)(af_array *, af_array *, af_array *, const af_array)> int Out3In (lua_State * L)
 {

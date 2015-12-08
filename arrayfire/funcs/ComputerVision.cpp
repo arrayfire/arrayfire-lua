@@ -1,8 +1,8 @@
 #include "../funcs.h"
 #include "../utils.h"
-#include "../out_in_template.h"
-#include "../out_in2_template.h"
-#include "../out2_in2_template.h"
+#include "../template/out_in.h"
+#include "../template/out_in2.h"
+#include "../template/out2_in2.h"
 
 template<af_err (*func)(af_features *, af_array *, const af_array, const unsigned, const float, const float, const float, const bool, const float, const float)> int SIFT (lua_State * L)
 {

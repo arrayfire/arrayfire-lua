@@ -1,6 +1,6 @@
 #include "../methods.h"
 #include "../utils.h"
-#include "../args_template.h"
+#include "../template/args.h"
 
 template<af_err (*func)(af_array *, const af_features)> int FeaturesProp (lua_State * L)
 {

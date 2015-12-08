@@ -1,8 +1,8 @@
 #include "../funcs.h"
-#include "../in_template.h"
-#include "../out_in_template.h"
-#include "../out_in2_template.h"
-#include "../out_in3_template.h"
+#include "../template/in.h"
+#include "../template/out_in.h"
+#include "../template/out_in2.h"
+#include "../template/out_in3.h"
 
 static const struct luaL_Reg signal_processing_funcs[] = {
 	OUTIN2_ARG2(approx1, af_interp_type, float),

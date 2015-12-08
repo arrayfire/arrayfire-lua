@@ -2,7 +2,7 @@ extern "C" {
 	#include <lua.h>
 }
 
-#include "args_template.h"
+#include "template/args.h"
 #include "utils.h"
 
 template <> struct SelectType<ARRAY_PROXY> {

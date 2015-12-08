@@ -115,26 +115,24 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="args_template.h" />
-    <ClInclude Include="doubles_template.h" />
-    <ClInclude Include="from_template.h" />
     <ClInclude Include="funcs.h" />
     <ClInclude Include="graphics.h" />
-    <ClInclude Include="in_template.h" />
     <ClInclude Include="methods.h" />
-    <ClInclude Include="out2_in2_template.h" />
-    <ClInclude Include="out2_in_template.h" />
-    <ClInclude Include="out_in2_template.h" />
-    <ClInclude Include="out_in3_template.h" />
-    <ClInclude Include="out_in_template.h" />
-    <ClInclude Include="out_template.h" />
+    <ClInclude Include="template\args.h" />
+    <ClInclude Include="template\doubles.h" />
+    <ClInclude Include="template\from.h" />
+    <ClInclude Include="template\in.h" />
+    <ClInclude Include="template\out.h" />
+    <ClInclude Include="template\out2_in.h" />
+    <ClInclude Include="template\out2_in2.h" />
+    <ClInclude Include="template\out_in.h" />
+    <ClInclude Include="template\out_in2.h" />
+    <ClInclude Include="template\out_in3.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="args.cpp" />
     <ClCompile Include="arrayfire.cpp" />
-    <ClCompile Include="array_creators.cpp" />
-    <ClCompile Include="array_methods.cpp" />
     <ClCompile Include="funcs\Backends.cpp" />
     <ClCompile Include="funcs\ComputerVision.cpp" />
     <ClCompile Include="funcs\ImageProcessing.cpp" />
@@ -149,9 +147,12 @@
     <ClCompile Include="graphics\Draw.cpp" />
     <ClCompile Include="graphics\Window.cpp" />
     <ClCompile Include="methods\AssignIndex.cpp" />
+    <ClCompile Include="methods\Constructor.cpp" />
+    <ClCompile Include="methods\Create.cpp" />
     <ClCompile Include="methods\Device.cpp" />
     <ClCompile Include="methods\Features.cpp" />
     <ClCompile Include="methods\Helper.cpp" />
+    <ClCompile Include="methods\Methods.cpp" />
     <ClCompile Include="methods\MoveReorder.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>

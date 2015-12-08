@@ -1,5 +1,5 @@
 #include "../methods.h"
-#include "../out_in2_template.h"
+#include "../template/out_in2.h"
 
 template<typename T> void Load (lua_State * L, T & value) {}
 

@@ -1,7 +1,7 @@
 #include "../funcs.h"
-#include "../doubles_template.h"
-#include "../out_in_template.h"
-#include "../out_in2_template.h"
+#include "../template/doubles.h"
+#include "../template/out_in.h"
+#include "../template/out_in2.h"
 
 static const struct luaL_Reg statistics_funcs[] = {
 	DDIN2(corrcoef),

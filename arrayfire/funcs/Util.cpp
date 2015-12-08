@@ -1,5 +1,5 @@
 #include "../funcs.h"
-#include "../in_template.h"
+#include "../template/in.h"
 
 static const struct luaL_Reg util_funcs[] = {
 	IN_NONE(print_array),

@@ -1,6 +1,6 @@
 #include "../methods.h"
 #include "../utils.h"
-#include "../out_in_template.h"
+#include "../template/out_in.h"
 
 static const struct luaL_Reg move_reorder_methods[] = {
 	OUTIN(flat),

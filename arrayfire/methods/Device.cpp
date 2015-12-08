@@ -1,6 +1,6 @@
 #include "../methods.h"
 #include "../utils.h"
-#include "../in_template.h"
+#include "../template/in.h"
 
 template<af_err (*func)(void **, const dim_t)> int Alloc (lua_State * L)
 {
