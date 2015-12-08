@@ -60,7 +60,20 @@ static const struct luaL_Reg array_methods[] = {
 		PRED_REG(floating),
 		PRED_REG(integer),
 		PRED_REG(bool),
-		IN_NONE(release_array),
+		{
+			"af_release_features", [](lua_State * L)
+			{
+				lua_settop(L, 1);	// arr
+
+				af_err err = af_release_array(GetArray(L, 1));
+
+				ClearArray(L, 1);
+
+				lua_pushinteger(L, err);// arr, err
+
+				return 1;
+			}
+		},
 		OUTIN(retain_array),
 		{
 			"af_write_array", [](lua_State * L)

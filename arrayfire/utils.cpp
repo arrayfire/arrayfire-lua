@@ -74,12 +74,24 @@ void * GetMemory (lua_State * L, int index)
 
 af_array GetArray (lua_State * L, int index)
 {
-	return *(af_array *)lua_touserdata(L, index);
+	af_array * ptr_to = (af_array *)lua_touserdata(L, index);
+
+#ifndef NDEBUG
+	// Assert? (error to access after Clear...)
+#endif
+
+	return *ptr_to;
 }
 
 af_features GetFeatures (lua_State * L, int index)
 {
-	return *(af_features *)lua_touserdata(L, index);
+	af_features * ptr_to = (af_features *)lua_touserdata(L, index);
+
+#ifndef NDEBUG
+	// Assert? (ditto)
+#endif
+
+	return *ptr_to;
 }
 
 static void AddMetatable (lua_State * L, const char * name, lua_CFunction func)

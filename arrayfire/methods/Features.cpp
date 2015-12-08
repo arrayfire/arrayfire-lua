@@ -54,6 +54,8 @@ static const struct luaL_Reg features_methods[] = {
 
 			af_err err = af_release_features(GetFeatures(L, 1));
 
+			ClearFeatures(L, 1);
+
 			lua_pushinteger(L, err);// features, err
 
 			return 1;
