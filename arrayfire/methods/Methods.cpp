@@ -61,7 +61,7 @@ static const struct luaL_Reg array_methods[] = {
 		PRED_REG(integer),
 		PRED_REG(bool),
 		{
-			"af_release_features", [](lua_State * L)
+			"af_release_array", [](lua_State * L)
 			{
 				lua_settop(L, 1);	// arr
 

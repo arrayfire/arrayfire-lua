@@ -26,7 +26,7 @@ template<typename T, af_err (*func)(af_array, const T)> int In_Arg (lua_State * 
 	return 1;
 }
 
-#define IN_NONE(name) { "#af_"#name, In<&af_##name> }
+#define IN_NONE(name) { "af_"#name, In<&af_##name> }
 #define IN_ARG(name, t) { "af_"#name, In_Arg<t, &af_##name> }
 
 #endif
