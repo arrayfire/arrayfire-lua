@@ -10,7 +10,7 @@ You can find the most recent updated documentation TODO.
 
 ## Supported platforms
 
-Currently, only Windows. So far compiles with Lua 5.1.
+Currently, only Windows. So far, compiles with [Lua 5.1](http://www.lua.org/ftp/lua-5.1.5.tar.gz).
 
 ## Build from Source
 
@@ -19,10 +19,13 @@ You can install ArrayFire using one of the following two ways.
 - [Download and install binaries](https://arrayfire.com/download)
 - [Build and install from source](https://github.com/arrayfire/arrayfire)
 
-arrayfire depends on Lua, client depends on both (TODO: probably should add -lua suffix...)
-Linkage required for appropriate ArrayFire library
+- Build Lua, e.g. from above source
+- arrayfire depends on Lua (TODO: probably should add -lua suffix...)
+- (Windows) client depends on both of these
+- In these latter two, linkage required for appropriate ArrayFire library
 
-TODO: point to Lua 5.1 (not sure on 5.2, 5.3... should do 5.0?) and LuaJIT source. Alternatives such as Ravi and Terra?
+TODO: [5.2](http://www.lua.org/ftp/lua-5.2.4.tar.gz), [5.3](http://www.lua.org/ftp/lua-5.3.2.tar.gz)... [LuaJIT source](http://luajit.org/download.html). 
+Alternatives such as [Ravi](https://github.com/dibyendumajumdar/ravi) and [Terra](https://github.com/zdevito/terra)?
 
 Preprocessor stuff:
 
