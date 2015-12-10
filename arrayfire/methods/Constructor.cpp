@@ -1,6 +1,7 @@
 #include <arrayfire.h>
 #include "../funcs.h"
 #include "../utils.h"
+#include "../template/args.h"
 #include "../template/out_in.h"
 
 template<typename T, af_err(*func)(af_array *, const T, const unsigned, const dim_t *)> int Long (lua_State * L)
@@ -29,7 +30,7 @@ static const struct luaL_Reg constructor_funcs[] = {
 
 			af_array * arr_ud = NewArray(L);// val, ndims, dims, type, arr_ud
 
-			af_err err = af_constant(arr_ud, D(L, 1), dt.GetNDims(), dt.GetDims(), dt.GetType());
+			af_err err = af_constant(arr_ud, D(L, 1), dt.GetNDims(), dt.GetDims(), Arg<af_dtype>(L, 4));
 
 			return PushErr(L, err);	// val, ndims, dims, type, err, arr_ud
 		}
@@ -42,7 +43,7 @@ static const struct luaL_Reg constructor_funcs[] = {
 
 			af_array * arr_ud = NewArray(L);// real, imag, ndims, dims, type, arr_ud
 
-			af_err err = af_constant_complex(arr_ud, D(L, 1), D(L, 2), dt.GetNDims(), dt.GetDims(), dt.GetType());
+			af_err err = af_constant_complex(arr_ud, D(L, 1), D(L, 2), dt.GetNDims(), dt.GetDims(), Arg<af_dtype>(L, 5));
 
 			return PushErr(L, err);	// real, imag, ndims, dims, type, err, arr_ud
 		}
@@ -76,7 +77,7 @@ static const struct luaL_Reg constructor_funcs[] = {
 
 			af_array * arr_ud = NewArray(L);// ndims, dims, t_ndims, tdims, type, arr_ud
 
-			af_err err = af_iota(arr_ud, dims.GetNDims(), dims.GetDims(), t_dt.GetNDims(), t_dt.GetDims(), t_dt.GetType());
+			af_err err = af_iota(arr_ud, dims.GetNDims(), dims.GetDims(), t_dt.GetNDims(), t_dt.GetDims(), Arg<af_dtype>(L, 5));
 
 			return PushErr(L, err);	// ndims, dims, t_ndims, tdims, type, err, arr_ud
 		}

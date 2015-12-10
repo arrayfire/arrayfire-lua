@@ -22,6 +22,7 @@ extern "C" __declspec(dllexport) int luaopen_arrayfire (lua_State * L)
 	lua_createtable(L, 0, 0);	// af
 
 	// Library functions
+	Register(L, &AddEnums);
 	Register(L, &Backends);
 	Register(L, &ComputerVision);
 	Register(L, &ImageProcessing);

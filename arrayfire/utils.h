@@ -56,11 +56,11 @@ template<af_err (*func)(af_array *, const unsigned, const dim_t *, const af_dtyp
 {
 	lua_settop(L, 3);	// ndims, dims, type
 
-	LuaDimsAndType dt(L, 2);
+	LuaDimsAndType dt(L, 1);
 
 	af_array * arr_ud = NewArray(L);// ndims, dims, type, arr_ud
 
-	af_err err = func(arr_ud, dt.GetNDims(), dt.GetDims(), GetDataType(L, 3));
+	af_err err = func(arr_ud, dt.GetNDims(), dt.GetDims(), Arg<af_dtype>(L, 3));
 
 	return PushErr(L, err);	// ndims, dims, type, err, arr_ud
 }

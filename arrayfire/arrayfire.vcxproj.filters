@@ -146,5 +146,8 @@
     <ClCompile Include="methods\Methods.cpp">
       <Filter>Source Files\Methods</Filter>
     </ClCompile>
+    <ClCompile Include="funcs\AddEnums.cpp">
+      <Filter>Source Files\Functions</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

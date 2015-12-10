@@ -105,7 +105,7 @@ static void AddMetatable (lua_State * L, const char * name, lua_CFunction func)
 	lua_setmetatable(L, -2);// ..., object
 }
 
-af_array * NewArray(lua_State * L)
+af_array * NewArray (lua_State * L)
 {
 	void * ptr = lua_newuserdata(L, sizeof(af_array)); // ..., array
 

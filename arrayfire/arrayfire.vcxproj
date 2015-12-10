@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClCompile Include="args.cpp" />
     <ClCompile Include="arrayfire.cpp" />
+    <ClCompile Include="funcs\AddEnums.cpp" />
     <ClCompile Include="funcs\Backends.cpp" />
     <ClCompile Include="funcs\ComputerVision.cpp" />
     <ClCompile Include="funcs\ImageProcessing.cpp" />
