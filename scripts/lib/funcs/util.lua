@@ -1,4 +1,4 @@
---- Library entry point.
+--- Utility functions.
 
 -- Standard library imports --
 local min = math.min
@@ -18,7 +18,7 @@ local M = {}
 
 --
 local function Print (exp, array, precision)
-	CheckError(af.af_print_array_gen(exp, GetHandle(array), precision or 5)) -- TODO: look up a good default
+	CheckError(af.af_print_array_gen(exp, GetHandle(array), precision or 4)) -- https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/util.cpp
 end
 
 --

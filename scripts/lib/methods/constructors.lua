@@ -1,4 +1,4 @@
---- Library entry point.
+--- Array constructors.
 
 -- Standard library imports --
 local min = math.min
@@ -16,9 +16,10 @@ local NewArray = array.NewArray
 -- Exports --
 local M = {}
 
---
+-- --
 local Params = {}
 
+--
 local function Rand (func)
 	return function(...)
 		--

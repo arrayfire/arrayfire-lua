@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
 ]]
 local af = require("arrayfire")
 local lib = require("lib.af_lib")
+local array = require("lib.impl.array")
 
 local ok, err = pcall(function(device)
 	-- Select a device and display arrayfire info
@@ -33,16 +34,14 @@ local ok, err = pcall(function(device)
     print("Element-wise arithmetic")
 	local B = lib.sin(A) + 1.5
     lib.print("B", B)
-    print("Negate the first three elements of second column")
 --[[
+    print("Negate the first three elements of second column")
         B(seq(0, 2), 1) = B(seq(0, 2), 1) * -1;
         af_print(B);
 ]]
---[[
     print("Fourier transform the result")
-        array C = fft(B);
-        af_print(C);
-]]
+    local C = lib.fft(B)
+    lib.print("C", C)
 --[[
     print("Grab last row")
         array c = C.row(end);
@@ -59,15 +58,12 @@ local ok, err = pcall(function(device)
         D.col(0) = D.col(end);
         af_print(D);
 ]]
---[[
     -- Sort A
     print("Sort A and print sorted array and corresponding indices")
-        array vals, inds;
-        sort(vals, inds, A);
-        af_print(vals);
-        af_print(inds);
-    }
-	]]
+    local vals, inds = array.EmptyArray(), array.EmptyArray()
+    lib.sort(vals, inds, A)
+    lib.print("vals", vals)
+    lib.print("inds", inds)
 --[[
     #ifdef WIN32 // pause in Windows
     if (!(argc == 2 && argv[1][0] == '-')) {
