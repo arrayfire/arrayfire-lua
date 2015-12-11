@@ -7,11 +7,9 @@
  * The complete license agreement can be obtained at:
  * http://arrayfire.com/licenses/BSD-3-Clause
  ********************************************************/
-#include <arrayfire.h>
-#include <stdio.h>
-#include <math.h>
-#include <cstdlib>
-using namespace af;
+]]
+
+--[[
 // create a small wrapper to benchmark
 static array A; // populated before each timing
 static void fn()

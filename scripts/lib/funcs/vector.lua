@@ -12,11 +12,14 @@ local array = require("lib.impl.array")
 -- Imports --
 local CheckError = array.CheckError
 local GetHandle = array.GetHandle
+local NewArray = array.NewArray
 local IsArray = array.IsArray
 local SetHandle = array.SetHandle
 
 -- Exports --
 local M = {}
+
+-- See also: https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/reduce.cpp
 
 --
 local function Bool (value)
@@ -26,6 +29,69 @@ local function Bool (value)
 		return true
 	end
 end
+
+--[[
+local function Reduce (func)
+	--
+end
+]]
+
+--
+local Dim = {}
+
+local function GetFNSD (ha, dim)
+	if dim < 0 then
+		local ndims = CheckError(af.af_get_numdims(ha))
+
+		Dim[1], Dim[2], Dim[3], Dim[4] = CheckError(af.af_get_dims(ha))
+
+		for i = 1, 4 do
+			if Dim[i] > 1 then
+				return i - 1
+			end
+		end
+
+		return 0
+	else
+		return dim
+	end
+end
+
+local function ReduceNaN (name)
+	local func, func_nan = af["af_" .. name], af["af_" .. name .. "_nan"]
+	local func_all, func_nan_all = af["af_" .. name .. "_all"], af["af_" .. name .. "_nan_all"]
+
+	return function(in_arr, dim, nanval)
+		local all = type(in_arr) == "string"
+
+		if all then
+			-- TODO: Use type?
+			in_arr = dim
+		end
+
+		local ha = GetHandle(in_arr)
+
+		if all then
+			if nanval then
+				return CheckError(func_nan_all(ha, nanval))
+			else
+				return CheckError(func_all(ha))
+			end	
+		else
+			local arr
+
+			if nanval then
+				arr = CheckError(func_nan(ha, dim, nanval))
+			else
+				arr = CheckError(func(ha, GetFNSD(ha, dim or -1)))
+			end
+
+			return NewArray(arr)
+		end
+	end
+end
+
+-- TODO: lost in macroland :P (probably missing some stuff)
 
 --
 local function Sort (a, b, c, d, e, f)
@@ -46,10 +112,15 @@ local function Sort (a, b, c, d, e, f)
 	end
 end
 
+local function Sum ()
+end
+
 --
 function M.Add (into)
 	for k, v in pairs{
-		sort = Sort
+		sort = Sort,
+		product = ReduceNaN("product"),
+		sum = ReduceNaN("sum")
 	} do
 		into[k] = v
 	end

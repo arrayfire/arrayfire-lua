@@ -16,11 +16,20 @@ local ArrayMethodsAndMetatable = {}
 
 local MetaValue = {}
 
+local Constants = setmetatable({}, { __mode = "k" })
+
 --- DOCME
 -- @param item
 -- @treturn boolean B
 function M.IsArray (item)
-	return getmetatable(item) == MetaValue
+	return getmetatable(item) == MetaValue and not Constants[item]
+end
+
+--- DOCME
+-- @param item
+-- @treturn boolean B
+function M.IsConstant (item)
+	return not not Constants[item] -- metatable redundant; coerce to false if missing
 end
 
 --- DOCME
@@ -42,6 +51,13 @@ function M.EmptyArray ()
 end
 
 --- DOCME
+-- @tparam Constant k
+-- @return R
+function M.GetConstant (k)
+	return Constants[k] and k[1]
+end
+
+--- DOCME
 -- @tparam LuaArray arr
 -- @treturn ?|af_array|nil X
 function M.GetHandle (arr)
@@ -53,6 +69,17 @@ end
 -- @treturn LuaArray X
 function M.NewArray (arr)
 	return setmetatable({ m_handle = arr }, ArrayMethodsAndMetatable)
+end
+
+--- DOCME
+-- @param k constant
+-- @treturn Constant Y
+function M.NewConstant (k)
+	k = { k }
+
+	Constants[k] = true
+
+	return setmetatable(k, ArrayMethodsAndMetatable) -- allow comparison operators
 end
 
 --- DOCME
@@ -69,7 +96,12 @@ function M.SetHandle (arr, handle)
 end
 
 --
-require("lib.impl.operators").Add(M, ArrayMethodsAndMetatable)
+for _, v in ipairs{
+	"lib.impl.operators",
+	"lib.methods.methods"
+} do
+	require(v).Add(M, ArrayMethodsAndMetatable)
+end
 
 ArrayMethodsAndMetatable.__index = ArrayMethodsAndMetatable
 ArrayMethodsAndMetatable.__metatable = MetaValue

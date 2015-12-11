@@ -46,6 +46,7 @@ static const struct luaL_Reg math_funcs[] = {
 	OUTIN(log),
 	OUTIN(log10),
 	OUTIN(log1p),
+	TWO_ARGS(lt),
 	TWO_ARGS(maxof),
 	TWO_ARGS(minof),
 	TWO_ARGS(mod),

@@ -587,6 +587,7 @@ $END_MIN$
 	af_err af_imag (af_array *, const af_array);
 	af_err af_le (af_array *, const af_array, const af_array, const bool);
 	af_err af_lgamma (af_array *, const af_array);
+	af_err af_lt (af_array *, const af_array, const af_array, const bool);
 	af_err af_log (af_array *, const af_array);	
 	af_err af_log10 (af_array *, const af_array);	
 	af_err af_log1p (af_array *, const af_array);

@@ -91,6 +91,8 @@ static const struct luaL_Reg array_methods[] = {
 		{ NULL, NULL }
 };
 
+// ^^^ TODO: replace, select, etc.
+
 #undef PRED_REG
 
 int Methods (lua_State * L)

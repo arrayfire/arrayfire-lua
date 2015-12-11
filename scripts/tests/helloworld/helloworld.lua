@@ -8,27 +8,15 @@
  * http://arrayfire.com/licenses/BSD-3-Clause
  ********************************************************/
  --]]
- 
- --[[
-#include <arrayfire.h>
-#include <cstdio>
-#include <cstdlib>
-using namespace af;
-int main(int argc, char *argv[])
-{
-]]
-local af = require("arrayfire")
-local lib = require("lib.af_lib")
-local array = require("lib.impl.array")
 
-local ok, err = pcall(function(device)
-	-- Select a device and display arrayfire info
-	af.af_set_device(device)
-	af.af_info()
+-- Modules --
+local lib = require("lib.af_lib")
+
+lib.main(function()
 	print("A")
     print("Create a 5-by-3 matrix of random floats on the GPU")
 	print("B")
-	local A = lib.randu(5, 32, { type = af.f32 })
+	local A = lib.randu(5, 32, "f32")
 	print("C")
 	lib.print("A", A)
     print("Element-wise arithmetic")
@@ -60,24 +48,8 @@ local ok, err = pcall(function(device)
 ]]
     -- Sort A
     print("Sort A and print sorted array and corresponding indices")
-    local vals, inds = array.EmptyArray(), array.EmptyArray()
+    local vals, inds = lib.EmptyArray(), lib.EmptyArray()
     lib.sort(vals, inds, A)
     lib.print("vals", vals)
     lib.print("inds", inds)
---[[
-    #ifdef WIN32 // pause in Windows
-    if (!(argc == 2 && argv[1][0] == '-')) {
-        printf("hit [enter]...");
-        fflush(stdout);
-        getchar();
-    }
-    #endif
-    return 0;
-]]
--- ^^^ Preserve this? Not impossible, but maybe can subsume into call site...
-end, ... or 0) -- pass command line args
-
-if not ok then
-	print(err)
-	-- throw
-end
+end)

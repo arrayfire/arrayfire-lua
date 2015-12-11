@@ -98,6 +98,7 @@ function M.Add (into)
 		"gt",
 		"hypot",
 		"le",
+		"lt",
 		"maxof",
 		"minof",
 		"mod",
