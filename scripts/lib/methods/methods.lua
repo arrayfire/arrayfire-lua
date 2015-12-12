@@ -7,8 +7,14 @@ local af = require("arrayfire")
 local CheckError
 local GetHandle
 
+-- Forward declarations --
+local Lib
+
 -- Exports --
 local M = {}
+
+-- --
+local Dims = {}
 
 --
 local function Eval (arr)
@@ -23,6 +29,11 @@ function M.Add (array_module, meta)
 
 	--
 	for k, v in pairs{
+		dims = function(self, i)
+			Lib = Lib or require("lib.af_lib")
+
+			return Lib.GetDims(self, Dims)[i + 1]
+		end,
 		eval = Eval
 	} do
 		meta[k] = v

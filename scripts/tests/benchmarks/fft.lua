@@ -10,7 +10,6 @@
 ]]
 
 -- Modules --
-local af = require("arrayfire")
 local lib = require("lib.af_lib")
 
 -- create a small wrapper to benchmark

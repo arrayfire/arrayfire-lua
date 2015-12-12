@@ -46,7 +46,7 @@ end
 --
 local function Constant (value, ...)
 	local n, dims, dtype = GetDimsAndType(...)
-print("!!!", value)
+
 	if type(value) == "table" then
 		if dtype == "c32" or dtype == "c64" then
 			local carr = CheckError(af.af_constant_complex(value.real, value.imag, n, dims, dtype))

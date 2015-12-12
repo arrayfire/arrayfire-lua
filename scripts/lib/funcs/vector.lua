@@ -112,9 +112,6 @@ local function Sort (a, b, c, d, e, f)
 	end
 end
 
-local function Sum ()
-end
-
 --
 function M.Add (into)
 	for k, v in pairs{

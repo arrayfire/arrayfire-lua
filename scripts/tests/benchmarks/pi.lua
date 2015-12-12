@@ -19,7 +19,6 @@ local random = math.random
 local sqrt = math.sqrt
 
 -- Modules --
-local af = require("arrayfire")
 local lib = require("lib.af_lib")
 
 -- generate millions of random samples

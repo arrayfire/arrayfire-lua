@@ -33,10 +33,14 @@ function M.Add (into)
 		EmptyArray = array.EmptyArray,
 		NewConstant = array.NewConstant,
 
-		getDims = function(arr)
+		getDims = function(arr, out)
 			local ndims = CheckError(af.af_get_numdims(GetHandle(arr)))
 
-			return { CheckError(af.af_get_dims(hother)) }
+			out = out or {}
+
+			out[1], out[2], out[3], out[4] = CheckError(af.af_get_dims(hother))
+
+			return out
 		end,
 		main = function(func, ...)
 			local argc, argv = select("#", ...), { ... }
