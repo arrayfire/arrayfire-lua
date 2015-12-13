@@ -19,7 +19,7 @@ local lib = require("lib.af_lib")
 -- Shorthands --
 local Comp, WC = lib.CompareResult, lib.WrapConstant
 
-local function monte_carlo_barrier (ty, use_barrier, N, K, t, vol, r, strike, steps, B)
+local function monte_carlo_barrier (_, ty, use_barrier, N, K, t, vol, r, strike, steps, B)
     local payoff = lib.constant(0, N, 1, ty)
     local dt = t / (steps - 1)
     local s = lib.constant(strike, N, 1, ty)
@@ -44,7 +44,7 @@ local function monte_carlo_bench (ty, use_barrier, N)
     local barrier = 115.0
     lib.timer_start()
     for _ = 1, 10 do
-        monte_carlo_barrier(ty, use_barrier, N, stock_price, maturity, volatility, rate, strike, steps, barrier)
+        lib.CallWithEnvironment(monte_carlo_barrier, ty, use_barrier, N, stock_price, maturity, volatility, rate, strike, steps, barrier)
     end
     return lib.timer_stop() / 10
 end

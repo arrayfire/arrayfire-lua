@@ -29,6 +29,7 @@ local function Binary (name, cmp)
 	end
 end
 
+--
 function M.Add (array_module, meta)
 	-- Import these here since the array module is not yet registered.
 	TwoArrays = array_module.TwoArrays

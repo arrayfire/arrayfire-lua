@@ -9,6 +9,7 @@ local setmetatable = setmetatable
 local af = require("arrayfire")
 
 -- Cached module references --
+local _AddToCurrentEnvironment_
 local _Call_
 local _CallWrap_
 local _CheckError_
@@ -123,9 +124,16 @@ end
 
 --- DOCME
 -- @tparam LuaArray arr
+-- @bool remove
 -- @treturn ?|af_array|nil X
-function M.GetHandle (arr)
-	return arr.m_handle
+function M.GetHandle (arr, remove)
+	local ha = arr.m_handle
+
+	if remove then
+		arr.m_handle = nil
+	end
+
+	return ha
 end
 
 --- DOCME
@@ -147,7 +155,7 @@ function M.SetHandle (arr, handle)
 	local cur = arr.m_handle
 
 	if cur ~= nil then
-		af.af_release_array(cur)
+		_Call_(af.af_release_array, cur)
 	end
 
 	arr.m_handle = handle
@@ -225,7 +233,11 @@ end
 -- @tparam af_array arr
 -- @treturn LuaArray X
 function M.WrapArray (arr)
-	return setmetatable({ m_handle = arr }, ArrayMethodsAndMetatable)
+	local wrapped = setmetatable({ m_handle = arr }, ArrayMethodsAndMetatable)
+
+	_AddToCurrentEnvironment_(wrapped)
+
+	return wrapped
 end
 
 --- DOCME
@@ -241,6 +253,7 @@ end
 
 --
 for _, v in ipairs{
+	"lib.impl.ephemeral",
 	"lib.impl.operators",
 	"lib.methods.methods"
 } do
@@ -251,6 +264,7 @@ ArrayMethodsAndMetatable.__index = ArrayMethodsAndMetatable
 ArrayMethodsAndMetatable.__metatable = MetaValue
 
 -- Cache module members.
+_AddToCurrentEnvironment_ = M.AddToCurrentEnvironment
 _Call_ = M.Call
 _CallWrap_ = M.CallWrap
 _CheckError_ = M.CheckError

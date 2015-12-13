@@ -33,6 +33,8 @@ local T0
 --
 function M.Add (into)
 	for k, v in pairs{
+		CallWithEnvironment = array.CallWithEnvironment,
+		CallWithEnvironment_Mode = array.CallWithEnvironment_Mode,
 		CompareResult = array.CompareResult,
 		EmptyArray = array.EmptyArray,
 		WrapConstant = array.WrapConstant,
