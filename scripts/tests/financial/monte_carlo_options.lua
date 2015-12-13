@@ -43,9 +43,8 @@ local function monte_carlo_bench (ty, use_barrier, N)
     local strike = 100
     local barrier = 115.0
     lib.timer_start()
-    for _ = 1, 10 do
-        lib.CallWithEnvironment(monte_carlo_barrier, ty, use_barrier, N, stock_price, maturity, volatility, rate, strike, steps, barrier)
-    end
+	-- loop 10 times in ephemeral environment (to clean up intermediate arrays)
+	lib.EnvLoopN(10, monte_carlo_barrier, ty, use_barrier, N, stock_price, maturity, volatility, rate, strike, steps, barrier)
     return lib.timer_stop() / 10
 end
 

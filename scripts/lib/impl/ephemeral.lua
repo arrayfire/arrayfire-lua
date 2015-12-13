@@ -67,6 +67,8 @@ local function NewEnv ()
 			end
 
 			list[a] = nil
+
+			return a
 		end
 	end
 end
@@ -74,7 +76,7 @@ end
 --
 local function Purge (list)
 	local nerrs = 0
-	local aa=0
+
 	for arr in pairs(list) do
 		local ha = GetHandle(arr, true)
 
