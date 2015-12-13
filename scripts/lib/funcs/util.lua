@@ -15,7 +15,8 @@ local af = require("arrayfire")
 local array = require("lib.impl.array")
 
 -- Imports --
-local CheckError = array.CheckError
+local Call = array.Call
+local CallArr = array.CallArr
 local GetHandle = array.GetHandle
 
 -- Exports --
@@ -23,22 +24,23 @@ local M = {}
 
 --
 local function Print (exp, array, precision)
-	CheckError(af.af_print_array_gen(exp, GetHandle(array), precision or 4)) -- https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/util.cpp
+	Call(af.af_print_array_gen, exp, GetHandle(array), precision or 4) -- https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/util.cpp
 end
+
+-- --
+local T0
 
 --
 function M.Add (into)
 	for k, v in pairs{
 		CompareResult = array.CompareResult,
 		EmptyArray = array.EmptyArray,
-		NewConstant = array.NewConstant,
+		WrapConstant = array.WrapConstant,
 
 		getDims = function(arr, out)
-			local ndims = CheckError(af.af_get_numdims(GetHandle(arr)))
-
 			out = out or {}
 
-			out[1], out[2], out[3], out[4] = CheckError(af.af_get_dims(hother))
+			out[1], out[2], out[3], out[4] = CallArr(af.af_get_dims, arr)
 
 			return out
 		end,
@@ -70,12 +72,12 @@ function M.Add (into)
 			end)
 
 			if not ok then
-				print(err)
+				print(err) -- TODO: more informative
 				-- throw
 			end
 		end,
 		numDims = function(arr)
-			return CheckError(af.af_get_numdims(GetHandle(arr)))
+			return CallArr(af.af_get_numdims, arr)
 		end,
 		print = Print,
 		printf = function(s, ...)
@@ -87,7 +89,14 @@ function M.Add (into)
 			func()
 
 			return clock() - t0
+		end,
+		timer_start = function()
+			T0 = clock()
+		end,
+		timer_stop = function()
+			return clock() - T0
 		end
+		-- ^^^ TODO: Better stuff?
 	} do
 		into[k] = v
 	end

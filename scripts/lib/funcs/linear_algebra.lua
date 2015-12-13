@@ -5,10 +5,9 @@ local af = require("arrayfire")
 local array = require("lib.impl.array")
 
 -- Imports --
-local CheckError = array.CheckError
+local CallWrap = array.CallWrap
 local GetHandle = array.GetHandle
 local IsArray = array.IsArray
-local NewArray = array.NewArray
 
 -- Exports --
 local M = {}
@@ -19,9 +18,7 @@ local M = {}
 local function MatMul2 (a, b, opt_lhs, opt_rhs)
 	opt_lhs, opt_rhs = opt_lhs or "AF_MAT_NONE", opt_rhs or "AF_MAT_NONE"
 
-	local arr = CheckError(af.af_matmul(GetHandle(a), GetHandle(b), af[opt_lhs], af[opt_rhs]))
-
-	return NewArray(arr)
+	return CallWrap(af.af_matmul, GetHandle(a), GetHandle(b), af[opt_lhs], af[opt_rhs])
 end
 
 --
@@ -65,20 +62,18 @@ end
 
 --
 local function MatMul (a, b, c, d)
-	if IsArray(d) then
+	if IsArray(d) then -- four arrays
 		return MatMul4(a, b, c, d)
-	elseif IsArray(c) then
+	elseif IsArray(c) then -- three arrays
 		return MatMul3(a, b, c)
-	else
+	else -- two arrays
 		return MatMul2(a, b, c, d)
 	end
 end
 
 --
 local function Dot (a, b, opt_lhs, opt_rhs)
-	local arr = CheckError(af.af_dot(a, b, af[opt_lhs or "AF_MAT_NONE"], af[opt_rhs or "AF_MAT_NONE"]))
-
-	return NewArray(arr)
+	return CallWrap(af.af_dot, a, b, af[opt_lhs or "AF_MAT_NONE"], af[opt_rhs or "AF_MAT_NONE"])
 end
 
 --

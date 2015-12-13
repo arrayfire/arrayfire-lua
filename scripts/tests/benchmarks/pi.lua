@@ -25,7 +25,7 @@ local lib = require("lib.af_lib")
 local samples = 20e6
 
 -- Shorthands --
-local Comp, K = lib.CompareResult, lib.NewConstant
+local Comp, K = lib.CompareResult, lib.WrapConstant
 
 --[[ Self-contained code to run host and device estimates of PI.  Note that
    each is generating its own random values, so the estimates of PI

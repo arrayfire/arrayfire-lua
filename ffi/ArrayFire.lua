@@ -801,6 +801,13 @@ $END_MIN$
 	af_err af_join_many (af_array *, const int, const unsigned, const af_array *);
 	af_err af_moddims (af_array *, const af_array, const unsigned, const dim_t *);
 	af_err af_reorder (af_array *, const af_array, const unsigned, const unsigned, const unsigned, const unsigned);
+$MIN_VERSION(31)$
+	af_err af_replace (af_array, const af_array, const af_array);
+	af_err af_replace_scalar (af_array, const af_array, const double);
+    af_err af_select (af_array *, const af_array, const af_array, const af_array);
+    af_err af_select_scalar_r (af_array *, const af_array, const af_array, const double);
+    af_err af_select_scalar_l (af_array *, const af_array, const double, const af_array);
+$END_MIN$
 	af_err af_shift (af_array *, const af_array, const int, const int, const int, const int);
 	af_err af_tile (af_array *, const af_array, const unsigned, const unsigned, const unsigned, const unsigned);
 

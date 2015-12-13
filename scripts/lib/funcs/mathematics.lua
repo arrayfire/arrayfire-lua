@@ -5,9 +5,9 @@ local af = require("arrayfire")
 local array = require("lib.impl.array")
 
 -- Imports --
-local CheckError = array.CheckError
+local CallWrap = array.CallWrap
 local GetHandle = array.GetHandle
-local NewArray = array.NewArray
+local TwoArrays = array.TwoArrays
 
 -- Exports --
 local M = {}
@@ -15,20 +15,14 @@ local M = {}
 --
 local function Binary (func)
 	return function(a, b, batch)
-		local ah, bh = GetHandle(a), GetHandle(b)
-		local arr = CheckError(func(ah, bh, batch))
-
-		return NewArray(arr)
+		return TwoArrays(func, a, b, batch)
 	end
 end
 
 --
 local function Unary (func)
 	return function(in_arr)
-		local ah = GetHandle(in_arr)
-		local arr = CheckError(func(ah))
-
-		return NewArray(arr)
+		return CallWrap(func, GetHandle(in_arr))
 	end
 end
 

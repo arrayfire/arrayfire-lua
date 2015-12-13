@@ -4,8 +4,7 @@
 local af = require("arrayfire")
 
 -- Forward declarations --
-local CheckError
-local GetHandle
+local CallArr
 
 -- Forward declarations --
 local Lib
@@ -18,21 +17,24 @@ local Dims = {}
 
 --
 local function Eval (arr)
-	CheckError(af.af_eval(GetHandle(arr)))
+	CallArr(af.af_eval, arr)
 end
 
 --
 function M.Add (array_module, meta)
 	-- Import these here since the array module is not yet registered.
-	CheckError = array_module.CheckError
-	GetHandle = array_module.GetHandle
+	CallArr = array_module.CallArr
 
 	--
 	for k, v in pairs{
 		dims = function(self, i)
 			Lib = Lib or require("lib.af_lib")
 
-			return Lib.GetDims(self, Dims)[i + 1]
+			if i then
+				return Lib.getDims(self, Dims)[i + 1]
+			else
+				return Lib.getDims(self)
+			end
 		end,
 		eval = Eval
 	} do

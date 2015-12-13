@@ -10,8 +10,7 @@ local af = require("arrayfire")
 local array = require("lib.impl.array")
 
 -- Imports --
-local CheckError = array.CheckError
-local NewArray = array.NewArray
+local CallWrap = array.CallWrap
 
 -- Exports --
 local M = {}
@@ -49,9 +48,7 @@ local function Constant (value, ...)
 
 	if type(value) == "table" then
 		if dtype == "c32" or dtype == "c64" then
-			local carr = CheckError(af.af_constant_complex(value.real, value.imag, n, dims, dtype))
-
-			return NewArray(carr)
+			return CallWrap(af.af_constant_complex, value.real, value.imag, n, dims, dtype)
 		else
 			value = value.real -- TODO: syntax? (ditto above)
 		end
@@ -62,21 +59,18 @@ local function Constant (value, ...)
 	if dtype == "s64" or dtype == "u64" then
 		local name = dtype == "s64" and "af_constant_long" or "af_constant_ulong"
 
-		arr = CheckError(af[name](value, n, dims))
+		return CallWrap(af[name], value, n, dims)
 	else
-		arr = CheckError(af.af_constant(value, n, dims, dtype or af.f32))
+		return CallWrap(af.af_constant, value, n, dims, dtype or af.f32)
 	end
-
-	return NewArray(arr)
 end
 
 --
 local function Rand (func)
 	return function(...)
 		local n, dims, dtype = GetDimsAndType(...)
-		local arr = CheckError(func(n, dims, dtype or af.f32))
 
-		return NewArray(arr)
+		return CallWrap(func, n, dims, dtype or af.f32)
 	end
 end
 

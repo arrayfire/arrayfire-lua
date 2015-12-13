@@ -10,11 +10,16 @@ local af = require("arrayfire")
 local array = require("lib.impl.array")
 
 -- Imports --
-local CheckError = array.CheckError
+local CallArr = array.CallArr
+local CallWrap = array.CallWrap
 local GetHandle = array.GetHandle
-local NewArray = array.NewArray
+local HandleDim = array.HandleDim
 local IsArray = array.IsArray
 local SetHandle = array.SetHandle
+local ToType = array.ToType
+
+-- Forward declarations --
+local Lib
 
 -- Exports --
 local M = {}
@@ -30,63 +35,91 @@ local function Bool (value)
 	end
 end
 
---[[
-local function Reduce (func)
-	--
+--
+local function Funcs (name, prefix)
+	name = (prefix or "af_") .. name
+
+	return af[name], af[name .. "_all"]
 end
-]]
 
 --
-local Dim = {}
+local function Reduce (name)
+	local func, func_all = Funcs(name)
 
-local function GetFNSD (ha, dim)
-	if dim < 0 then
-		local ndims = CheckError(af.af_get_numdims(ha))
+	return function(in_arr, dim)
+		local rtype
 
-		Dim[1], Dim[2], Dim[3], Dim[4] = CheckError(af.af_get_dims(ha))
-
-		for i = 1, 4 do
-			if Dim[i] > 1 then
-				return i - 1
-			end
+		if type(in_arr) == "string" then
+			rtype, in_arr = in_arr, dim
 		end
 
-		return 0
-	else
-		return dim
+		if rtype then
+			local r, i = CallArr(func_all, in_arr)
+
+			return ToType(rtype, r, i)
+		else
+			return HandleDim(func, in_arr, dim)
+		end
+	end
+end
+
+--
+local function ReduceMaxMin (name)
+	local func, func_all = Funcs(name)
+	local ifunc, ifunc_all = Funcs(name, "af_i")
+	local arith = name .. "of"
+
+	return function(a, b, c, d)
+		if c == "arith" then -- a: lhs, b: rhs
+			Lib = Lib or require("lib.af_lib")
+
+			return Lib[arith](a, b)
+		elseif type(a) == "string" then -- a: type, b: in_arr, c: get_index
+			if c then
+				local r, i, index = CallArr(ifunc_all, b)
+
+				return ToType(a, r, i), index
+			else
+				return ToType(a, CallArr(func_all, b))
+			end
+		elseif IsArray(c) then -- a: val, b: idx, c: arr, d: dim
+			local out, idx = HandleDim(ifunc, c, d, "no_wrap")
+
+			SetHandle(a, out)
+			SetHandle(b, idx)
+		else -- a: arr, b: dim
+			return HandleDim(func, a, b)
+		end
 	end
 end
 
 local function ReduceNaN (name)
-	local func, func_nan = af["af_" .. name], af["af_" .. name .. "_nan"]
-	local func_all, func_nan_all = af["af_" .. name .. "_all"], af["af_" .. name .. "_nan_all"]
+	local func, func_all = Funcs(name)
+	local func_nan, func_nan_all = Funcs(name .. "_nan")
 
 	return function(in_arr, dim, nanval)
-		local all = type(in_arr) == "string"
+		local rtype
 
-		if all then
-			-- TODO: Use type?
-			in_arr = dim
+		if type(in_arr) == "string" then
+			rtype, in_arr = in_arr, dim
 		end
 
-		local ha = GetHandle(in_arr)
-
-		if all then
-			if nanval then
-				return CheckError(func_nan_all(ha, nanval))
-			else
-				return CheckError(func_all(ha))
-			end	
-		else
-			local arr
+		if rtype then
+			local r, i
 
 			if nanval then
-				arr = CheckError(func_nan(ha, dim, nanval))
+				r, i = CallArr(func_nan_all, in_arr, nanval)
 			else
-				arr = CheckError(func(ha, GetFNSD(ha, dim or -1)))
+				r, i = CallArr(func_all, in_arr)
 			end
 
-			return NewArray(arr)
+			return ToType(rtype, r, i)
+		else
+			if nanval then
+				return CallWrap(func_nan, GetHandle(in_arr), dim, nanval)
+			else
+				return HandleDim(func, in_arr, dim)
+			end
 		end
 	end
 end
@@ -95,26 +128,32 @@ end
 
 --
 local function Sort (a, b, c, d, e, f)
-	if IsArray(d) then
-		local keys, values = CheckError(af.af_sort_by_key(GetHandle(c), GetHandle(d), e or 0, Bool(f)))
+	if IsArray(d) then -- four arrays
+		local keys, values = CallArr(af.af_sort_by_key, c, GetHandle(d), e or 0, Bool(f))
 
 		SetHandle(a, keys)
 		SetHandle(b, values)
-	elseif IsArray(c) then
-	    local arr, indices = CheckError(af.af_sort_index(GetHandle(c), d or 0, Bool(e)))
+	elseif IsArray(c) then -- three arrays
+	    local arr, indices = CallArr(af.af_sort_index, c, d or 0, Bool(e))
 
 		SetHandle(a, arr)
 		SetHandle(b, indices)
-	else
-		local arr = CheckError(af.af_sort(GetHandle(a), b or 0, Bool(c)))
-
-		return NewArray(arr)
+	else -- one array
+		return CallWrap(af.af_sort, GetHandle(a), b or 0, Bool(c))
 	end
 end
 
 --
+local AllTrue, AnyTrue = Reduce("all_true"), Reduce("any_true")
+
+--
 function M.Add (into)
 	for k, v in pairs{
+		alltrue = AllTrue, allTrue = AllTrue,
+		anytrue = AnyTrue, anyTrue = AnyTrue,
+		count = Reduce("count"),
+		max = ReduceMaxMin("max"),
+		min = ReduceMaxMin("min"),
 		sort = Sort,
 		product = ReduceNaN("product"),
 		sum = ReduceNaN("sum")
