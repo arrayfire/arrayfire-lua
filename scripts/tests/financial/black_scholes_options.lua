@@ -43,7 +43,7 @@ local function black_scholes (S, X, R, V, T)
 	return C, P
 end
 lib.main(function()
-	print("** ArrayFire Black-Scholes Example **\n"
+	print("** ArrayFire Black-Scholes Example **\n" ..
 		   "**          by AccelerEyes         **\n")
 --[[
 	array GC1(4000, 1, C1);
@@ -54,21 +54,22 @@ lib.main(function()
 ]]
 	-- Compile kernels
 	-- Create GPU copies of the data
---[[
-	array Sg = GC1;
-	array Xg = GC2;
-	array Rg = GC3;
-	array Vg = GC4;
-	array Tg = GC5;
-	array Cg, Pg;
-]]
-	 Warm up black scholes example
-	black_scholes(Sg,Xg,Rg,Vg,Tg)
---  eval(Cg, Pg)
+	local Sg = GC1:copy()
+	local Xg = GC2:copy()
+	local Rg = GC3:copy()
+	local Vg = GC4:copy()
+	local Tg = GC5:copy()
+	local Cg, Pg
+
+	--Warm up black scholes example
+	-- CallEnv
+	Cg, Pg = black_scholes(Sg,Xg,Rg,Vg,Tg)
+    lib.eval(Cg, Pg)
 	print("Warming up done")
-	af::sync()
+	lib.sync()
 	local iter = 5
 	for n = 50, 500, 50 do
+	-- EnvLoopFromToStep_Mode(, "parent")
 		-- Create GPU copies of the data
 		Sg = tile(GC1, n, 1)
 		Xg = tile(GC2, n, 1)
@@ -81,9 +82,10 @@ lib.main(function()
 		lib.sync()
 		lib.timer_start()
 		for _ = 1, iter do
-			Cg, Pg = black_scholes(Sg,Xg,Rg,Vg,Tg);
---			eval(Cg,Pg)
-		}
+			-- EnvLoopN()
+			Cg, Pg = black_scholes(Sg,Xg,Rg,Vg,Tg)
+			lib.eval(Cg,Pg)
+		end
 		lib.sync()
 		lib.printf("Mean GPU Time = %0.6fms\n\n", 1000 * lib.timer_stop()/iter)
 	end

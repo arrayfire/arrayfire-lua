@@ -2,6 +2,7 @@
 
 -- Standard library imports --
 local clock = os.clock
+local error = error
 local getenv = os.getenv
 local min = math.min
 local pcall = pcall
@@ -17,8 +18,6 @@ local array = require("lib.impl.array")
 -- Imports --
 local Call = array.Call
 local CallArr = array.CallArr
-local CallWithEnvironment = array.CallWithEnvironment
-local CallWithEnvironment_Mode = array.CallWithEnvironment_Mode
 local GetHandle = array.GetHandle
 
 -- Exports --
@@ -35,42 +34,12 @@ local T0
 --
 function M.Add (into)
 	for k, v in pairs{
-		CallWithEnvironment = CallWithEnvironment,
-		CallWithEnvironment_Mode = CallWithEnvironment_Mode,
+		CallWithEnvironment = array.CallWithEnvironment,
+		CallWithEnvironment_Args = array.CallWithEnvironment_Args,
 		CompareResult = array.CompareResult,
 		EmptyArray = array.EmptyArray,
 		WrapConstant = array.WrapConstant,
 
-		EnvLoopN = function(n, func, ...)
-			for _ = 1, n do
-				CallWithEnvironment(func, ...)
-			end
-		end,
-		EnvLoopN_Mode = function(n, func, mode, ...)
-			for _ = 1, n do
-				CallWithEnvironment_Mode(func, mode, ...)
-			end
-		end,
-		EnvLoopWhile = function(func, pred, ...)
-			while pred(...) do
-				CallWithEnvironment(func, ...)
-			end
-		end,
-		EnvLoopWhile_Mode = function(func, pred, mode, ...)
-			while pred(...) do
-				CallWithEnvironment(func, mode, ...)
-			end
-		end,
-		EnvLoopUntil = function(func, pred, ...)
-			repeat
-				CallWithEnvironment(func, ...)
-			until pred(...)
-		end,
-		EnvLoopUntil_Mode = function(func, pred, mode, ...)
-			repeat
-				CallWithEnvironment_Mode(func, mode, ...)
-			until pred(...)
-		end,
 		getDims = function(arr, out)
 			out = out or {}
 
@@ -107,7 +76,7 @@ function M.Add (into)
 
 			if not ok then
 				print(err) -- TODO: more informative
-				-- throw
+				error("aborting")
 			end
 		end,
 		numDims = function(arr)

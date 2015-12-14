@@ -16,7 +16,8 @@ for _, v in ipairs{
 	"funcs.vector",
 	"methods.constructors",
 	"methods.device",
-	"methods.move_reorder"
+	"methods.move_reorder",
+	"funcs.misc"
 } do
 	require("lib." .. v).Add(M)
 end

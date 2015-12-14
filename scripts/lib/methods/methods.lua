@@ -5,6 +5,7 @@ local af = require("arrayfire")
 
 -- Forward declarations --
 local CallArr
+local CallArrWrap
 
 -- Forward declarations --
 local Lib
@@ -16,6 +17,11 @@ local M = {}
 local Dims = {}
 
 --
+local function Copy (arr)
+	return CallArrWrap(af.af_copy_array, arr)
+end
+
+--
 local function Eval (arr)
 	CallArr(af.af_eval, arr)
 end
@@ -24,9 +30,11 @@ end
 function M.Add (array_module, meta)
 	-- Import these here since the array module is not yet registered.
 	CallArr = array_module.CallArr
+	CallArrWrap = array_module.CallArrWrap
 
 	--
 	for k, v in pairs{
+		copy = Copy,
 		dims = function(self, i)
 			Lib = Lib or require("lib.af_lib")
 

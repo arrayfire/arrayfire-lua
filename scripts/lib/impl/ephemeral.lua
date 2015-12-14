@@ -42,7 +42,7 @@ local ID = 0
 
 --
 local function NewEnv ()
-	local id, list, mode = ID, {}
+	local id, list, mode, step = ID, {}
 
 	ID = ID + 1
 
@@ -54,7 +54,11 @@ local function NewEnv ()
 				return id
 			elseif b == "get_list" then
 				return list
+			elseif b == "set_step" then
+				step = c
 			end
+		elseif a == "get_step" then -- a: "get_step"
+			return step
 		elseif IsArray(a) then -- a: array?
 			local env = Stack[Top]
 
@@ -131,12 +135,13 @@ local function CallWithEnvironment (func, ...)
 end
 
 --
-local function CallWithEnvironment_Mode (func, mode, ...)
+local function CallWithEnvironment_Args (func, args, ...)
 	local env = remove(Cache) or NewEnv()
 
 	Top = Top + 1
 
-	env(_command, "set_mode", mode)
+	env(_command, "set_mode", args.mode)
+	env(_command, "set_step", args.step)
 
 	Stack[Top] = env
 
@@ -152,7 +157,7 @@ function M.Add (array_module)
 	--
 	array_module.AddToCurrentEnvironment = AddToCurrentEnvironment
 	array_module.CallWithEnvironment = CallWithEnvironment
-	array_module.CallWithEnvironment_Mode = CallWithEnvironment_Mode
+	array_module.CallWithEnvironment_Args = CallWithEnvironment_Args
 end
 
 -- Export the module.

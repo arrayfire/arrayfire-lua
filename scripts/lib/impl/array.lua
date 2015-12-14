@@ -64,6 +64,15 @@ end
 
 --- DOCME
 -- @function func
+-- @tparam LuaArray arr
+-- @param ... Additional arguments to _func_.
+-- @treturn LuaArray X
+function M.CallArrWrap (func, arr, ...)
+	return _CallWrap_(func, _GetHandle_(arr), ...)
+end
+
+--- DOCME
+-- @function func
 -- @param ... Arguments to _func_.
 -- @treturn LuaArray X
 function M.CallWrap (func, ...)
