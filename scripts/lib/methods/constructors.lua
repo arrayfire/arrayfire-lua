@@ -66,7 +66,7 @@ local function Constant (value, ...)
 end
 
 --
-local function Rand (func)
+local function DimsAndTypeFunc (func)
 	return function(...)
 		local n, dims, dtype = GetDimsAndType(...)
 
@@ -78,8 +78,9 @@ end
 function M.Add (into)
 	for k, v in pairs{
 		constant = Constant,
-		randn = Rand(af.af_randn),
-		randu = Rand(af.af_randu)
+		identity = DimsAndTypeFunc(af.af_identity),
+		randn = DimsAndTypeFunc(af.af_randn),
+		randu = DimsAndTypeFunc(af.af_randu)
 	} do
 		into[k] = v
 	end

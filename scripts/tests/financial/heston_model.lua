@@ -44,11 +44,11 @@ local function simulateHestonModel (T, N, R, mu, kappa, vBar, sigmaV, rho, x0, v
     local v = {lib.constant(v0, R), lib.constant(0, R)}
     local sqrtDeltaT = sqrt(deltaT)
     local sqrtOneMinusRhoSquare = sqrt(1 - rho*rho)
-    local mArray[] = {rho, sqrtOneMinusRhoSquare}
+    local mArray = {rho, sqrtOneMinusRhoSquare}
  -- af::array m(2, 1, mArray);
     local tPrevious, tCurrent = 0, 0
     local zeroConstant = lib.constant(0, R)
-    for t = 1, N - 1 do
+    for t = 1, N - 1 do -- LoopN
         tPrevious = (t+1) % 2
         tCurrent = t % 2
         local dBt = lib.randn(R, 2) * sqrtDeltaT
@@ -65,7 +65,7 @@ lib.main(function()
     local nT = 10 * T
     local R_first_run = 1000
     local R = 20000000
-    local x0 = 0; -- initial log stock price
+    local x0 = 0 -- initial log stock price
     local v0 = math.pow(0.087, 2) -- initial volatility
     local r = math.log(1.0319) -- risk-free rate
     local rho = -0.82 -- instantaneous correlation between Brownian motions
@@ -75,10 +75,10 @@ lib.main(function()
     local k = math.log(0.95) -- strike price
     -- Price European call option
 	-- first run
-	local x, v = simulateHestonModel(x, v, T, nT, R_first_run, r, kappa, vBar, sigmaV, rho, x0, v0)
+	simulateHestonModel(T, nT, R_first_run, r, kappa, vBar, sigmaV, rho, x0, v0) -- CallInEnv
 	lib.sync() -- Ensure the first run is finished
 	lib.timer_start()
-	simulateHestonModel(x, v, T, nT, R, r, kappa, vBar, sigmaV, rho, x0, v0)
+	local x, _ = simulateHestonModel(T, nT, R, r, kappa, vBar, sigmaV, rho, x0, v0)
 	lib.sync()
 	print("Time in simulation: " .. lib.timer_stop())
 	local K = lib.exp(lib.constant(k, x:dims()))

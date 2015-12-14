@@ -7,42 +7,24 @@
  * The complete license agreement can be obtained at:
  * http://arrayfire.com/licenses/BSD-3-Clause
  ********************************************************/
-#include <arrayfire.h>
-#include <cstdio>
-#include <cstdlib>
-using namespace af;
-int main(int argc, char *argv[])
-{
-    try {
-        // Select a device and display arrayfire info
-        int device = argc > 1 ? atoi(argv[1]) : 0;
-        af::setDevice(device);
-        af::info();
-        array in = randu(5, 8);
-        af_print(in);
-        array lin = in.copy();
-        printf("Running LU InPlace\n");
-        array pivot;
-        luInPlace(pivot, lin);
-        af_print(lin);
-        af_print(pivot);
-        printf("Running LU with Upper Lower Factorization\n");
-        array lower, upper;
-        lu(lower, upper, pivot, in);
-        af_print(lower);
-        af_print(upper);
-        af_print(pivot);
-    } catch (af::exception& e) {
-        fprintf(stderr, "%s\n", e.what());
-        throw;
-    }
-    #ifdef WIN32 // pause in Windows
-    if (!(argc == 2 && argv[1][0] == '-')) {
-        printf("hit [enter]...");
-        fflush(stdout);
-        getchar();
-    }
-    #endif
-    return 0;
-}
 ]]
+ 
+ -- Modules --
+local lib = require("lib.af_lib")
+
+lib.main(function()
+	local in_arr = lib.randu(5, 8)
+	lib.print("in", in_arr)
+	local lin = in_arr:copy()
+	print("Running LU InPlace")
+	local pivot = lib.EmptyArray()
+	lib.luInPlace(pivot, lin)
+	lib.print("lin", lin)
+	lib.print("pivot", pivot)
+	print("Running LU with Upper Lower Factorization")
+	local lower, upper = lib.EmptyArray(), lib.EmptyArray()
+	lib.lu(lower, upper, pivot, in_arr)
+	lib.print("lower", lower)
+	lib.print("upper", upper)
+	lib.print("pivot", pivot);
+end)

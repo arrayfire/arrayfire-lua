@@ -24,7 +24,7 @@ local function cnd (x)
     return y
 end
 
-local function black_scholes (S, X, R, V, T)
+local function black_scholes (--[[env]]S, X, R, V, T)
     -- This function computes the call and put option prices based on
     -- Black-Scholes Model
     -- S = Underlying stock price
@@ -40,7 +40,7 @@ local function black_scholes (S, X, R, V, T)
     local cnd_d2 = cnd(d2)
     local C = S * cnd_d1  - (X * lib.exp((-R)*T) * cnd_d2)
     local P = X * lib.exp((-R)*T) * (1 - cnd_d2) - (S * (1 - cnd_d1))
-	return C, P
+	return C, P -- env(C), env(P)
 end
 lib.main(function()
 	print("** ArrayFire Black-Scholes Example **\n" ..
@@ -69,7 +69,7 @@ lib.main(function()
 	lib.sync()
 	local iter = 5
 	for n = 50, 500, 50 do
-	-- EnvLoopFromToStep_Mode(, "parent")
+	-- EnvLoopFromToStep_Mode(50, 500, 50, "parent") -- n = env("get_step")
 		-- Create GPU copies of the data
 		Sg = tile(GC1, n, 1)
 		Xg = tile(GC2, n, 1)
