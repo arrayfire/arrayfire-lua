@@ -7,7 +7,8 @@ local array = require("lib.impl.array")
 -- Imports --
 local CallArr = array.CallArr
 local CallArrWrap = array.CallArrWrap
-local GetHandle = array.GetHandle
+local CallArr2Wrap = array.CallArr2Wrap
+local CallArr3Wrap = array.CallArr3Wrap
 local IsArray = array.IsArray
 local SetHandle = array.SetHandle
 local ToType = array.ToType
@@ -23,7 +24,7 @@ local M = {}
 local function MatMul2 (a, b, opt_lhs, opt_rhs)
 	opt_lhs, opt_rhs = opt_lhs or "AF_MAT_NONE", opt_rhs or "AF_MAT_NONE"
 
-	return CallArrWrap(af.af_matmul, a, GetHandle(b), af[opt_lhs], af[opt_rhs])
+	return CallArr2Wrap(af.af_matmul, a, b, af[opt_lhs], af[opt_rhs])
 end
 
 --
@@ -93,7 +94,7 @@ function M.Add (into)
 
 		--
 		dot = function(a, b, opt_lhs, opt_rhs)
-			return CallArrWrap(af.af_dot, a, GetHandle(b), af[opt_lhs or "AF_MAT_NONE"], af[opt_rhs or "AF_MAT_NONE"])
+			return CallArr2Wrap(af.af_dot, a, b, af[opt_lhs or "AF_MAT_NONE"], af[opt_rhs or "AF_MAT_NONE"])
 		end,
 
 		--
@@ -185,12 +186,12 @@ function M.Add (into)
 
 		--
 		solve = function(a, b, options)
-			return CallArrWrap(af.af_solve, a, GetHandle(b), af[options or "AF_MAT_NONE"])
+			return CallArr2Wrap(af.af_solve, a, b, af[options or "AF_MAT_NONE"])
 		end,
 
 		--
 		solveLU = function(a, piv, b, options)
-			return CallArrWrap(af.af_solve_lu, a, GetHandle(piv), GetHandle(b), af[options or "AF_MAT_NONE"])
+			return CallArr3Wrap(af.af_solve_lu, a, piv, b, af[options or "AF_MAT_NONE"])
 		end,
 
 		--

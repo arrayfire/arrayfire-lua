@@ -56,10 +56,43 @@ end
 --- DOCME
 -- @tparam function func
 -- @tparam LuaArray arr
--- @param ... Additional rguments to _func_.
+-- @param ... Additional arguments to _func_.
 -- @return Any non-error return values.
 function M.CallArr (func, arr, ...)
 	return _CheckError_(func(_GetHandle_(arr), ...))
+end
+
+--- DOCME
+-- @tparam function func
+-- @tparam LuaArray arr1
+-- @tparam LuaArray arr2
+-- @param ... Additional arguments to _func_.
+-- @return Any non-error return values.
+function M.CallArr2 (func, arr1, arr2, ...)
+	return _CheckError_(func(_GetHandle_(arr1), _GetHandle_(arr2), ...))
+end
+
+--- DOCME
+-- @tparam function func
+-- @tparam LuaArray arr1
+-- @tparam LuaArray arr2
+-- @tparam LuaArray arr3
+-- @param ... Additional arguments to _func_.
+-- @return Any non-error return values.
+function M.CallArr3 (func, arr1, arr2, arr3, ...)
+	return _CheckError_(func(_GetHandle_(arr1), _GetHandle_(arr2), _GetHandle_(arr3), ...))
+end
+
+--- DOCME
+-- @tparam function func
+-- @tparam LuaArray arr1
+-- @tparam LuaArray arr2
+-- @tparam LuaArray arr3
+-- @tparam LuaArray arr4
+-- @param ... Additional arguments to _func_.
+-- @return Any non-error return values.
+function M.CallArr4 (func, arr1, arr2, arr3, arr4, ...)
+	return _CheckError_(func(_GetHandle_(arr1), _GetHandle_(arr2), _GetHandle_(arr3), _GetHandle_(arr4), ...))
 end
 
 --- DOCME
@@ -67,18 +100,59 @@ end
 -- @tparam LuaArray arr
 -- @param ... Additional arguments to _func_.
 -- @treturn LuaArray X
+-- @return Any additional return values.
 function M.CallArrWrap (func, arr, ...)
 	return _CallWrap_(func, _GetHandle_(arr), ...)
+end
+
+--- DOCME
+-- @tparam function func
+-- @tparam LuaArray arr1
+-- @tparam LuaArray arr2
+-- @param ... Additional arguments to _func_.
+-- @treturn LuaArray X
+-- @return Any additional return values.
+function M.CallArr2Wrap (func, arr1, arr2, ...)
+	return _CallWrap_(func(_GetHandle_(arr1), _GetHandle_(arr2), ...))
+end
+
+--- DOCME
+-- @tparam function func
+-- @tparam LuaArray arr1
+-- @tparam LuaArray arr2
+-- @tparam LuaArray arr3
+-- @param ... Additional arguments to _func_.
+-- @treturn LuaArray X
+-- @return Any additional return values.
+function M.CallArr3Wrap (func, arr1, arr2, arr3, ...)
+	return _CallWrap_(func(_GetHandle_(arr1), _GetHandle_(arr2), _GetHandle_(arr3), ...))
+end
+
+--- DOCME
+-- @tparam function func
+-- @tparam LuaArray arr1
+-- @tparam LuaArray arr2
+-- @tparam LuaArray arr3
+-- @tparam LuaArray arr4
+-- @param ... Additional arguments to _func_.
+-- @treturn LuaArray X
+-- @return Any additional return values.
+function M.CallArr4Wrap (func, arr1, arr2, arr3, arr4, ...)
+	return _CallWrap_(func(_GetHandle_(arr1), _GetHandle_(arr2), _GetHandle_(arr3), _GetHandle_(arr4), ...))
+end
+
+--
+local function Return (arr, ...)
+	return _WrapArray_(arr), ...
 end
 
 --- DOCME
 -- @function func
 -- @param ... Arguments to _func_.
 -- @treturn LuaArray X
+-- @return Any additional return values.
 function M.CallWrap (func, ...)
-	local arr = _CheckError_(func(...))
-
-	return _WrapArray_(arr)
+	return Return(_CheckError_(func(...)))
 end
 
 --- DOCME

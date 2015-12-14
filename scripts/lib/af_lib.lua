@@ -11,13 +11,17 @@ for _, v in ipairs{
 	"funcs.linear_algebra",
 	"funcs.mathematics",
 	"funcs.signal_processing",
+	"funcs.static",
 	"funcs.statistics",
 	"funcs.util",
 	"funcs.vector",
+	"graphics.window",
 	"methods.constructors",
 	"methods.device",
 	"methods.move_reorder",
-	"funcs.misc"
+	"misc.env_loop",
+	"misc.program",
+	"misc.imports"
 } do
 	require("lib." .. v).Add(M)
 end

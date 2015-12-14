@@ -9,9 +9,9 @@ local array = require("lib.impl.array")
 
 -- Imports --
 local CallArr = array.CallArr
-local CallWrap = array.CallWrap
+local CallArr2 = array.CallArr2
+local CallArr2Wrap = array.CallArr2Wrap
 local GetFNSD = array.GetFNSD
-local GetHandle = array.GetHandle
 local HandleDim = array.HandleDim
 local IsArray = array.IsArray
 local ToType = array.ToType
@@ -24,12 +24,12 @@ local M = {}
 local function Mean (a, b, c)
 	if type(a) == "string" then -- a: type, b: in_arr, c: weights
 		if IsArray(c) then
-			return ToType(a, CallArr(af.af_mean_all_weighted, b, GetHandle(c)))
+			return ToType(a, CallArr2(af.af_mean_all_weighted, b, c))
 		else
 			return ToType(a, CallArr(af.af_mean_all, b))
 		end
 	elseif IsArray(b) then -- a: arr, b: weights, c: dim
-		return CallWrap(af.mean_weighted, GetHandle(a), GetHandle(b), GetFNSD(c))
+		return CallArr2Wrap(af.mean_weighted, a, b, GetFNSD(c))
 	else -- a: arr, b: dim
 		return HandleDim(af.af_mean, a, b)
 	end

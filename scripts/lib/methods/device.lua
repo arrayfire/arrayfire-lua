@@ -11,27 +11,23 @@ local Call
 local M = {}
 
 --
-local function Info ()
-	Call(af.af_info)
-end
-
---
-local function SetDevice (device)
-	Call(af.af_set_device, device)
-end
-
---
-local function Sync (device)
-	Call(af.af_sync, device or -1)
-end
-
---
 function M.Add (into)
 	--
 	for k, v in pairs{
-		info = Info,
-		setDevice = SetDevice,
-		sync = Sync
+		--
+		info = function()
+			Call(af.af_info)
+		end,
+
+		--
+		setDevice = function(device)
+			Call(af.af_set_device, device)
+		end,
+
+		--
+		sync = function(device)
+			Call(af.af_sync, device or -1)
+		end
 	} do
 		into[k] = v
 	end

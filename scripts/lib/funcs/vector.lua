@@ -11,8 +11,8 @@ local array = require("lib.impl.array")
 
 -- Imports --
 local CallArr = array.CallArr
-local CallWrap = array.CallWrap
-local GetHandle = array.GetHandle
+local CallArr2 = array.CallArr2
+local CallArrWrap = array.CallArrWrap
 local HandleDim = array.HandleDim
 local IsArray = array.IsArray
 local SetHandle = array.SetHandle
@@ -93,6 +93,7 @@ local function ReduceMaxMin (name)
 	end
 end
 
+--
 local function ReduceNaN (name)
 	local func, func_all = Funcs(name)
 	local func_nan, func_nan_all = Funcs(name .. "_nan")
@@ -116,7 +117,7 @@ local function ReduceNaN (name)
 			return ToType(rtype, r, i)
 		else
 			if nanval then
-				return CallWrap(func_nan, GetHandle(in_arr), dim, nanval)
+				return CallArrWrap(func_nan, in_arr, dim, nanval)
 			else
 				return HandleDim(func, in_arr, dim)
 			end
@@ -127,35 +128,47 @@ end
 -- TODO: lost in macroland :P (probably missing some stuff)
 
 --
-local function Sort (a, b, c, d, e, f)
-	if IsArray(d) then -- four arrays
-		local keys, values = CallArr(af.af_sort_by_key, c, GetHandle(d), e or 0, Bool(f))
-
-		SetHandle(a, keys)
-		SetHandle(b, values)
-	elseif IsArray(c) then -- three arrays
-	    local arr, indices = CallArr(af.af_sort_index, c, d or 0, Bool(e))
-
-		SetHandle(a, arr)
-		SetHandle(b, indices)
-	else -- one array
-		return CallWrap(af.af_sort, GetHandle(a), b or 0, Bool(c))
-	end
-end
-
---
 local AllTrue, AnyTrue = Reduce("all_true"), Reduce("any_true")
 
 --
 function M.Add (into)
 	for k, v in pairs{
+		--
 		alltrue = AllTrue, allTrue = AllTrue,
+
+		--
 		anytrue = AnyTrue, anyTrue = AnyTrue,
+
+		--
 		count = Reduce("count"),
+
+		--
 		max = ReduceMaxMin("max"),
+
+		--
 		min = ReduceMaxMin("min"),
-		sort = Sort,
+
+		--
 		product = ReduceNaN("product"),
+
+		--
+		sort = function(a, b, c, d, e, f)
+			if IsArray(d) then -- four arrays
+				local keys, values = CallArr2(af.af_sort_by_key, c, d, e or 0, Bool(f))
+
+				SetHandle(a, keys)
+				SetHandle(b, values)
+			elseif IsArray(c) then -- three arrays
+				local arr, indices = CallArr(af.af_sort_index, c, d or 0, Bool(e))
+
+				SetHandle(a, arr)
+				SetHandle(b, indices)
+			else -- one array
+				return CallArrWrap(af.af_sort, a, b or 0, Bool(c))
+			end
+		end,
+
+		--
 		sum = ReduceNaN("sum")
 	} do
 		into[k] = v
