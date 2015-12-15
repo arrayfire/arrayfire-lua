@@ -12,6 +12,9 @@ extern "C" {
 #include <stdio.h>
 #include <io.h>
 #include <fcntl.h>
+#include <io.h>
+#include <iostream>
+#include <fstream>
 
 // http://www.cplusplus.com/forum/windows/58206/
 void RedirectIOToConsole()
@@ -57,6 +60,10 @@ void RedirectIOToConsole()
     *stderr = *fp;
 
     setvbuf( stderr, NULL, _IONBF, 0 );
+
+// make cout, wcout, cin, wcin, wcerr, cerr, wclog and clog
+// point to console as well
+    std::ios::sync_with_stdio();
 }
 
 void PushString (lua_State * L, LPTSTR str)
