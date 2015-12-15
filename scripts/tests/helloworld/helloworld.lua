@@ -13,11 +13,8 @@
 local lib = require("lib.af_lib")
 
 lib.main(function()
-	print("A")
     print("Create a 5-by-3 matrix of random floats on the GPU")
-	print("B")
 	local A = lib.randu(5, 32, "f32")
-	print("C")
 	lib.print("A", A)
     print("Element-wise arithmetic")
 	local B = lib.sin(A) + 1.5
@@ -35,12 +32,10 @@ lib.main(function()
         array c = C.row(end);
         af_print(c);
 ]]
---[[
     print("Create 2-by-3 matrix from host data")
-        float d[] = { 1, 2, 3, 4, 5, 6 };
-        array D(2, 3, d, afHost);
-        af_print(D);
-]]
+    local d = { 1, 2, 3, 4, 5, 6 }
+    local D = lib.array(2, 3, d, "afHost")
+    lib.print("D", D)
 --[[
     print("Copy last column onto first")
         D.col(0) = D.col(end);

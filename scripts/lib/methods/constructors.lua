@@ -1,9 +1,11 @@
 --- Array constructors.
 
 -- Standard library imports --
-local min = math.min
+local assert = assert
+local error = error
 local select = select
 local type = type
+local unpack = unpack
 
 -- Modules --
 local af = require("arrayfire")
@@ -11,11 +13,15 @@ local array = require("lib.impl.array")
 
 -- Imports --
 local CallWrap = array.CallWrap
+local IsArray = array.IsArray
+local ToType = array.ToType
+local WrapArray = array.WrapArray
 
 -- Exports --
 local M = {}
 
--- See also: https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/data.cpp
+-- See also: https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/array.cpp
+-- https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/data.cpp
 
 -- --
 local DimsAndType = {}
@@ -25,44 +31,31 @@ local function GetDimsAndType (...)
 	DimsAndType[1], DimsAndType[2], DimsAndType[3], DimsAndType[4], DimsAndType[5] = ...
 
 	--
-	local n, dtype = min(select("#", ...), 5)
-	local last = DimsAndType[n]
+	local n = 0
 
-	if type(last) == "string" then
-		n, dtype = n - 1, af[last]
+	while type(DimsAndType[n + 1]) == "number" do
+		n = n + 1
+	end
+
+	local last, dtype = DimsAndType[n + 1]
+	local last_type = type(last)
+
+	if last_type == "string" or last_type == "table" then
+		if last_type == "table" then
+			dtype, DimsAndType[n + 1] = last -- remove table ref
+		else
+			dtype = af[last]
+		end
 	end
 
 	--
 	local dims = DimsAndType
 
 	if type(DimsAndType[1]) == "table" then
-		dims, n = DimsAndType[1], 4
+		dims, n, DimsAndtype[1] = DimsAndType[1], 4 -- remove table ref
 	end
 
 	return n, dims, dtype
-end
-
---
-local function Constant (value, ...)
-	local n, dims, dtype = GetDimsAndType(...)
-
-	if type(value) == "table" then
-		if dtype == "c32" or dtype == "c64" then
-			return CallWrap(af.af_constant_complex, value.real, value.imag, n, dims, dtype)
-		else
-			value = value.real -- TODO: syntax? (ditto above)
-		end
-	end
-
-	local arr
-
-	if dtype == "s64" or dtype == "u64" then
-		local name = dtype == "s64" and "af_constant_long" or "af_constant_ulong"
-
-		return CallWrap(af[name], value, n, dims)
-	else
-		return CallWrap(af.af_constant, value, n, dims, dtype or af.f32)
-	end
 end
 
 --
@@ -74,12 +67,109 @@ local function DimsAndTypeFunc (func)
 	end
 end
 
+-- --
+local Dims = DimsAndType
+
+--
+local function PrepDims (d0, d1, d2, d3)
+	Dims[1], Dims[2], Dims[3], Dims[4] = d0, d1 or 1, d2 or 1, d3 or 1
+
+	return Dims
+end
+
+--
+local function InitEmptyArray (dtype, d0, d1, d2, d3)
+	return CallWrap(af.af_create_handle, 4, PrepDims(d0, d1, d2, d3), af[dtype])
+end
+
+--
+local function InitDataArray (dtype, ptr, src, d0, d1, d2, d3)
+	local func
+
+	if src == "afHost" then
+		func = af.af_create_array
+	elseif src == "afDevice" then
+		func = af.af_device_array
+	else
+		error("Can not create array from the requested source pointer") -- TODO: AF_ERR_ARG?
+	end
+
+	return CallWrap(func, ptr, 4, PrepDims(d0, d1, d2, d3), af[dtype])
+end
+
 --
 function M.Add (into)
 	for k, v in pairs{
-		constant = Constant,
+		--
+		array = function(a, b, c, d, e, f)
+			if a == nil then
+				return InitEmptyArray(af.f32, 0, 0, 0, 0)
+			elseif b == "handle" then -- a: handle, b: "handle"
+				return WrapArray(a)
+			elseif IsArray(a) then
+				if type(b) == "table" then -- a: input, b: dims
+					return CallWrap(af.af_moddims, a:get(), 4, b)
+				elseif b then -- a: input, b...e: dims
+					return CallWrap(af.af_moddims, a:get(), 4, PrepDims(b, c, d, e))
+				else -- a: input
+					return CallWrap(af.af_retain_array, a:get())
+				end
+			elseif type(a) == "table" then
+				if type(b) == "table" then -- a: dims, b: ptr, c: src
+					return InitDataArray("f32", b, c or "afHost", a[1], a[2], a[3], a[4])
+				else -- a: dims, b: type
+					return InitEmptyArray(af[b or "f32"], a[1], a[2], a[3], a[4])
+				end
+			else
+				local n, dims, dtype = GetDimsAndType(a, b, c, d, e)
+
+				if type(dtype) == "table" then -- a...: dims, second-to-last: ptr, last?: source
+					return InitDataArray("f32", dtype, select(n + 2, a, b, c, d, e, f) or "afHost", unpack(dims, 1, n))
+				else -- a...: dims, last?: type
+					return InitEmptyArray(dtype or af.f32, unpack(dims, 1, n))
+				end
+			end
+		end,
+
+		--
+		constant = function(value, ...)
+			local n, dims, dtype = GetDimsAndType(...)
+
+			if type(value) == "table" then
+				if dtype == "c32" or dtype == "c64" then
+					return CallWrap(af.af_constant_complex, value.real, value.imag, n, dims, dtype)
+				else
+					value = value.real -- TODO: syntax? (ditto above)
+				end
+			end
+
+			if dtype == "s64" or dtype == "u64" then
+				local name = dtype == "s64" and "af_constant_long" or "af_constant_ulong"
+
+				return CallWrap(af[name], value, n, dims)
+			else
+				return CallWrap(af.af_constant, value, n, dims, dtype or af.f32)
+			end
+		end,
+
+		--
+		diag = function(in_arr, num, extract)
+			if extract == nil then
+				extract = true
+			end
+
+			local name = extract and "af_diag_extract" or "af_diag_create"
+
+			return CallWrap(af[name], in_arr:get(), num or 0)
+		end,
+
+		--
 		identity = DimsAndTypeFunc(af.af_identity),
+
+		--
 		randn = DimsAndTypeFunc(af.af_randn),
+
+		--
 		randu = DimsAndTypeFunc(af.af_randu)
 	} do
 		into[k] = v

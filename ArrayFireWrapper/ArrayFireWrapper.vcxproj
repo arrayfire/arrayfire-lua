@@ -161,9 +161,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\arrayfire\arrayfire.vcxproj">
-      <Project>{e60d023e-007c-4412-a508-893a5ce44f37}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\lua\lua.vcxproj">
       <Project>{4a89daac-5c9d-4309-92f0-44a3e36db7ad}</Project>
     </ProjectReference>

@@ -5,7 +5,7 @@ local af = require("arrayfire")
 local array = require("lib.impl.array")
 
 -- Imports --
-local Call
+local Call = array.Call
 
 -- Exports --
 local M = {}

@@ -13,7 +13,7 @@ template<af_err (*func)(af_array *, const void *, unsigned int, const dim_t *, a
 
 	LuaData arr(L, 1, dt.GetType());
 
-	af_err err = func(arr_ud, arr.GetData(), dt.GetNDims(), dt.GetDims(), arr.GetType());
+	af_err err = func(arr_ud, arr.GetData(), dt.GetNDims(), dt.GetDims(), Arg<af_dtype>(L, 4));
 
 	return PushErr(L, err);	// data, ndims, dims, type, err, arr_ud
 }

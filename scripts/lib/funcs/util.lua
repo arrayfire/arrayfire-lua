@@ -9,7 +9,6 @@ local array = require("lib.impl.array")
 
 -- Imports --
 local Call = array.Call
-local GetHandle = array.GetHandle
 
 -- Exports --
 local M = {}
@@ -19,7 +18,7 @@ function M.Add (into)
 	for k, v in pairs{
 		--
 		print = function(exp, arr, precision)
-			Call(af.af_print_array_gen, exp, GetHandle(arr), precision or 4) -- https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/util.cpp
+			Call(af.af_print_array_gen, exp, arr:get(), precision or 4) -- https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/util.cpp
 		end,
 
 		--

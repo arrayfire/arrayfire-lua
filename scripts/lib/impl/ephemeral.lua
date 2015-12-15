@@ -13,7 +13,6 @@ local remove = table.remove
 local af = require("arrayfire")
 
 -- Forward declarations --
-local GetHandle
 local IsArray
 
 -- Cookies --
@@ -23,22 +22,13 @@ local _command = {}
 local M = {}
 
 -- --
+local ID = 0
+
+-- --
 local Stack = {}
 
 -- --
 local Top = 0
-
---
-local function AddToCurrentEnvironment (arr)
-	local env = Top > 0 and Stack[Top]
-
-	if env then
-		env(_command, "get_list")[arr] = true
-	end
-end
-
--- --
-local ID = 0
 
 --
 local function NewEnv ()
@@ -62,7 +52,7 @@ local function NewEnv ()
 		elseif IsArray(a) then -- a: array?
 			local env = Stack[Top]
 
-			assert(env and env(_get_id) == id, "Environment not active") -- is self?
+			assert(env and env(_command, "get_id") == id, "Environment not active") -- is self?
 
 			local lower_env = (mode == "parent" or mode == "parent_gc") and Stack[top - 1]
 
@@ -82,7 +72,7 @@ local function Purge (list)
 	local nerrs = 0
 
 	for arr in pairs(list) do
-		local ha = GetHandle(arr, true)
+		local ha = arr:get(true)
 
 		if ha then
 			local err = af.af_release_array(ha)
@@ -124,40 +114,43 @@ local function GetResults (env, ok, a, ...)
 end
 
 --
-local function CallWithEnvironment (func, ...)
-	local env = remove(Cache) or NewEnv()
-
-	Top = Top + 1
-
-	Stack[Top] = env
-
-	return GetResults(env, pcall(func, env, ...))
-end
-
---
-local function CallWithEnvironment_Args (func, args, ...)
-	local env = remove(Cache) or NewEnv()
-
-	Top = Top + 1
-
-	env(_command, "set_mode", args.mode)
-	env(_command, "set_step", args.step)
-
-	Stack[Top] = env
-
-	return GetResults(env, pcall(func, env, ...))
-end
-
---
 function M.Add (array_module)
 	-- Import these here since the array module is not yet registered.
-	GetHandle = array_module.GetHandle
 	IsArray = array_module.IsArray
 
 	--
-	array_module.AddToCurrentEnvironment = AddToCurrentEnvironment
-	array_module.CallWithEnvironment = CallWithEnvironment
-	array_module.CallWithEnvironment_Args = CallWithEnvironment_Args
+	function array_module.AddToCurrentEnvironment (arr)
+		local env = Top > 0 and Stack[Top]
+
+		if env then
+			env(_command, "get_list")[arr] = true
+		end
+	end
+
+	--
+	function array_module.CallWithEnvironment (func, ...)
+		local env = remove(Cache) or NewEnv()
+
+		Top = Top + 1
+
+		Stack[Top] = env
+
+		return GetResults(env, pcall(func, env, ...))
+	end
+
+	--
+	function array_module.CallWithEnvironment_Args (func, args, ...)
+		local env = remove(Cache) or NewEnv()
+
+		Top = Top + 1
+
+		env(_command, "set_mode", args.mode)
+		env(_command, "set_step", args.step)
+
+		Stack[Top] = env
+
+		return GetResults(env, pcall(func, env, ...))
+	end
 end
 
 -- Export the module.

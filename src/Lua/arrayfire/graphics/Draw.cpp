@@ -17,7 +17,7 @@ public:
 
 		mCell.row = I(L, -4);
 		mCell.col = I(L, -3);
-		mCell.title = lua_tostring(L, -2);
+		mCell.title = !lua_isnil(L, -1) ? lua_tostring(L, -2) : NULL;
 		mCell.cmap = Arg<af_colormap>(L, -1);
 
 		lua_pop(L, 4);	// ...

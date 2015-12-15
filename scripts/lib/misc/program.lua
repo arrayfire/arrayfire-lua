@@ -21,6 +21,12 @@ local T0
 --
 function M.Add (into)
 	for k, v in pairs{
+		--
+		assets = function()
+			return getenv("AF_PATH") .. "/assets"
+		end,
+
+		--
 		main = function(func, ...)
 			local argc, argv = select("#", ...), { ... }
 

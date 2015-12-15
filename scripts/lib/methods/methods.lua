@@ -4,47 +4,74 @@
 local af = require("arrayfire")
 
 -- Forward declarations --
-local CallArr
-local CallArrWrap
-
--- Forward declarations --
 local Lib
 
 -- Exports --
 local M = {}
 
+-- See also: https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/array.cpp
+
 -- --
 local Dims = {}
 
 --
-local function Copy (arr)
-	return CallArrWrap(af.af_copy_array, arr)
-end
+local function GetLib ()
+	Lib = Lib or require("lib.af_lib")
 
---
-local function Eval (arr)
-	CallArr(af.af_eval, arr)
+	return Lib
 end
 
 --
 function M.Add (array_module, meta)
-	-- Import these here since the array module is not yet registered.
-	CallArr = array_module.CallArr
-	CallArrWrap = array_module.CallArrWrap
+	local Call = array_module.Call
+	local CallWrap = array_module.CallWrap
 
 	--
 	for k, v in pairs{
-		copy = Copy,
-		dims = function(self, i)
-			Lib = Lib or require("lib.af_lib")
+		--
+		as = function(arr, atype)
+			return CallWrap(af.af_cast, arr:get(), af[atype])
+		end,
 
+		--
+		copy = function(arr)
+			return CallWrap(af.af_copy_array, arr:get())
+		end,
+
+		--
+		dims = function(self, i)
 			if i then
-				return Lib.getDims(self, Dims)[i + 1]
+				return GetLib().getDims(self, Dims)[i + 1]
 			else
-				return Lib.getDims(self)
+				return GetLib().getDims(self)
 			end
 		end,
-		eval = Eval
+
+		--
+		eval = function(arr)
+			Call(af.af_eval, arr:get())
+		end,
+
+		--
+		get = array_module.GetHandle,
+
+		--
+		H = function(self)
+			return GetLib().transpose(self, true)
+		end,
+
+		--
+		numdims = function(self)
+			return GetLib().numDims(self)
+		end,
+
+		--
+		set = array_module.SetHandle,
+
+		--
+		T = function(self)
+			return GetLib().transpose(self)
+		end
 	} do
 		meta[k] = v
 	end

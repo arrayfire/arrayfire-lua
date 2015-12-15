@@ -9,7 +9,8 @@
  ********************************************************/
  ]]
  
- -- Modules --
+-- Modules --
+local input = require("tests.financial.input")
 local lib = require("lib.af_lib")
 
 -- --
@@ -24,7 +25,7 @@ local function cnd (x)
     return y
 end
 
-local function black_scholes (--[[env]]S, X, R, V, T)
+local function black_scholes (env, S, X, R, V, T)
     -- This function computes the call and put option prices based on
     -- Black-Scholes Model
     -- S = Underlying stock price
@@ -40,18 +41,17 @@ local function black_scholes (--[[env]]S, X, R, V, T)
     local cnd_d2 = cnd(d2)
     local C = S * cnd_d1  - (X * lib.exp((-R)*T) * cnd_d2)
     local P = X * lib.exp((-R)*T) * (1 - cnd_d2) - (S * (1 - cnd_d1))
-	return C, P -- env(C), env(P)
+	return env(C), env(P)
 end
 lib.main(function()
 	print("** ArrayFire Black-Scholes Example **\n" ..
 		   "**          by AccelerEyes         **\n")
---[[
-	array GC1(4000, 1, C1);
-	array GC2(4000, 1, C2);
-	array GC3(4000, 1, C3);
-	array GC4(4000, 1, C4);
-	array GC5(4000, 1, C5);
-]]
+	local GC1 = lib.array(4000, 1, input.C1)
+	local GC2 = lib.array(4000, 1, input.C2)
+	local GC3 = lib.array(4000, 1, input.C3)
+	local GC4 = lib.array(4000, 1, input.C4)
+	local GC5 = lib.array(4000, 1, input.C5)
+
 	-- Compile kernels
 	-- Create GPU copies of the data
 	local Sg = GC1:copy()
@@ -62,31 +62,30 @@ lib.main(function()
 	local Cg, Pg
 
 	--Warm up black scholes example
-	-- CallEnv
-	Cg, Pg = black_scholes(Sg,Xg,Rg,Vg,Tg)
+	Cg, Pg = lib.CallWithEnvironment(black_scholes, Sg,Xg,Rg,Vg,Tg)
     lib.eval(Cg, Pg)
 	print("Warming up done")
 	lib.sync()
 	local iter = 5
-	for n = 50, 500, 50 do
-	-- EnvLoopFromToStep_Mode(50, 500, 50, "parent") -- n = env("get_step")
+	lib.EnvLoopFromToStep_Mode(50, 500, 50, "parent", function(env)
+		local n = env("get_step")
+
 		-- Create GPU copies of the data
-		Sg = tile(GC1, n, 1)
-		Xg = tile(GC2, n, 1)
-		Rg = tile(GC3, n, 1)
-		Vg = tile(GC4, n, 1)
-		Tg = tile(GC5, n, 1)
+		Sg = lib.tile(GC1, n, 1)
+		Xg = lib.tile(GC2, n, 1)
+		Rg = lib.tile(GC3, n, 1)
+		Vg = lib.tile(GC4, n, 1)
+		Tg = lib.tile(GC5, n, 1)
 		local dims = Xg:dims()
 		lib.printf("Input Data Size = %d x %d", dims[1], dims[2])
 		-- Force compute on the GPU
 		lib.sync()
 		lib.timer_start()
-		for _ = 1, iter do
-			-- EnvLoopN()
-			Cg, Pg = black_scholes(Sg,Xg,Rg,Vg,Tg)
+		lib.EnvLoopN(iter, function(inner_env)
+			Cg, Pg = black_scholes(inner_env, Sg,Xg,Rg,Vg,Tg)
 			lib.eval(Cg,Pg)
-		end
+		end)
 		lib.sync()
 		lib.printf("Mean GPU Time = %0.6fms\n\n", 1000 * lib.timer_stop()/iter)
-	end
+	end)
 end)

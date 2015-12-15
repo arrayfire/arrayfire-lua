@@ -823,6 +823,7 @@ $MIN_VERSION(32.1)$
 $END_MIN$
 
 	/* Window */
+	af_err af_create_window (af_window *, const int, const int, const char * const);	
 	af_err af_destroy_window (const af_window);
 	af_err af_grid (const af_window, const int, const int);
 	af_err af_is_window_closed (bool *, const af_window);

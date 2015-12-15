@@ -8,6 +8,8 @@ local M = {}
 
 --
 for _, v in ipairs{
+	"funcs.image",
+	"funcs.io",
 	"funcs.linear_algebra",
 	"funcs.mathematics",
 	"funcs.signal_processing",

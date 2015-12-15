@@ -10,12 +10,10 @@ local af = require("arrayfire")
 local array = require("lib.impl.array")
 
 -- Imports --
-local CallArr = array.CallArr
-local CallArr2 = array.CallArr2
-local CallArrWrap = array.CallArrWrap
+local Call = array.Call
+local CallWrap = array.CallWrap
 local HandleDim = array.HandleDim
 local IsArray = array.IsArray
-local SetHandle = array.SetHandle
 local ToType = array.ToType
 
 -- Forward declarations --
@@ -54,7 +52,7 @@ local function Reduce (name)
 		end
 
 		if rtype then
-			local r, i = CallArr(func_all, in_arr)
+			local r, i = Call(func_all, in_arr:get())
 
 			return ToType(rtype, r, i)
 		else
@@ -76,17 +74,17 @@ local function ReduceMaxMin (name)
 			return Lib[arith](a, b)
 		elseif type(a) == "string" then -- a: type, b: in_arr, c: get_index
 			if c then
-				local r, i, index = CallArr(ifunc_all, b)
+				local r, i, index = Call(ifunc_all, b:get())
 
 				return ToType(a, r, i), index
 			else
-				return ToType(a, CallArr(func_all, b))
+				return ToType(a, Call(func_all, b:get()))
 			end
 		elseif IsArray(c) then -- a: val, b: idx, c: arr, d: dim
 			local out, idx = HandleDim(ifunc, c, d, "no_wrap")
 
-			SetHandle(a, out)
-			SetHandle(b, idx)
+			a:set(out)
+			b:set(idx)
 		else -- a: arr, b: dim
 			return HandleDim(func, a, b)
 		end
@@ -109,15 +107,15 @@ local function ReduceNaN (name)
 			local r, i
 
 			if nanval then
-				r, i = CallArr(func_nan_all, in_arr, nanval)
+				r, i = Call(func_nan_all, in_arr:get(), nanval)
 			else
-				r, i = CallArr(func_all, in_arr)
+				r, i = Call(func_all, in_arr:get())
 			end
 
 			return ToType(rtype, r, i)
 		else
 			if nanval then
-				return CallArrWrap(func_nan, in_arr, dim, nanval)
+				return CallWrap(func_nan, in_arr:get(), dim, nanval)
 			else
 				return HandleDim(func, in_arr, dim)
 			end
@@ -143,6 +141,16 @@ function M.Add (into)
 		count = Reduce("count"),
 
 		--
+		diff1 = function(in_arr, dim)
+			return CallWrap(af.af_diff1, in_arr:get(), dim)
+		end,
+
+		--
+		diff2 = function(in_arr, dim)
+			return CallWrap(af.af_diff2, in_arr:get(), dim)
+		end,
+
+		--
 		max = ReduceMaxMin("max"),
 
 		--
@@ -154,17 +162,17 @@ function M.Add (into)
 		--
 		sort = function(a, b, c, d, e, f)
 			if IsArray(d) then -- four arrays
-				local keys, values = CallArr2(af.af_sort_by_key, c, d, e or 0, Bool(f))
+				local keys, values = Call(af.af_sort_by_key, c:get(), d:get(), e or 0, Bool(f))
 
-				SetHandle(a, keys)
-				SetHandle(b, values)
+				a:set(keys)
+				b:set(values)
 			elseif IsArray(c) then -- three arrays
-				local arr, indices = CallArr(af.af_sort_index, c, d or 0, Bool(e))
+				local arr, indices = Call(af.af_sort_index, c:get(), d or 0, Bool(e))
 
-				SetHandle(a, arr)
-				SetHandle(b, indices)
+				a:set(arr)
+				b:set(indices)
 			else -- one array
-				return CallArrWrap(af.af_sort, a, b or 0, Bool(c))
+				return CallWrap(af.af_sort, a:get(), b or 0, Bool(c))
 			end
 		end,
 

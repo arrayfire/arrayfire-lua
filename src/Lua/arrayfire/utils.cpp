@@ -179,7 +179,7 @@ template<typename T> void AddToVector (std::vector<char> & arr, T value)
 {
 	const char * bytes = (const char *)&value;
 
-	for (auto i = arr.size(); i < arr.size() + sizeof(T); ++i) arr[i] = *bytes++;
+	for (size_t i = 0; i < sizeof(T); ++i) arr.push_back(*bytes++);
 }
 
 template<typename T> void AddFloat (std::vector<char> & arr, lua_State * L, int index, int pos)
@@ -213,7 +213,7 @@ template<typename T, typename C> void AddComplex (std::vector<char> & arr, lua_S
 	lua_pop(L, 3);	// ..., arr, ...
 }
 
-LuaData::LuaData (lua_State * L, int index, af_dtype type, bool copy) : mType(type)
+LuaData::LuaData (lua_State * L, int index, af_dtype type, bool copy) : mDataPtr(0), mType(type)
 {
 	// Non-string: build up from Lua array.
 	if (!lua_isstring(L, index))
@@ -269,8 +269,10 @@ LuaData::LuaData (lua_State * L, int index, af_dtype type, bool copy) : mType(ty
 				break;
 #if AF_API_VERSION >= 32
 			case s16:
+				AddInt<short>(mData, L, index, i);
 				break;
 			case u16:
+				AddInt<unsigned short>(mData, L, index, i);
 				break;
 #endif
 			case s32:

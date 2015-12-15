@@ -5,12 +5,9 @@ local af = require("arrayfire")
 local array = require("lib.impl.array")
 
 -- Imports --
-local CallArr = array.CallArr
-local CallArrWrap = array.CallArrWrap
-local CallArr2Wrap = array.CallArr2Wrap
-local CallArr3Wrap = array.CallArr3Wrap
+local Call = array.Call
+local CallWrap = array.CallWrap
 local IsArray = array.IsArray
-local SetHandle = array.SetHandle
 local ToType = array.ToType
 
 -- Exports --
@@ -24,7 +21,7 @@ local M = {}
 local function MatMul2 (a, b, opt_lhs, opt_rhs)
 	opt_lhs, opt_rhs = opt_lhs or "AF_MAT_NONE", opt_rhs or "AF_MAT_NONE"
 
-	return CallArr2Wrap(af.af_matmul, a, b, af[opt_lhs], af[opt_rhs])
+	return CallWrap(af.af_matmul, a:get(), b:get(), af[opt_lhs], af[opt_rhs])
 end
 
 --
@@ -54,11 +51,11 @@ end
 --
 local function SVD (func)
 	return function(u, s, vt, in_arr)
-		local ul, sl, vtl = CallArr(func, in_arr)
+		local ul, sl, vtl = Call(func, in_arr:get())
 
-		SetHandle(s, sl)
-		SetHandle(u, ul)
-		SetHandle(vt, vtl)
+		s:set(sl)
+		u:set(ul)
+		vt:set(vtl)
 	end
 end
 
@@ -71,9 +68,9 @@ function M.Add (into)
 				is_upper = true
 			end
 
-			local res, info = CallArr(af.af_cholesky, in_arr, is_upper)
+			local res, info = Call(af.af_cholesky, in_arr:get(), is_upper)
 
-			SetHandle(out, res)
+			out:set(res)
 
 			return info
 		end,
@@ -84,39 +81,39 @@ function M.Add (into)
 				is_upper = true
 			end
 
-			return CallArr(af.af_cholesky_inplace, in_arr, is_upper)
+			return Call(af.af_cholesky_inplace, in_arr:get(), is_upper)
 		end,
 
 		--
 		det = function(rtype, arr)
-			return ToType(rtype, CallArr(af.af_det, arr))
+			return ToType(rtype, Call(af.af_det, arr:get()))
 		end,
 
 		--
 		dot = function(a, b, opt_lhs, opt_rhs)
-			return CallArr2Wrap(af.af_dot, a, b, af[opt_lhs or "AF_MAT_NONE"], af[opt_rhs or "AF_MAT_NONE"])
+			return CallWrap(af.af_dot, a:get(), b:get(), af[opt_lhs or "AF_MAT_NONE"], af[opt_rhs or "AF_MAT_NONE"])
 		end,
 
 		--
 		inverse = function(arr, options)
-			return CallArrWrap(arr, af[options or "AF_MAT_NONE"])
+			return CallWrap(arr:get(), af[options or "AF_MAT_NONE"])
 		end,
 
 		--
 		lu = function(a, b, c, d)
 			if IsArray(d) then -- a: lower, b: upper, c: pivot, d: in
-				local l, u, p = CallArr(af.af_lu, d)
+				local l, u, p = Call(af.af_lu, d:get())
 
-				SetHandle(a, l)
-				SetHandle(b, u)
-				SetHandle(c, p)
+				a:set(l)
+				b:set(u)
+				c:set(p)
 			else -- a: out, b: pivot, c: in, d: is_lapack_piv
 				if d == nil then
 					d = true
 				end
 
-				SetHandle(a, CallArr(af.af_copy_array, c))
-				SetHandle(b, CallArr(af.af_lu_inplace, a, d))
+				a:set(Call(af.af_copy_array, c:get()))
+				b:set(Call(af.af_lu_inplace, a:get(), d))
 			end
 		end,
 
@@ -126,7 +123,7 @@ function M.Add (into)
 				is_lapack_piv = true
 			end
 
-			SetHandle(pivot, CallArr(af.af_lu_inplace, in_arr, is_lapack_piv))
+			pivot:set(Call(af.af_lu_inplace, in_arr:get(), is_lapack_piv))
 		end,
 	
 		--
@@ -157,41 +154,41 @@ function M.Add (into)
 
 		--
 		norm = function(arr, norm_type, p, q)
-			return CallArr(af.af_norm, af[norm_type or "AF_NORM_EUCLID"], p or 1, q or 1)
+			return Call(af.af_norm, arr:get(), af[norm_type or "AF_NORM_EUCLID"], p or 1, q or 1)
 		end,
 
 		--
 		qr = function(a, b, c, d)
 			if IsArray(d) then -- a: q, b: r, c: tau, d: in
-				local q, r, t = CallArr(af.af_qr, d)
+				local q, r, t = Call(af.af_qr, d:get())
 
-				SetHandle(a, q)
-				SetHandle(b, r)
-				SetHandle(c, t)
+				a:set(q)
+				b:set(r)
+				c:set(t)
 			else -- a: out, b: tau, c: in
-				SetHandle(a, CallArr(af.af_copy_array, c))
-				SetHandle(b, CallArr(af.af_qr_inplace, a))
+				a:set(Call(af.af_copy_array, c:get()))
+				b:set(Call(af.af_qr_inplace, a:get()))
 			end
 		end,
 
 		--
 		qrInPlace = function(tau, in_arr)
-			SetHandle(tau, CallArr(af.af_qr_inplace, in_arr))
+			tau:set(Call(af.af_qr_inplace, in_arr:get()))
 		end,
 
 		--
 		rank = function(arr, tol)
-			return CallArr(af.af_rank, arr, tol or 1e-5)
+			return Call(af.af_rank, arr:get(), tol or 1e-5)
 		end,
 
 		--
 		solve = function(a, b, options)
-			return CallArr2Wrap(af.af_solve, a, b, af[options or "AF_MAT_NONE"])
+			return CallWrap(af.af_solve, a:get(), b:get(), af[options or "AF_MAT_NONE"])
 		end,
 
 		--
 		solveLU = function(a, piv, b, options)
-			return CallArr3Wrap(af.af_solve_lu, a, piv, b, af[options or "AF_MAT_NONE"])
+			return CallWrap(af.af_solve_lu, a:get(), piv:get(), b:get(), af[options or "AF_MAT_NONE"])
 		end,
 
 		--
@@ -202,12 +199,12 @@ function M.Add (into)
 
 		--
 		transpose = function(arr, conjugate)
-			return CallArrWrap(af.af_transpose, arr, conjugate)
+			return CallWrap(af.af_transpose, arr:get(), conjugate)
 		end,
 
 		--
 		transposeInPlace = function(arr, conjugate)
-			return CallArr(af.af_transpose_inplace, arr, conjugate)
+			return Call(af.af_transpose_inplace, arr:get(), conjugate)
 		end
 	} do
 		into[k] = v

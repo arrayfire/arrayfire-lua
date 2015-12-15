@@ -5,7 +5,7 @@ local af = require("arrayfire")
 local array = require("lib.impl.array")
 
 -- Imports --
-local CallArrWrap = array.CallArrWrap
+local CallWrap = array.CallWrap
 local TwoArrays = array.TwoArrays
 
 -- Exports --
@@ -21,7 +21,7 @@ end
 --
 local function Unary (func)
 	return function(in_arr)
-		return CallArrWrap(func, in_arr)
+		return CallWrap(func, in_arr:get())
 	end
 end
 

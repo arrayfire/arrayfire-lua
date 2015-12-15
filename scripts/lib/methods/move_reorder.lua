@@ -1,5 +1,8 @@
 --- Move and reorder operations.
 
+-- Standard library imports --
+local type = type
+
 -- Modules --
 local af = require("arrayfire")
 local array = require("lib.impl.array")
@@ -7,41 +10,56 @@ local array = require("lib.impl.array")
 -- Imports --
 local CallWrap = array.CallWrap
 local CheckError = array.CheckError
-local GetHandle = array.GetHandle
 local IsArray = array.IsArray
 local WrapArray = array.WrapArray
 
 -- Exports --
 local M = {}
 
+-- See also: https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/data.cpp
+
 -- --
 local Arrays = {} 
 
 --
-local function Join (dim, a1, a2, a3, a4)
-	if IsArray(a3) then -- three or arrays
-		Arrays[1], Arrays[2], Arrays[3] = GetHandle(a1), GetHandle(a2), GetHandle(a3)
-
-		if IsArray(a4) then -- four arrays
-			Arrays[4] = GetHandle(a4)
-		end
-
-		local err, arr = af.af_join_many(dim, Arrays[4] and 4 or 3, Arrays)
-
-		Arrays[1], Arrays[2], Arrays[3], Arrays[4] = nil
-
-		CheckError(err) -- do after wiping Arrays
-
-		return WrapArray(arr)
-	else -- two arrays
-		return CallWrap(af.af_join, dim, GetHandle(a1), GetHandle(a2))
-	end
-end
-
---
 function M.Add (into)
 	for k, v in pairs{
-		join = Join
+		--
+		flip = function(in_arr, dim)
+			return CallWrap(af.af_flip, in_arr:get(), dim)
+		end,
+
+		--
+		join = function(dim, a1, a2, a3, a4)
+			if IsArray(a3) then -- three or arrays
+				Arrays[1], Arrays[2], Arrays[3] = a1:get(), a2:get(), a3:get()
+
+				if IsArray(a4) then -- four arrays
+					Arrays[4] = a4:get()
+				end
+
+				local err, arr = af.af_join_many(dim, Arrays[4] and 4 or 3, Arrays)
+
+				Arrays[1], Arrays[2], Arrays[3], Arrays[4] = nil
+
+				CheckError(err) -- do after wiping Arrays
+
+				return WrapArray(arr)
+			else -- two arrays
+				return CallWrap(af.af_join, dim, a1:get(), a2:get())
+			end
+		end,
+
+		--
+		tile = function(in_arr, a, b, c, d)
+			if type(a) == "table" then -- a: dims
+				a, b, c, d = a[1], a[2], a[3], a[4]
+			else  -- a: x, b: y, c: z, d: w
+				b, c, d = b or 1, c or 1, d or 1
+			end
+
+			return CallWrap(af.af_tile, in_arr:get(), a, b, c, d)
+		end
 	} do
 		into[k] = v
 	end

@@ -45,7 +45,7 @@ local function simulateHestonModel (T, N, R, mu, kappa, vBar, sigmaV, rho, x0, v
     local sqrtDeltaT = sqrt(deltaT)
     local sqrtOneMinusRhoSquare = sqrt(1 - rho*rho)
     local mArray = {rho, sqrtOneMinusRhoSquare}
- -- af::array m(2, 1, mArray);
+	local m = lib.array(2, 1, mArray);
     local tPrevious, tCurrent = 0, 0
     local zeroConstant = lib.constant(0, R)
     for t = 1, N - 1 do -- LoopN
@@ -78,7 +78,7 @@ lib.main(function()
 	simulateHestonModel(T, nT, R_first_run, r, kappa, vBar, sigmaV, rho, x0, v0) -- CallInEnv
 	lib.sync() -- Ensure the first run is finished
 	lib.timer_start()
-	local x, _ = simulateHestonModel(T, nT, R, r, kappa, vBar, sigmaV, rho, x0, v0)
+	local x, _ = simulateHestonModel(T, nT, R, r, kappa, vBar, sigmaV, rho, x0, v0) -- ditto
 	lib.sync()
 	print("Time in simulation: " .. lib.timer_stop())
 	local K = lib.exp(lib.constant(k, x:dims()))

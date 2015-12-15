@@ -15,6 +15,20 @@ template<typename T, af_err (*func)(const af_window, const T, const T)> int TwoT
 
 static const struct luaL_Reg window_funcs[] = {
 	{
+		"af_create_window", [](lua_State * L)
+		{
+			lua_settop(L, 3);	// width, height, title
+
+			af_window wnd = 0;
+
+			af_err err = af_create_window(&wnd, I(L, 1), I(L, 2), S(L, 3));
+
+			lua_pushinteger(L, err);// width, height, title, err
+			lua_pushinteger(L, wnd);// width, height, title, err, wnd
+
+			return 2;
+		}
+	}, {
 		"af_destroy_window", [](lua_State * L)
 		{
 			lua_settop(L, 1);	// window

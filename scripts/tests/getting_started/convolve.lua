@@ -24,12 +24,12 @@ lib.main(function()
 	-- setup image and device copies of kernels
 	local img = lib.randu(640, 480)
 	-- device kernels
---	local dx = array(5, 1, h_dx) -- 5x1 kernel
---	local spread = array(1, 5, h_spread) -- 1x5 kernel
+	local dx = lib.array(5, 1, h_dx) -- 5x1 kernel
+	local spread = lib.array(1, 5, h_spread) -- 1x5 kernel
 	local kernel = lib.matmul(dx, spread) -- 5x5 kernel
 	local full_out, dsep_out
-	lib.printf("full 2D convolution:         %.5f seconds", lib.timeit(function() full_out = convolve2(img, kernel) end))
-	lib.printf("separable, device pointers:  %.5f seconds", lib.timeit(function() dsep_out = convolve(dx, spread, img) end))
+	lib.printf("full 2D convolution:         %.5f seconds", lib.timeit(function() full_out = lib.convolve2(img, kernel) end))
+	lib.printf("separable, device pointers:  %.5f seconds", lib.timeit(function() dsep_out = lib.convolve(dx, spread, img) end))
 	-- ensure values are all the same across versions
 	assert(not fail(full_out, dsep_out), "full != dsep")
 end)

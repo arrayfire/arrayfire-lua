@@ -3,6 +3,7 @@
 -- Standard library imports --
 local error = error
 local getmetatable = getmetatable
+local rawequal = rawequal
 local setmetatable = setmetatable
 
 -- Modules --
@@ -15,7 +16,6 @@ local _CallWrap_
 local _CheckError_
 local _GetConstant_
 local _GetFNSD_
-local _GetHandle_
 local _IsArray_
 local _IsConstant_
 local _ToArray_
@@ -32,113 +32,11 @@ local MetaValue = {}
 local Constants = setmetatable({}, { __mode = "k" })
 
 --- DOCME
--- @param item
--- @treturn boolean B
-function M.IsArray (item)
-	return getmetatable(item) == MetaValue and not Constants[item]
-end
-
---- DOCME
--- @param item
--- @treturn boolean B
-function M.IsConstant (item)
-	return not not Constants[item] -- metatable redundant; coerce to false if missing
-end
-
---- DOCME
 -- @tparam function func
 -- @param ... Arguments to _func_.
 -- @return Any non-error return values.
 function M.Call (func, ...)
 	return _CheckError_(func(...))
-end
-
---- DOCME
--- @tparam function func
--- @tparam LuaArray arr
--- @param ... Additional arguments to _func_.
--- @return Any non-error return values.
-function M.CallArr (func, arr, ...)
-	return _CheckError_(func(_GetHandle_(arr), ...))
-end
-
---- DOCME
--- @tparam function func
--- @tparam LuaArray arr1
--- @tparam LuaArray arr2
--- @param ... Additional arguments to _func_.
--- @return Any non-error return values.
-function M.CallArr2 (func, arr1, arr2, ...)
-	return _CheckError_(func(_GetHandle_(arr1), _GetHandle_(arr2), ...))
-end
-
---- DOCME
--- @tparam function func
--- @tparam LuaArray arr1
--- @tparam LuaArray arr2
--- @tparam LuaArray arr3
--- @param ... Additional arguments to _func_.
--- @return Any non-error return values.
-function M.CallArr3 (func, arr1, arr2, arr3, ...)
-	return _CheckError_(func(_GetHandle_(arr1), _GetHandle_(arr2), _GetHandle_(arr3), ...))
-end
-
---- DOCME
--- @tparam function func
--- @tparam LuaArray arr1
--- @tparam LuaArray arr2
--- @tparam LuaArray arr3
--- @tparam LuaArray arr4
--- @param ... Additional arguments to _func_.
--- @return Any non-error return values.
-function M.CallArr4 (func, arr1, arr2, arr3, arr4, ...)
-	return _CheckError_(func(_GetHandle_(arr1), _GetHandle_(arr2), _GetHandle_(arr3), _GetHandle_(arr4), ...))
-end
-
---- DOCME
--- @function func
--- @tparam LuaArray arr
--- @param ... Additional arguments to _func_.
--- @treturn LuaArray X
--- @return Any additional return values.
-function M.CallArrWrap (func, arr, ...)
-	return _CallWrap_(func, _GetHandle_(arr), ...)
-end
-
---- DOCME
--- @tparam function func
--- @tparam LuaArray arr1
--- @tparam LuaArray arr2
--- @param ... Additional arguments to _func_.
--- @treturn LuaArray X
--- @return Any additional return values.
-function M.CallArr2Wrap (func, arr1, arr2, ...)
-	return _CallWrap_(func(_GetHandle_(arr1), _GetHandle_(arr2), ...))
-end
-
---- DOCME
--- @tparam function func
--- @tparam LuaArray arr1
--- @tparam LuaArray arr2
--- @tparam LuaArray arr3
--- @param ... Additional arguments to _func_.
--- @treturn LuaArray X
--- @return Any additional return values.
-function M.CallArr3Wrap (func, arr1, arr2, arr3, ...)
-	return _CallWrap_(func(_GetHandle_(arr1), _GetHandle_(arr2), _GetHandle_(arr3), ...))
-end
-
---- DOCME
--- @tparam function func
--- @tparam LuaArray arr1
--- @tparam LuaArray arr2
--- @tparam LuaArray arr3
--- @tparam LuaArray arr4
--- @param ... Additional arguments to _func_.
--- @treturn LuaArray X
--- @return Any additional return values.
-function M.CallArr4Wrap (func, arr1, arr2, arr3, arr4, ...)
-	return _CallWrap_(func(_GetHandle_(arr1), _GetHandle_(arr2), _GetHandle_(arr3), _GetHandle_(arr4), ...))
 end
 
 --
@@ -226,9 +124,23 @@ end
 -- @string[opt] how
 -- @return Results of _func_.
 function M.HandleDim (func, arr, dim, how)
-	local harr = _GetHandle_(arr)
+	local harr = arr:get()
 
 	return (how ~= "no_wrap" and _CallWrap_ or _Call_)(func, harr, _GetFNSD_(harr, dim or -1))
+end
+
+--- DOCME
+-- @param item
+-- @treturn boolean B
+function M.IsArray (item)
+	return rawequal(getmetatable(item), MetaValue) and not Constants[item]
+end
+
+--- DOCME
+-- @param item
+-- @treturn boolean B
+function M.IsConstant (item)
+	return not not Constants[item] -- metatable redundant; coerce to false if missing
 end
 
 --- DOCME
@@ -256,7 +168,7 @@ function M.ToArray (value, other)
 		value = _GetConstant_(value)
 	end
 
-	local btype, hother = type(value), _GetHandle_(other)
+	local btype, hother = type(value), other:get()
 	local ndims = _Call_(af.af_get_numdims, hother)
 
 	Args[1], Args[2], Args[3], Args[4] = _Call_(af.af_get_dims, hother)				
@@ -293,11 +205,11 @@ function M.TwoArrays (func, a, b, ...)
 	local atemp, btemp, ha, hb
 
 	if not _IsArray_(a) then
-		hb, ha, atemp = _GetHandle_(b), _ToArray_(a, b), true
+		hb, ha, atemp = b:get(), _ToArray_(a, b), true
 	elseif not _IsArray_(b) then
-		ha, hb, btemp = _GetHandle_(a), _ToArray_(b, a), true
+		ha, hb, btemp = a:get(), _ToArray_(b, a), true
 	else
-		ha, hb = _GetHandle_(a), _GetHandle_(b)
+		ha, hb = a:get(), b:get()
 	end
 
 	--
@@ -353,7 +265,6 @@ _CallWrap_ = M.CallWrap
 _CheckError_ = M.CheckError
 _GetConstant_ = M.GetConstant
 _GetFNSD_ = M.GetFNSD
-_GetHandle_ = M.GetHandle
 _IsArray_ = M.IsArray
 _IsConstant_ = M.IsConstant
 _ToArray_ = M.ToArray

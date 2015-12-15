@@ -16,10 +16,8 @@ lib.main(function()
 	print("\n=== ArrayFire signed(s32) / unsigned(u32) Integer Example ===")
 	local h_A = {1, 2, 4, -1, 2, 0, 4, 2, 3}
 	local h_B = {2, 3, -5, 6, 0, 10, -12, 0, 1}
---[[
-	array A = array(3, 3, h_A)
-	array B = array(3, 3, h_B)
-]]
+	local A = lib.array(3, 3, h_A)
+	local B = lib.array(3, 3, h_B)
 	print("--\nSub-refencing and Sub-assignment")
 	lib.print("A", A)
 --    af_print(A.col(0))
@@ -43,11 +41,11 @@ lib.main(function()
 ]]
 	print("\n--Transpose")
 	lib.print("A", A)
---    af_print(A.T());
+	lib.print("A.T()", A:T())
 	print("\n--Flip Vertically / Horizontally")
 	lib.print("A", A)
- --   af_print(flip(A,0))
- --   af_print(flip(A,1))
+	lib.print("flip(A,0)", lib.flip(A,0))
+	lib.print("flip(A,1)", lib.flip(A,1))
 	print("\n--Sum along columns")
 	lib.print("A", A)
 	lib.print("sum(A)", lib.sum(A))

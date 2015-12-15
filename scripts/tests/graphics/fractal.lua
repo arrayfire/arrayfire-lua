@@ -7,14 +7,15 @@
  * The complete license agreement can be obtained at:
  * http://arrayfire.com/licenses/BSD-3-Clause
  ********************************************************/
-#include <stdio.h>
-#include <iostream>
-#include <arrayfire.h>
-#include <math.h>
-#include <cstdlib>
+]]
+
+-- Modules --
+local lib = require("lib.af_lib")
+
+lib.main(function()
 #define WIDTH 400 // Width of image
 #define HEIGHT 400 // Width of image
-using namespace af;
+
 array complex_grid(int width, int height, float zoom, float center[2])
 {
     // Generate sequences of length width, height
@@ -53,37 +54,26 @@ array normalize(array a)
     float mn = af::min<float>(a);
     return (a-mn)/(mx-mn);
 }
-int main(int argc, char **argv)
-{
-    int device = argc > 1 ? atoi(argv[1]) : 0;
     int iter = argc > 2 ? atoi(argv[2]) : 100;
     bool console = argc > 2 ? argv[2][0] == '-' : false;
-    try {
-        af::setDevice(device);
-        info();
-        printf("** ArrayFire Fractals Demo **\n");
-        af::Window wnd(WIDTH, HEIGHT, "Fractal Demo");
-        wnd.setColorMap(AF_COLORMAP_SPECTRUM);
-        float center[] = {-0.75, 0.1};
-        // Keep zomming out for each frame
-        for (int i = 10; i < 400; i++) {
-            int zoom = i * i;
-            if(!(i % 10)) printf("iteration: %d zoom: %d\n", i, zoom); fflush(stdout);
-            // Generate the grid at the current zoom factor
-            array c = complex_grid(WIDTH, HEIGHT, zoom, center);
-            iter =sqrt(abs(2*sqrt(abs(1-sqrt(5*zoom)))))*100;
-            // Generate the mandelbrot image
-            array mag = mandelbrot(c, iter, 1000);
-            if(!console) {
-                if (wnd.close()) break;
-                array mag_norm = normalize(mag);
-                wnd.image(mag_norm);
-            }
-        }
-    } catch (af::exception &e) {
-        fprintf(stderr, "%s\n", e.what());
-        throw;
-    }
-    return 0;
-}
-]]
+
+	printf("** ArrayFire Fractals Demo **\n");
+	af::Window wnd(WIDTH, HEIGHT, "Fractal Demo");
+	wnd.setColorMap(AF_COLORMAP_SPECTRUM);
+	float center[] = {-0.75, 0.1};
+	// Keep zomming out for each frame
+	for (int i = 10; i < 400; i++) {
+		int zoom = i * i;
+		if(!(i % 10)) printf("iteration: %d zoom: %d\n", i, zoom); fflush(stdout);
+		// Generate the grid at the current zoom factor
+		array c = complex_grid(WIDTH, HEIGHT, zoom, center);
+		iter =sqrt(abs(2*sqrt(abs(1-sqrt(5*zoom)))))*100;
+		// Generate the mandelbrot image
+		array mag = mandelbrot(c, iter, 1000);
+		if(!console) {
+			if (wnd.close()) break;
+			array mag_norm = normalize(mag);
+			wnd.image(mag_norm);
+		}
+	}
+end)

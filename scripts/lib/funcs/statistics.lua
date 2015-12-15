@@ -8,9 +8,8 @@ local af = require("arrayfire")
 local array = require("lib.impl.array")
 
 -- Imports --
-local CallArr = array.CallArr
-local CallArr2 = array.CallArr2
-local CallArr2Wrap = array.CallArr2Wrap
+local Call = array.Call
+local CallWrap = array.CallWrap
 local GetFNSD = array.GetFNSD
 local HandleDim = array.HandleDim
 local IsArray = array.IsArray
@@ -24,12 +23,12 @@ local M = {}
 local function Mean (a, b, c)
 	if type(a) == "string" then -- a: type, b: in_arr, c: weights
 		if IsArray(c) then
-			return ToType(a, CallArr2(af.af_mean_all_weighted, b, c))
+			return ToType(a, Call(af.af_mean_all_weighted, b:get(), c:get()))
 		else
-			return ToType(a, CallArr(af.af_mean_all, b))
+			return ToType(a, Call(af.af_mean_all, b:get()))
 		end
 	elseif IsArray(b) then -- a: arr, b: weights, c: dim
-		return CallArr2Wrap(af.mean_weighted, a, b, GetFNSD(c))
+		return CallWrap(af.mean_weighted, a:get(), b, GetFNSD(c))
 	else -- a: arr, b: dim
 		return HandleDim(af.af_mean, a, b)
 	end
