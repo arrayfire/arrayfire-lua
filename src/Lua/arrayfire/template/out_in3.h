@@ -15,7 +15,7 @@ template<af_err (*func)(af_array *, const af_array, const af_array, const af_arr
 	return PushErr(L, err);	// a, b, c, err, arr_ud
 }
 
-template<typename T, af_err (*func)(af_array *, const af_array, const af_array, const af_array, const T)>
+template<typename T, af_err (*func)(af_array *, const af_array, const af_array, const af_array, rtype_t<T>)>
 int OutIn3_Arg (lua_State * L)
 {
 	lua_settop(L, 4);	// a, b, c, arg
@@ -27,7 +27,7 @@ int OutIn3_Arg (lua_State * L)
 	return PushErr(L, err);	// a, b, c, arg, err, arr_ud
 }
 
-template<typename T1, typename T2, af_err (*func)(af_array *, const af_array, const af_array, const af_array, const T1, const T2)>
+template<typename T1, typename T2, af_err (*func)(af_array *, const af_array, const af_array, const af_array, rtype_t<T1>, rtype_t<T2>)>
 int OutIn3_Arg2 (lua_State * L)
 {
 	lua_settop(L, 5);	// a, b, c, arg1, arg2

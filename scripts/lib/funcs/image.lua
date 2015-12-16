@@ -5,7 +5,7 @@ local af = require("arrayfire")
 local array = require("lib.impl.array")
 
 -- Imports --
-local Call = array.Call
+local CallWrap = array.CallWrap
 
 -- Exports --
 local M = {}
@@ -31,7 +31,7 @@ function M.Add (into)
 				minval, maxval = lib.min("f64", in_arr), lib.max("f64", in_arr)
 			end
 
-			return CallWrap(in_arr:get(), nbins, minval, maxval)
+			return CallWrap(af.af_histogram, in_arr:get(), nbins, minval, maxval)
 		end
 	} do
 		into[k] = v

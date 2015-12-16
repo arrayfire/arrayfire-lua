@@ -60,6 +60,13 @@ function Window:close ()
 end
 
 --- DOCME
+function Window:destroy ()
+	if not self:close() then
+		Call(af.af_destroy_window, Get(self))
+	end
+end
+
+--- DOCME
 function Window:grid (rows, cols)
     Call(af.af_grid, Get(self), rows, cols)
 end

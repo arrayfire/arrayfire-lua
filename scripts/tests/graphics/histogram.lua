@@ -17,16 +17,13 @@ lib.main(function()
 	local imgWnd = lib.Window(480, 640, "Input Image")
 	local img = lib.loadImage(lib.assets() .. "/examples/images/arrow.jpg", false)
 	local hist_out = lib.histogram(img, 256, 0, 255)
-	lib.EnvLoopUntil(function()
+	lib.EnvLoopWhile(function()
 		myWindow:hist(hist_out, 0, 255)
 		imgWnd:image(img:as("u8"))
 	end, function()
 		return not myWindow:close() and not imgWnd:close()
 	end)
---[[
-	while (!myWindow.close() && !imgWnd.close()) {
-		myWindow.hist(hist_out, 0, 255);
-		imgWnd.image(img.as(u8));
-	}
-]]
+	-- :/
+	myWindow:destroy()
+	imgWnd:destroy()
 end)

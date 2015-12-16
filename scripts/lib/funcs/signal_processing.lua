@@ -48,9 +48,9 @@ function M.Add (into)
 				else
 					func = Convolve3
 				end
-			end
 
-			return func(a, b, c, d)
+				return func(a, b, c, d)
+			end
 		end,
 
 		--

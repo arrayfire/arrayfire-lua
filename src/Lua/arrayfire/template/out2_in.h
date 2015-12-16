@@ -18,7 +18,7 @@ int Out2In (lua_State * L)
 
 }
 
-template<typename T, af_err (*func)(af_array *, af_array *, const af_array, const T)>
+template<typename T, af_err (*func)(af_array *, af_array *, const af_array, rtype_t<T>)>
 int Out2In_Arg (lua_State * L)
 {
 	lua_settop(L, 2);	// a, arg
@@ -32,7 +32,7 @@ int Out2In_Arg (lua_State * L)
 
 }
 
-template<typename T1, typename T2, af_err (*func)(af_array *, af_array *, const af_array, const T1, const T2)>
+template<typename T1, typename T2, af_err (*func)(af_array *, af_array *, const af_array, rtype_t<T1>, rtype_t<T2>)>
 int Out2In_Arg2 (lua_State * L)
 {
 	lua_settop(L, 3);	// a, arg1, arg2

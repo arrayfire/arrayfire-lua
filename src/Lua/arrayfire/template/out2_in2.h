@@ -4,7 +4,7 @@
 #include "../utils.h"
 #include "args.h"
 
-template<typename T, af_err (*func)(af_array *, af_array *, const af_array, const af_array, const T)>
+template<typename T, af_err (*func)(af_array *, af_array *, const af_array, const af_array, rtype_t<T>)>
 int Out2In2_Arg (lua_State * L)
 {
 	lua_settop(L, 3);	// a, b, arg
@@ -18,7 +18,7 @@ int Out2In2_Arg (lua_State * L)
 
 }
 
-template<typename T1, typename T2, af_err (*func)(af_array *, af_array *, const af_array, const af_array, const T1, const T2)>
+template<typename T1, typename T2, af_err (*func)(af_array *, af_array *, const af_array, const af_array, rtype_t<T1>, rtype_t<T2>)>
 int Out2In2_Arg2 (lua_State * L)
 {
 	lua_settop(L, 4);	// a, b, arg1, arg2
@@ -32,7 +32,7 @@ int Out2In2_Arg2 (lua_State * L)
 
 }
 
-template<typename T1, typename T2, typename T3, af_err (*func)(af_array *, af_array *, const af_array, const af_array, const T1, const T2, const T3)>
+template<typename T1, typename T2, typename T3, af_err (*func)(af_array *, af_array *, const af_array, const af_array, rtype_t<T1>, rtype_t<T2>, rtype_t<T3>)>
 int Out2In2_Arg3 (lua_State * L)
 {
 	lua_settop(L, 5);	// a, b, arg1, arg2, arg3

@@ -12,6 +12,9 @@
 -- Modules --
 local lib = require("lib.af_lib")
 
+-- Shorthands --
+local Comp, WC = lib.CompareResult, lib.WrapConstant
+
 lib.main(function()
 	local h_kernel = {1, 1, 1, 1, 0, 1, 1, 1, 1}
 	local reset = 500
@@ -25,31 +28,33 @@ lib.main(function()
 	print("4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.")
 	print("Each white block in the visualization represents 1 alive cell, black space represents dead cells")
 
---	af::Window myWindow(512, 512, "Conway's Game of Life using ArrayFire");
+	local _0_5, _2, _3 = WC(0.5), WC(2), WC(3)
+
+	local myWindow = lib.Window(512, 512, "Conway's Game of Life using ArrayFire")
 	local frame_count = 0
 	-- Initialize the kernel array just once
---[[
-	const af::array kernel(3, 3, h_kernel, afHost)
-	array state
-	state = (af::randu(game_h, game_w, f32) > 0.5).as(f32)
-]]
---	while(!myWindow.close()) {
-	--	myWindow.image(state)
+	local kernel = lib.array(3, 3, h_kernel, "afHost")
+	local state
+	state = Comp(lib.randu(game_h, game_w, "f32") > _0_5):as("f32")
+	lib.EnvLoopWhile_Mode(function(env)
+		myWindow:image(state)
 		frame_count = frame_count + 1
 		-- Generate a random starting state
 		if frame_count % reset == 0 then
-		--	state = (af::randu(game_h, game_w, f32) > 0.5).as(f32)
+			state = Comp(lib.randu(game_h, game_w, "f32") > _0_5):as("f32")
 		end
 		-- Convolve gets neighbors
-	--	af::array nHood = convolve(state, kernel)
+		local nHood = lib.convolve(state, kernel)
 		-- Generate conditions for life
 		-- state == 1 && nHood < 2 ->> state = 0
 		-- state == 1 && nHood > 3 ->> state = 0
 		-- else if state == 1 ->> state = 1
 		-- state == 0 && nHood == 3 ->> state = 1
-	--	af::array C0 = (nHood == 2)
-	--	af::array C1 = (nHood == 3)
+		local C0 = Comp(nHood == _2)
+		local C1 = Comp(nHood == _3)
 		-- Update state
-		state = state * C0 + C1
-	end
+		state = env(state * C0 + C1)
+	end, function()
+		return not myWindow:close()
+	end, "normal_gc") -- evict old states every now and then
 end)

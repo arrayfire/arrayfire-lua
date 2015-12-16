@@ -4,7 +4,7 @@
 #include "../utils.h"
 #include "args.h"
 
-template<typename T1, typename T2, af_err (*func)(af_array *, const T1, const T2)> int Out_Arg2 (lua_State * L)
+template<typename T1, typename T2, af_err (*func)(af_array *, rtype_t<T1>, rtype_t<T2>)> int Out_Arg2 (lua_State * L)
 {
 	lua_settop(L, 2);	// arg1, arg2
 

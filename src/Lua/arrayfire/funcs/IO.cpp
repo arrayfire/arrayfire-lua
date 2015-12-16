@@ -17,7 +17,7 @@ static const struct luaL_Reg io_funcs[] = {
 		}
 	},
 #endif
-	OUT_ARG2(load_image, const char *, bool),
+	OUT_ARG2(load_image, STRING_PROXY, bool),
 #if AF_API_VERSION >= 31
 	{
 		"af_load_image_memory", [](lua_State * L)
@@ -46,8 +46,8 @@ static const struct luaL_Reg io_funcs[] = {
 		}
 	},
 #endif
-	OUT_ARG2(read_array_index, const char *, unsigned),
-	OUT_ARG2(read_array_key, const char *, const char *),
+	OUT_ARG2(read_array_index, STRING_PROXY, unsigned),
+	OUT_ARG2(read_array_key, STRING_PROXY, STRING_PROXY),
 	{
 		"af_read_array_key_check", [](lua_State * L)
 		{

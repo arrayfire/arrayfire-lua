@@ -15,7 +15,7 @@ template<af_err (*func)(af_array)> int In (lua_State * L)
 	return 1;
 }
 
-template<typename T, af_err (*func)(af_array, const T)> int In_Arg (lua_State * L)
+template<typename T, af_err (*func)(af_array, rtype_t<T>)> int In_Arg (lua_State * L)
 {
 	lua_settop(L, 2);	// in, arg
 
