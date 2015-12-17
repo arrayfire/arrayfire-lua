@@ -29,7 +29,7 @@ local function monte_carlo_barrier (_, ty, use_barrier, N, K, t, vol, r, strike,
     if use_barrier then
         S = S * AF.allTrue(Comp(S < WC(B)), 1)
     end
-    payoff = AF.max(0.0, S - K, "arith")
+    payoff = AF.max(0.0, S - K)
     local P = AF.mean(ty, payoff) * exp(-r * t)
     return P
 end

@@ -64,7 +64,7 @@ local function GetDimsAndType (...)
 	end
 
 	local last, dtype = DimsAndType[n + 1]
-	local last_type = type(last)
+	local last_type = n > 0 and type(last)
 
 	if last_type == "string" or last_type == "table" then
 		if last_type == "table" then
@@ -78,7 +78,7 @@ local function GetDimsAndType (...)
 	local dims = DimsAndType
 
 	if type(DimsAndType[1]) == "table" then
-		dims, n, DimsAndtype[1] = DimsAndType[1], 4 -- remove table ref
+		dims, n, DimsAndType[1] = DimsAndType[1], 4 -- remove table ref
 	end
 
 	return n, dims, dtype

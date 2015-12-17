@@ -12,12 +12,12 @@
 -- Standard library imports --
 local pi = math.pi
 
+-- Modules --
+local AF = require("lib.af_lib")
+
 --
 local ITERATIONS = 100
 local PRECISION = 1.0/ITERATIONS
-
--- Modules --
-local AF = require("lib.af_lib")
 
 AF.main(function()
 	local myWindow = AF.Window(512, 512, "2D Plot example: ArrayFire")

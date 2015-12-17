@@ -31,7 +31,7 @@ function M.Add (into)
 
 		--
 		join = function(dim, a1, a2, a3, a4)
-			if IsArray(a3) then -- three or arrays
+			if IsArray(a3) then -- three or four arrays
 				Arrays[1], Arrays[2], Arrays[3] = a1:get(), a2:get(), a3:get()
 
 				if IsArray(a4) then -- four arrays

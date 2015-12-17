@@ -12,12 +12,10 @@ local array = require("lib.impl.array")
 -- Imports --
 local Call = array.Call
 local CallWrap = array.CallWrap
+local GetLib = array.GetLib
 local HandleDim = array.HandleDim
 local IsArray = array.IsArray
 local ToType = array.ToType
-
--- Forward declarations --
-local Lib
 
 -- Exports --
 local M = {}
@@ -68,12 +66,8 @@ local function ReduceMaxMin (name)
 	local arith = name .. "of"
 
 	return function(a, b, c, d)
-		if c == "arith" then -- a: lhs, b: rhs
-			Lib = Lib or require("lib.af_lib")
-
-			return Lib[arith](a, b)
-		elseif type(a) == "string" then -- a: type, b: in_arr, c: get_index
-			if c then
+		if type(a) == "string" then -- a: type, b: in_arr, c: get_index
+			if c then -- TODO: This is ugly and doesn't resemble the C++ interface... maybe a table as first argument, as compromise?
 				local r, i, index = Call(ifunc_all, b:get())
 
 				return ToType(a, r, i), index
@@ -85,6 +79,8 @@ local function ReduceMaxMin (name)
 
 			a:set(out)
 			b:set(idx)
+		elseif IsArray(b) then -- a: lhs, b: rhs
+			return GetLib()[arith](a, b)
 		else -- a: arr, b: dim
 			return HandleDim(func, a, b)
 		end

@@ -27,7 +27,7 @@ static const struct luaL_Reg move_reorder_methods[] = {
 
 			unsigned count = U(L, 2);
 
-			std::vector<af_array> arrays(count);
+			std::vector<af_array> arrays;
 
 			for (unsigned i = 1; i <= count; ++i)
 			{
