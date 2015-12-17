@@ -1,77 +1,64 @@
---[[
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <arrayfire.h>
-#include "../common/progress.h"
-using namespace af;
-Window *win;
-array normalize(array a, float max)
-{
-    float mx = max * 0.5;
-    float mn = -max * 0.5;
-    return (a-mn)/(mx-mn);
-}
-static void swe(bool console)
-{
-    double time_total = 20; // run for N seconds
-    // Grid length, number and spacing
-    const unsigned Lx = 512, nx = Lx + 1;
-    const unsigned Ly = 512, ny = Ly + 1;
-    const float dx = Lx / (nx - 1);
-    const float dy = Ly / (ny - 1);
-    array ZERO = constant(0, nx, ny);
-    array um = ZERO, vm = ZERO;
-    unsigned io = (unsigned)floor(Lx  / 5.0f),
-             jo = (unsigned)floor(Ly / 5.0f),
-             k = 20;
-    array x = tile(moddims(seq(nx),nx,1), 1,ny);
-    array y = tile(moddims(seq(ny),1,ny), nx,1);
-    // Initial condition
-    array etam = 0.01f * exp((-((x - io) * (x - io) + (y - jo) * (y - jo))) / (k * k));
-    float m_eta = max<float>(etam);
-    array eta = etam;
-    float dt = 0.5;
-    // conv kernels
-    float h_diff_kernel[] = {9.81f * (dt / dx), 0, -9.81f * (dt / dx)};
-    float h_lap_kernel[] = {0, 1, 0, 1, -4, 1, 0, 1, 0};
-    array h_diff_kernel_arr(3, h_diff_kernel);
-    array h_lap_kernel_arr(3, 3, h_lap_kernel);
-    if(!console) {
-        win = new Window(512, 512,"Shallow Water Equations");
-        win->setColorMap(AF_COLORMAP_MOOD);
-    }
-    timer t = timer::start();
-    unsigned iter = 0;
-    while (progress(iter, t, time_total)) {
-        // compute
-        array up = um + convolve(eta, h_diff_kernel_arr);
-        array vp = um + convolve(eta, h_diff_kernel_arr.T());
-        array e = convolve(eta, h_lap_kernel_arr);
-        array etap = 2 * eta - etam + (2 * dt * dt) / (dx * dy) * e;
-        etam = eta;
-        eta = etap;
-        if (!console) {
-            win->image(normalize(eta, m_eta));
-            // viz
-        } else eval(eta, up, vp);
-        iter++;
-    }
-}
-int main(int argc, char* argv[])
-{
-    int device = argc > 1 ? atoi(argv[1]) : 0;
-    bool console = argc > 2 ? argv[2][0] == '-' : false;
-    try {
-        af::setDevice(device);
-        af::info();
-        printf("Simulation of shallow water equations\n");
-        swe(console);
-    } catch (af::exception& e) {
-        fprintf(stderr, "%s\n", e.what());
-        throw;
-    }
-    return 0;
-}
-]]
+-- Standard library imports --
+local floor = math.floor
+
+-- Modules --
+local AF = require("lib.af_lib")
+
+lib.main(function(argc, arv)
+	local win
+	local function normalize (a, max)
+		local mx = max * 0.5
+		local mn = -max * 0.5
+		return (a-mn)/(mx-mn)
+	end
+	local function swe (console)
+		local time_total = 20 -- run for N seconds
+		-- Grid length, number and spacing
+		local Lx, nx = 512, Lx + 1
+		local Ly, ny = 512, Ly + 1
+		local dx = Lx / (nx - 1)
+		local dy = Ly / (ny - 1)
+		local ZERO = AF.constant(0, nx, ny)
+		local um, vm = ZERO:copy(), ZERO:copy()
+		local io, jo, k = floor(Lx  / 5.0),	floor(Ly / 5.0), 20
+	--	local x = tile(moddims(AF.seq(nx),nx,1), 1,ny)
+	--	local y = tile(moddims(AF.seq(ny),1,ny), nx,1)
+		-- Initial condition
+		local etam = 0.01 * AF.exp((-((x - io) * (x - io) + (y - jo) * (y - jo))) / (k * k))
+		local m_eta = AF.max("f32", etam)
+		local eta = etam:copy()
+		local dt = 0.5
+		-- conv kernels
+		local h_diff_kernel[] = {9.81 * (dt / dx), 0, -9.81 * (dt / dx)}
+		local h_lap_kernel[] = {0, 1, 0, 1, -4, 1, 0, 1, 0}
+		local h_diff_kernel_arr = AF.array(3, h_diff_kernel)
+		local h_lap_kernel_arr = AF.array(3, 3, h_lap_kernel)
+		if not console then
+			win = AF.Window(512, 512,"Shallow Water Equations")
+			win:setColorMap("AF_COLORMAP_MOOD")
+		end
+--		timer t = timer::start();
+		local iter = 0
+		AF.EnvLoopWhile_Args(function(env)
+			-- compute
+			local up = um + AF.convolve(eta, h_diff_kernel_arr)
+			local vp = um + AF.convolve(eta, h_diff_kernel_arr:T())
+			local e = AF.convolve(eta, h_lap_kernel_arr)
+			local etap = 2 * eta - etam + (2 * dt * dt) / (dx * dy) * e
+			etam = env(eta:copy())
+			eta = env(etap:copy())
+			if not console then
+				win:image(normalize(eta, m_eta))
+				-- viz
+			else
+				AF.eval(eta, up, vp)
+			end
+			iter = iter + 1
+		end, function()
+		--	return AF.progress(iter, t, time_total)
+		end, "normal_gc") -- evict old states every now and then
+	end
+
+	print("Simulation of shallow water equations")
+	swe(argc > 2 and argv[2][0] == '-' )
+end)

@@ -14,6 +14,8 @@ local array = require("lib.impl.array")
 -- Imports --
 local CallWrap = array.CallWrap
 local IsArray = array.IsArray
+local IsSeq = array.IsSeq
+local SeqToArray = array.SeqToArray
 local ToType = array.ToType
 local WrapArray = array.WrapArray
 
@@ -22,6 +24,30 @@ local M = {}
 
 -- See also: https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/array.cpp
 -- https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/data.cpp
+
+-- TODO: put these somewhere better... might need to fix up some things?
+
+--
+local function GetElements (dims)
+	return dims[1] * dims[2] * dims[3] * dims[4]
+end
+
+--
+local function GetNDims (dims)
+    local num = GetElements(dims)
+
+	if num < 2 then
+		return num
+	else
+		for i = 4, 2, -1 do
+			if dims[i] ~= 1 then
+				return i
+			end
+		end
+	end
+
+	return 1
+end
 
 -- --
 local DimsAndType = {}
@@ -79,7 +105,7 @@ end
 
 --
 local function InitEmptyArray (dtype, d0, d1, d2, d3)
-	return CallWrap(af.af_create_handle, 4, PrepDims(d0, d1, d2, d3), af[dtype])
+	return CallWrap(af.af_create_handle, 4, PrepDims(d0, d1, d2, d3), dtype)
 end
 
 --
@@ -102,9 +128,7 @@ function M.Add (into)
 	for k, v in pairs{
 		--
 		array = function(a, b, c, d, e, f)
-			if a == nil then
-				return InitEmptyArray(af.f32, 0, 0, 0, 0)
-			elseif b == "handle" then -- a: handle, b: "handle"
+			if b == "handle" then -- a: handle, b: "handle"
 				return WrapArray(a)
 			elseif IsArray(a) then
 				if type(b) == "table" then -- a: input, b: dims
@@ -114,13 +138,15 @@ function M.Add (into)
 				else -- a: input
 					return CallWrap(af.af_retain_array, a:get())
 				end
+			elseif IsSeq(a) then -- a: seq
+				return SeqToArray(a)
 			elseif type(a) == "table" then
 				if type(b) == "table" then -- a: dims, b: ptr, c: src
 					return InitDataArray("f32", b, c or "afHost", a[1], a[2], a[3], a[4])
 				else -- a: dims, b: type
 					return InitEmptyArray(af[b or "f32"], a[1], a[2], a[3], a[4])
 				end
-			else
+			elseif a then
 				local n, dims, dtype = GetDimsAndType(a, b, c, d, e)
 
 				if type(dtype) == "table" then -- a...: dims, second-to-last: ptr, last?: source
@@ -128,6 +154,8 @@ function M.Add (into)
 				else -- a...: dims, last?: type
 					return InitEmptyArray(dtype or af.f32, unpack(dims, 1, n))
 				end
+			else
+				return InitEmptyArray(af.f32, 0, 0, 0, 0)
 			end
 		end,
 
@@ -170,7 +198,23 @@ function M.Add (into)
 		randn = DimsAndTypeFunc(af.af_randn),
 
 		--
-		randu = DimsAndTypeFunc(af.af_randu)
+		randu = DimsAndTypeFunc(af.af_randu),
+
+		--
+		range = function(a, b, c, d, e, f)
+			local dims, seq_dim, dtype
+
+			if type(a) == "table" then -- a: dims, b: seq_dim, c: type
+				dims, seq_dim, dtype = a, b, c
+			else -- a: dim0, b: dim1, c: dim2, d: dim3, e: seq_dim, f: type
+				dims, seq_dim, dtype = PrepDims(a, b, c, d), e, f
+			end
+
+			return CallWrap(af.af_range, GetNDims(dims), dims, seq_dim or -1, af[dtype or "f32"])
+		end,
+
+		--
+		seq = array.NewSeq
 	} do
 		into[k] = v
 	end

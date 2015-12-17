@@ -10,21 +10,21 @@
 ]]
  
  -- Modules --
-local lib = require("lib.af_lib")
+local AF = require("lib.af_lib")
 
-lib.main(function()
-	local in_arr = lib.randu(5, 8)
-	lib.print("in", in_arr)
+AF.main(function()
+	local in_arr = AF.randu(5, 8)
+	AF.print("in", in_arr)
 	local lin = in_arr:copy()
 	print("Running LU InPlace")
-	local pivot = lib.EmptyArray()
-	lib.luInPlace(pivot, lin)
-	lib.print("lin", lin)
-	lib.print("pivot", pivot)
+	local pivot = AF.array()
+	AF.luInPlace(pivot, lin)
+	AF.print("lin", lin)
+	AF.print("pivot", pivot)
 	print("Running LU with Upper Lower Factorization")
-	local lower, upper = lib.EmptyArray(), lib.EmptyArray()
-	lib.lu(lower, upper, pivot, in_arr)
-	lib.print("lower", lower)
-	lib.print("upper", upper)
-	lib.print("pivot", pivot);
+	local lower, upper = AF.array(), AF.array()
+	AF.lu(lower, upper, pivot, in_arr)
+	AF.print("lower", lower)
+	AF.print("upper", upper)
+	AF.print("pivot", pivot);
 end)

@@ -3,9 +3,6 @@
 -- Modules --
 local af = require("arrayfire")
 
--- Forward declarations --
-local Lib
-
 -- Exports --
 local M = {}
 
@@ -15,16 +12,10 @@ local M = {}
 local Dims = {}
 
 --
-local function GetLib ()
-	Lib = Lib or require("lib.af_lib")
-
-	return Lib
-end
-
---
 function M.Add (array_module, meta)
 	local Call = array_module.Call
 	local CallWrap = array_module.CallWrap
+	local GetLib = array_module.GetLib
 
 	--
 	for k, v in pairs{

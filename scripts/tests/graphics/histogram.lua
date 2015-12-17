@@ -10,14 +10,14 @@
 ]]
 
 -- Modules --
-local lib = require("lib.af_lib")
+local AF = require("lib.af_lib")
 
-lib.main(function()
-	local myWindow = lib.Window(512, 512, "Histogram example using ArrayFire")
-	local imgWnd = lib.Window(480, 640, "Input Image")
-	local img = lib.loadImage(lib.assets() .. "/examples/images/arrow.jpg", false)
-	local hist_out = lib.histogram(img, 256, 0, 255)
-	lib.EnvLoopWhile(function()
+AF.main(function()
+	local myWindow = AF.Window(512, 512, "Histogram example using ArrayFire")
+	local imgWnd = AF.Window(480, 640, "Input Image")
+	local img = AF.loadImage(AF.assets() .. "/examples/images/arrow.jpg", false)
+	local hist_out = AF.histogram(img, 256, 0, 255)
+	AF.EnvLoopWhile(function()
 		myWindow:hist(hist_out, 0, 255)
 		imgWnd:image(img:as("u8"))
 	end, function()

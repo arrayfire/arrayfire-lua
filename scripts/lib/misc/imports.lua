@@ -12,7 +12,6 @@ function M.Add (into)
 		CallWithEnvironment = array.CallWithEnvironment,
 		CallWithEnvironment_Args = array.CallWithEnvironment_Args,
 		CompareResult = array.CompareResult,
-		EmptyArray = array.EmptyArray,
 		WrapConstant = array.WrapConstant
 	} do
 		into[k] = v

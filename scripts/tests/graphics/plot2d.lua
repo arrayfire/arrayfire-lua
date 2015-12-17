@@ -17,24 +17,26 @@ local ITERATIONS = 100
 local PRECISION = 1.0/ITERATIONS
 
 -- Modules --
-local lib = require("lib.af_lib")
+local AF = require("lib.af_lib")
 
-lib.main(function()
---[[
-	af::Window myWindow(512, 512, "2D Plot example: ArrayFire");
-	array Y;
-	int sign = 1;
-	array X = seq(-af::Pi, af::Pi, PRECISION);
-	for (double val=-af::Pi; !myWindow.close(); ) {
-		Y = sin(X);
-		myWindow.plot(X, Y);
-		X = X + PRECISION * float(sign);
-		val += PRECISION * float(sign);
-		if (val>af::Pi) {
-			sign = -1;
-		} else if (val<-af::Pi) {
-			sign = 1;
-		}
-	}
-]]
+AF.main(function()
+	local myWindow = AF.Window(512, 512, "2D Plot example: ArrayFire")
+	local Y
+	local sign = 1
+	local X = AF.array(AF.seq(-pi, pi, PRECISION))
+	local val = -pi
+	AF.EnvLoopWhile_Mode(function(env)
+		Y = AF.sin(X)
+		myWindow:plot(X, Y)
+		X = env(X + PRECISION * sign)
+		val = val + PRECISION * sign
+		if val > pi then
+			sign = -1
+		elseif val < -pi then
+			sign = 1
+		end
+	end, function()
+		return not myWindow:close()
+	end, "normal_gc") -- evict old states every now and then
+	myWindow:destroy()
 end)

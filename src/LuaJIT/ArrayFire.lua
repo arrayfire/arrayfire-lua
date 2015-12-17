@@ -375,14 +375,10 @@ $END_MIN$
 	typedef unsigned long long af_window;
 
 $USES_CUDA$
-	// TODO?: CUstream_st
-
-	typedef struct CUstream_st* cudaStream_t
+	typedef struct CUstream_st* cudaStream_t;
 $END_USES_CUDA$
 
 $USES_OPENCL$
-	// TODO?: _cl_context, _cl_device_id, _cl_command_queue
-
 	typedef struct _cl_device_id *      cl_device_id;
 	typedef struct _cl_context *        cl_context;
 	typedef struct _cl_command_queue *  cl_command_queue;
@@ -764,7 +760,9 @@ $MIN_VERSION(32)$
 	af_err af_set_seq_param_indexer (af_index_t *, const double, const double, const double, const dim_t, const bool);
 $END_MIN$
 	af_seq af_make_seq (double, double, double);
-	
+
+	static const af_seq af_span = {1, 1, 0};
+
 	/* Device */
 	af_err af_alloc_device (void **, const dim_t);
 	af_err af_alloc_pinned (void **, const dim_t);

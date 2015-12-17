@@ -10,12 +10,12 @@
 ]]
 
 -- Modules --
-local lib = require("lib.af_lib")
+local AF = require("lib.af_lib")
 
 -- Shorthands --
-local Comp, WC = lib.CompareResult, lib.WrapConstant
+local Comp, WC = AF.CompareResult, AF.WrapConstant
 
-lib.main(function()
+AF.main(function()
 	local h_kernel = {1, 1, 1, 1, 0, 1, 1, 1, 1}
 	local reset = 500
 	local game_w, game_h = 128, 128
@@ -30,21 +30,21 @@ lib.main(function()
 
 	local _0_5, _2, _3 = WC(0.5), WC(2), WC(3)
 
-	local myWindow = lib.Window(512, 512, "Conway's Game of Life using ArrayFire")
+	local myWindow = AF.Window(512, 512, "Conway's Game of Life using ArrayFire")
 	local frame_count = 0
 	-- Initialize the kernel array just once
-	local kernel = lib.array(3, 3, h_kernel, "afHost")
+	local kernel = AF.array(3, 3, h_kernel, "afHost")
 	local state
-	state = Comp(lib.randu(game_h, game_w, "f32") > _0_5):as("f32")
-	lib.EnvLoopWhile_Mode(function(env)
+	state = Comp(AF.randu(game_h, game_w, "f32") > _0_5):as("f32")
+	AF.EnvLoopWhile_Mode(function(env)
 		myWindow:image(state)
 		frame_count = frame_count + 1
 		-- Generate a random starting state
 		if frame_count % reset == 0 then
-			state = Comp(lib.randu(game_h, game_w, "f32") > _0_5):as("f32")
+			state = Comp(AF.randu(game_h, game_w, "f32") > _0_5):as("f32")
 		end
 		-- Convolve gets neighbors
-		local nHood = lib.convolve(state, kernel)
+		local nHood = AF.convolve(state, kernel)
 		-- Generate conditions for life
 		-- state == 1 && nHood < 2 ->> state = 0
 		-- state == 1 && nHood > 3 ->> state = 0
@@ -57,4 +57,5 @@ lib.main(function()
 	end, function()
 		return not myWindow:close()
 	end, "normal_gc") -- evict old states every now and then
+	myWindow:destroy()
 end)

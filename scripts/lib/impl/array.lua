@@ -65,12 +65,6 @@ function M.CheckError (err, ...)
 	return ...
 end
 
---- DOCME
--- @treturn LuaArray X
-function M.EmptyArray ()
-	return setmetatable({}, ArrayMethodsAndMetatable)
-end
-
 -- --
 local Dim = {}
 
@@ -115,6 +109,16 @@ function M.GetHandle (arr, remove)
 	end
 
 	return ha
+end
+
+-- --
+local Lib
+
+--- DOCME
+function M.GetLib ()
+	Lib = Lib or require("lib.af_lib")
+
+	return Lib
 end
 
 --- DOCME
@@ -250,6 +254,7 @@ end
 for _, v in ipairs{
 	"lib.impl.ephemeral",
 	"lib.impl.operators",
+	"lib.impl.seq",
 	"lib.methods.methods"
 } do
 	require(v).Add(M, ArrayMethodsAndMetatable)
