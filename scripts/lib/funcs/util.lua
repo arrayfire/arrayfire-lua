@@ -4,7 +4,6 @@
 local print = print
 
 -- Modules --
-local af = require("arrayfire")
 local array = require("lib.impl.array")
 
 -- Imports --
@@ -18,7 +17,7 @@ function M.Add (into)
 	for k, v in pairs{
 		--
 		print = function(exp, arr, precision)
-			Call(af.af_print_array_gen, exp, arr:get(), precision or 4) -- https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/util.cpp
+			Call("af_print_array_gen", exp, arr:get(), precision or 4) -- https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/util.cpp
 		end,
 
 		--

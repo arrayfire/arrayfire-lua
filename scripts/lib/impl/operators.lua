@@ -14,12 +14,12 @@ local Result
 
 --
 local function Binary (name, cmp)
-	local func = af["af_" .. name]
+	name = "af_" .. name
 
 	return function(a, b)
 		Result = nil
 
-		local arr = TwoArrays(func, a, b, true) -- TODO: gforGet()
+		local arr = TwoArrays(name, a, b, true) -- TODO: gforGet()
 
 		if cmp then
 			Result = arr

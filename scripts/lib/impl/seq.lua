@@ -8,9 +8,6 @@ local rawequal = rawequal
 local setmetatable = setmetatable
 local type = type
 
--- Modules --
-local af = require("arrayfire")
-
 -- Cached module references --
 local _IsSeq_
 local _MakeSeq_

@@ -37,7 +37,7 @@ function M.Add (into)
 		--
 		convolve = function(a, b, c, d)
 			if IsArray(c) then -- a: col_filter, b: row_filter, c: signal, d: mode
-				return CallWrap(af.af_convolve2_sep, a:get(), b:get(), c:get(), af[mode or "AF_CONV_DEFAULT"])
+				return CallWrap("af_convolve2_sep", a:get(), b:get(), c:get(), af[mode or "AF_CONV_DEFAULT"])
 			else -- a: signal, b: filter, c: mode, d: domain
 				local n, func = min(a:numdims(), b:numdims())
 
@@ -64,17 +64,17 @@ function M.Add (into)
 
 		--
 		fft = function(in_arr, dim0)
-			return CallWrap(af.af_fft, in_arr:get(), 1, dim0 or 0)
+			return CallWrap("af_fft", in_arr:get(), 1, dim0 or 0)
 		end,
 
 		--
 		fft2 = function(in_arr, dim0, dim1)
-			return CallWrap(af.af_fft2, in_arr:get(), 1, dim0 or 0, dim1 or 0)
+			return CallWrap("af_fft2", in_arr:get(), 1, dim0 or 0, dim1 or 0)
 		end,
 
 		--
 		fft3 = function(in_arr, dim0, dim1, dim2)
-			return CallWrap(af.af_fft3, in_arr:get(), 1, dim0 or 0, dim1 or 0, dim2 or 0)
+			return CallWrap("af_fft3", in_arr:get(), 1, dim0 or 0, dim1 or 0, dim2 or 0)
 		end
 	} do
 		into[k] = v

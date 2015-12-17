@@ -105,7 +105,7 @@ end
 
 --
 local function InitEmptyArray (dtype, d0, d1, d2, d3)
-	return CallWrap(af.af_create_handle, 4, PrepDims(d0, d1, d2, d3), dtype)
+	return CallWrap("af_create_handle", 4, PrepDims(d0, d1, d2, d3), dtype)
 end
 
 --
@@ -113,9 +113,9 @@ local function InitDataArray (dtype, ptr, src, d0, d1, d2, d3)
 	local func
 
 	if src == "afHost" then
-		func = af.af_create_array
+		func = "af_create_array"
 	elseif src == "afDevice" then
-		func = af.af_device_array
+		func = "af_device_array"
 	else
 		error("Can not create array from the requested source pointer") -- TODO: AF_ERR_ARG?
 	end
@@ -132,11 +132,11 @@ function M.Add (into)
 				return WrapArray(a)
 			elseif IsArray(a) then
 				if type(b) == "table" then -- a: input, b: dims
-					return CallWrap(af.af_moddims, a:get(), 4, b)
+					return CallWrap("af_moddims", a:get(), 4, b)
 				elseif b then -- a: input, b...e: dims
-					return CallWrap(af.af_moddims, a:get(), 4, PrepDims(b, c, d, e))
+					return CallWrap("af_moddims", a:get(), 4, PrepDims(b, c, d, e))
 				else -- a: input
-					return CallWrap(af.af_retain_array, a:get())
+					return CallWrap("af_retain_array", a:get())
 				end
 			elseif IsSeq(a) then -- a: seq
 				return SeqToArray(a)
@@ -165,7 +165,7 @@ function M.Add (into)
 
 			if type(value) == "table" then
 				if dtype == "c32" or dtype == "c64" then
-					return CallWrap(af.af_constant_complex, value.real, value.imag, n, dims, dtype)
+					return CallWrap("af_constant_complex", value.real, value.imag, n, dims, dtype)
 				else
 					value = value.real -- TODO: syntax? (ditto above)
 				end
@@ -174,9 +174,9 @@ function M.Add (into)
 			if dtype == "s64" or dtype == "u64" then
 				local name = dtype == "s64" and "af_constant_long" or "af_constant_ulong"
 
-				return CallWrap(af[name], value, n, dims)
+				return CallWrap(name, value, n, dims)
 			else
-				return CallWrap(af.af_constant, value, n, dims, dtype or af.f32)
+				return CallWrap("af_constant", value, n, dims, dtype or af.f32)
 			end
 		end,
 
@@ -186,19 +186,17 @@ function M.Add (into)
 				extract = true
 			end
 
-			local name = extract and "af_diag_extract" or "af_diag_create"
-
-			return CallWrap(af[name], in_arr:get(), num or 0)
+			return CallWrap(extract and "af_diag_extract" or "af_diag_create", in_arr:get(), num or 0)
 		end,
 
 		--
-		identity = DimsAndTypeFunc(af.af_identity),
+		identity = DimsAndTypeFunc("af_identity"),
 
 		--
-		randn = DimsAndTypeFunc(af.af_randn),
+		randn = DimsAndTypeFunc("af_randn"),
 
 		--
-		randu = DimsAndTypeFunc(af.af_randu),
+		randu = DimsAndTypeFunc("af_randu"),
 
 		--
 		range = function(a, b, c, d, e, f)
@@ -210,7 +208,7 @@ function M.Add (into)
 				dims, seq_dim, dtype = PrepDims(a, b, c, d), e, f
 			end
 
-			return CallWrap(af.af_range, GetNDims(dims), dims, seq_dim or -1, af[dtype or "f32"])
+			return CallWrap("af_range", GetNDims(dims), dims, seq_dim or -1, af[dtype or "f32"])
 		end,
 
 		--

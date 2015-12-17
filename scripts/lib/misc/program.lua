@@ -129,6 +129,8 @@ void read_idx(std::vector<dim_t> &dims, std::vector<ty> &data, const char *name)
 		end,
 
 		-- ^^^ TODO: setfenv() / _ENV variant?
+		-- Also, rearrange for exit stuff?
+		-- Are the windows redirecting IO?
 
 		--
 		progress = function()

@@ -21,47 +21,52 @@ function M.Add (array_module, meta)
 	for k, v in pairs{
 		--
 		as = function(arr, atype)
-			return CallWrap(af.af_cast, arr:get(), af[atype])
+			return CallWrap("af_cast", arr:get(), af[atype])
 		end,
 
 		--
 		copy = function(arr)
-			return CallWrap(af.af_copy_array, arr:get())
+			return CallWrap("af_copy_array", arr:get())
 		end,
 
 		--
-		dims = function(self, i)
+		dims = function(arr, i)
 			if i then
-				return GetLib().getDims(self, Dims)[i + 1]
+				return GetLib().getDims(arr, Dims)[i + 1]
 			else
-				return GetLib().getDims(self)
+				return GetLib().getDims(arr)
 			end
 		end,
 
 		--
+		elements = function(arr)
+			return Call("af_get_elements", arr:get())
+		end,
+
+		--
 		eval = function(arr)
-			Call(af.af_eval, arr:get())
+			Call("af_eval", arr:get())
 		end,
 
 		--
 		get = array_module.GetHandle,
 
 		--
-		H = function(self)
-			return GetLib().transpose(self, true)
+		H = function(arr)
+			return GetLib().transpose(arr, true)
 		end,
 
 		--
-		numdims = function(self)
-			return GetLib().numDims(self)
+		numdims = function(arr)
+			return GetLib().numDims(arr)
 		end,
 
 		--
 		set = array_module.SetHandle,
 
 		--
-		T = function(self)
-			return GetLib().transpose(self)
+		T = function(arr)
+			return GetLib().transpose(arr)
 		end
 	} do
 		meta[k] = v

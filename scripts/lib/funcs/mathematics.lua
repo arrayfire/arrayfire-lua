@@ -6,30 +6,33 @@ local array = require("lib.impl.array")
 
 -- Imports --
 local CallWrap = array.CallWrap
+local IsArray = array.IsArray
 local TwoArrays = array.TwoArrays
 
 -- Exports --
 local M = {}
 
+-- See also: https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/binary.cpp
+
 --
-local function Binary (func)
-	return function(a, b, batch)
-		return TwoArrays(func, a, b, batch)
+local function Binary (name)
+	return function(a, b)
+		return TwoArrays(name, a, b--[[TODO: IsArray(a) and IsArray(b) and gfor_get]])
 	end
 end
 
 --
-local function Unary (func)
+local function Unary (name)
 	return function(in_arr)
-		return CallWrap(func, in_arr:get())
+		return CallWrap(name, in_arr:get())
 	end
 end
 
 local function LoadFuncs (into, funcs, op)
 	for _, v in ipairs(funcs) do
-		local func = af["af_" .. v]
+		local name = "af_" .. v
 
-		into[v] = func and op(func) -- ignore conditionally unavailable functions
+		into[v] = af[name] and op(name) -- ignore conditionally unavailable functions
 	end
 end
 
@@ -103,6 +106,9 @@ function M.Add (into)
 		"root",
 		"sub"
 	}, Binary)
+
+	-- Use C++ name. (TODO: maxof, minof... re. vector)
+	into.complex, into.cplx2 = into.cplx2
 end
 
 -- Export the module.

@@ -12,6 +12,7 @@ local array = require("lib.impl.array")
 -- Imports --
 local Call = array.Call
 local IsArray = array.IsArray
+local GetLib = array.GetLib
 
 -- Exports --
 local M = {}
@@ -56,40 +57,40 @@ end
 
 --- DOCME
 function Window:close ()
-    return Call(af.af_is_window_closed, Get(self))
+    return Call("af_is_window_closed", Get(self))
 end
 
 --- DOCME
 function Window:destroy ()
 	if not self:close() then
-		Call(af.af_destroy_window, Get(self))
+		Call("af_destroy_window", Get(self))
 	end
 end
 
 --- DOCME
 function Window:grid (rows, cols)
-    Call(af.af_grid, Get(self), rows, cols)
+    Call("af_grid", Get(self), rows, cols)
 end
 
 --- DOCME
 function Window:hist (X, minval, maxval, title)
-    Call(af.af_draw_hist, Get(self), X:get(), minval, maxval, Temp(self, title))
+    Call("af_draw_hist", Get(self), X:get(), minval, maxval, Temp(self, title))
 end
 
 --- DOCME
 function Window:image (in_arr, title)
-    Call(af.af_draw_image, Get(self), in_arr:get(), Temp(self, title, "use_cmap"))
+    Call("af_draw_image", Get(self), in_arr:get(), Temp(self, title, "use_cmap"))
 end
 
 --- DOCME
 function Window:plot (X, Y, title)
-    Call(af.af_draw_plot, Get(self), X:get(), Y:get(), Temp(self, title))
+    Call("af_draw_plot", Get(self), X:get(), Y:get(), Temp(self, title))
 end
 
 function Window:plot3 (P, title)
     P:eval()
 
-    Call(af.af_draw_plot3, Get(self), P:get(), Temp(self, title))
+    Call("af_draw_plot3", Get(self), P:get(), Temp(self, title))
 end
 
 --[[
@@ -109,17 +110,17 @@ void Window::scatter3(const array& P, af::markerType marker, const char* const t
 
 --- DOCME
 function Window:setPos (x, y)
-    Call(af.af_set_position, Get(self), x, y)
+    Call("af_set_position", Get(self), x, y)
 end
 
 --- DOCME
 function Window:setTitle (title)
-    Call(af.af_set_title, Get(self), title)
+    Call("af_set_title", Get(self), title)
 end
 
 --- DOCME
 function Window:setSize (w, h)
-    Call(af.af_set_size, Get(self), w, h)
+    Call("af_set_size", Get(self), w, h)
 end
 
 --- DOCME
@@ -129,7 +130,7 @@ end
 
 --- DOCME
 function Window:show ()
-    Call(af.af_show, Get(self))
+    Call("af_show", Get(self))
 
     self._r, self._c = -1, -1
 end
@@ -140,12 +141,14 @@ function Window:surface (a, b, c, d)
 	if IsArray(b) then -- a: xVals, b: yVals, c: S, d: title
 		xVals, yVals, title = a, b, d
 	else -- a: S, b: title
-		-- af::array xVals = seq(0, S.dims(0)-1);
-		-- af::array yVals = seq(0, S.dims(1)-1);
+		local lib = GetLib()
+
+		xVals = lib.array(lib.seq(0, c:dims(0) - 1))
+		yVals = lib.array(lib.seq(0, c:dims(0) - 1))
 		title = b
 	end
 
-    Call(af.af_draw_surface, Get(self), xVals:get(), yVals:get(), S:get(), Temp(self, title))
+    Call("af_draw_surface", Get(self), xVals:get(), yVals:get(), S:get(), Temp(self, title))
 end
 
 --
@@ -155,7 +158,7 @@ end
 
 --
 local function InitWindow (window, w, h, title)
-    Set(window, Call(af.af_create_window, w, h, title or "ArrayFire"))
+    Set(window, Call("af_create_window", w, h, title or "ArrayFire"))
 end
 
 --

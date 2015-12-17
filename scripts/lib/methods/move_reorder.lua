@@ -26,7 +26,7 @@ function M.Add (into)
 	for k, v in pairs{
 		--
 		flip = function(in_arr, dim)
-			return CallWrap(af.af_flip, in_arr:get(), dim)
+			return CallWrap("af_flip", in_arr:get(), dim)
 		end,
 
 		--
@@ -46,7 +46,7 @@ function M.Add (into)
 
 				return WrapArray(arr)
 			else -- two arrays
-				return CallWrap(af.af_join, dim, a1:get(), a2:get())
+				return CallWrap("af_join", dim, a1:get(), a2:get())
 			end
 		end,
 
@@ -58,7 +58,7 @@ function M.Add (into)
 				b, c, d = b or 1, c or 1, d or 1
 			end
 
-			return CallWrap(af.af_tile, in_arr:get(), a, b, c, d)
+			return CallWrap("af_tile", in_arr:get(), a, b, c, d)
 		end
 	} do
 		into[k] = v

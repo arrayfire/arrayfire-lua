@@ -54,7 +54,7 @@ local function NewEnv ()
 
 			assert(env and env(_command, "get_id") == id, "Environment not active") -- is self?
 
-			local lower_env = (mode == "parent" or mode == "parent_gc") and Stack[top - 1]
+			local lower_env = (mode == "parent" or mode == "parent_gc") and Stack[Top - 1]
 -- TODO: pingpong, pingpong_gc
 			if lower_env then
 				lower_env(_command, "get_list")[a] = true

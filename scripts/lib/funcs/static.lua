@@ -1,7 +1,6 @@
 --- Static companions of array methods.
 
 -- Modules --
-local af = require("arrayfire")
 local array = require("lib.impl.array")
 
 -- Imports --
@@ -46,14 +45,14 @@ function M.Add (into)
 		getDims = function(arr, out)
 			out = out or {}
 
-			out[1], out[2], out[3], out[4] = Call(af.af_get_dims, arr:get())
+			out[1], out[2], out[3], out[4] = Call("af_get_dims", arr:get())
 
 			return out
 		end,
 
 		--
 		numDims = function(arr)
-			return Call(af.af_get_numdims, arr:get())
+			return Call("af_get_numdims", arr:get())
 		end,
 	} do
 		into[k] = v

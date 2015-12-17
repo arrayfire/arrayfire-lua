@@ -4,7 +4,6 @@
 local type = type
 
 -- Modules --
-local af = require("arrayfire")
 local array = require("lib.impl.array")
 
 -- Imports --
@@ -23,14 +22,14 @@ local M = {}
 local function Mean (a, b, c)
 	if type(a) == "string" then -- a: type, b: in_arr, c: weights
 		if IsArray(c) then
-			return ToType(a, Call(af.af_mean_all_weighted, b:get(), c:get()))
+			return ToType(a, Call("af_mean_all_weighted", b:get(), c:get()))
 		else
-			return ToType(a, Call(af.af_mean_all, b:get()))
+			return ToType(a, Call("af_mean_all", b:get()))
 		end
 	elseif IsArray(b) then -- a: arr, b: weights, c: dim
-		return CallWrap(af.mean_weighted, a:get(), b, GetFNSD(c))
+		return CallWrap("mean_weighted", a:get(), b, GetFNSD(c))
 	else -- a: arr, b: dim
-		return HandleDim(af.af_mean, a, b)
+		return HandleDim("af_mean", a, b)
 	end
 end
 

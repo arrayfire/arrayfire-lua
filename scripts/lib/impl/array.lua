@@ -5,6 +5,8 @@ local error = error
 local getmetatable = getmetatable
 local rawequal = rawequal
 local setmetatable = setmetatable
+local tostring = tostring
+local type = type
 
 -- Modules --
 local af = require("arrayfire")
@@ -31,38 +33,72 @@ local MetaValue = {}
 
 local Constants = setmetatable({}, { __mode = "k" })
 
---- DOCME
--- @tparam function func
--- @param ... Arguments to _func_.
--- @return Any non-error return values.
-function M.Call (func, ...)
-	return _CheckError_(func(...))
+--
+local function CallFromName_Checked (name, ...)
+	if type(name) ~= "string" then
+	print(debug.traceback())
+		error("Expected string name, got: " .. tostring(name))
+	end
+
+	Name = name
+
+	return _CheckError_(af[name](...))
 end
 
 --
-local function Return (arr, ...)
+local function CallFromName_Unchecked (name, ...)
+	Name = name
+
+	return _CheckError_(af[name](...))
+end
+
+-- --
+local CallFromName
+
+--- DOCME
+-- @string name
+-- @param ... Arguments to function.
+-- @return Any non-error return values.
+function M.Call (name, ...)
+	return CallFromName(name, ...)
+end
+
+--
+local function WrapAndReturn (arr, ...)
 	return _WrapArray_(arr), ...
 end
 
 --- DOCME
--- @function func
--- @param ... Arguments to _func_.
+-- @string name
+-- @param ... Arguments to function.
 -- @treturn LuaArray X
 -- @return Any additional return values.
-function M.CallWrap (func, ...)
-	return Return(_CheckError_(func(...)))
+function M.CallWrap (name, ...)
+	return WrapAndReturn(CallFromName(name, ...))
 end
+
+-- --
+local SUCCESS = af.AF_SUCCESS
 
 --- DOCME
 -- @tparam af_err err
 -- @param ...
 -- @return ...
 function M.CheckError (err, ...)
-	if err ~= af.AF_SUCCESS then
-		error(("%i"):format(err))
+	if err ~= SUCCESS then
+		local name = Name or ""
+
+		Name = nil
+
+		error(("%s: %i"):format(name, err))
 	end
 
 	return ...
+end
+
+--- DOCME
+function M.CheckNames (check)
+	CallFromName = check and CallFromName_Checked or CallFromName_Unchecked
 end
 
 -- --
@@ -74,9 +110,9 @@ local Dim = {}
 -- @treturn int FNSD
 function M.GetFNSD (ha, dim)
 	if dim < 0 then
-		local ndims = _Call_(af.af_get_numdims, ha)
+		local ndims = _Call_("af_get_numdims", ha)
 
-		Dim[1], Dim[2], Dim[3], Dim[4] = _Call_(af.af_get_dims, ha)
+		Dim[1], Dim[2], Dim[3], Dim[4] = _Call_("af_get_dims", ha)
 
 		for i = 1, 4 do
 			if Dim[i] > 1 then
@@ -154,7 +190,7 @@ function M.SetHandle (arr, handle)
 	local cur = arr.m_handle
 
 	if cur ~= nil then
-		_Call_(af.af_release_array, cur)
+		_Call_("af_release_array", cur)
 	end
 
 	arr.m_handle = handle
@@ -173,16 +209,16 @@ function M.ToArray (value, other)
 	end
 
 	local btype, hother = type(value), other:get()
-	local ndims = _Call_(af.af_get_numdims, hother)
+	local ndims = _Call_("af_get_numdims", hother)
 
-	Args[1], Args[2], Args[3], Args[4] = _Call_(af.af_get_dims, hother)				
+	Args[1], Args[2], Args[3], Args[4] = _Call_("af_get_dims", hother)				
 
 	if btype == "table" then
 		-- Complex...
 	elseif btype == "number" then
 		-- Argh... detect range, integer-ness, etc?
 
-		return _Call_(af.af_constant, value, ndims, Args, af.f32)
+		return _Call_("af_constant", value, ndims, Args, af.f32)
 	end
 end
 
@@ -201,11 +237,12 @@ function M.ToType (ret_type, real, imag)
 end
 
 --- DOCME
+-- @string name
 -- @param a
 -- @param b
 -- @param ...
 -- @treturn LuaArray X
-function M.TwoArrays (func, a, b, ...)
+function M.TwoArrays (name, a, b, ...)
 	local atemp, btemp, ha, hb
 
 	if not _IsArray_(a) then
@@ -217,11 +254,13 @@ function M.TwoArrays (func, a, b, ...)
 	end
 
 	--
-	local err, arr = func(ha, hb, ...)
+	local err, arr = af[name](ha, hb, ...)
 
 	if atemp or btemp then
-		_Call_(af.af_release_array, atemp and ha or hb)
+		_Call_("af_release_array", atemp and ha or hb)
 	end
+
+	Name = name
 
 	_CheckError_(err)
 
@@ -262,6 +301,9 @@ end
 
 ArrayMethodsAndMetatable.__index = ArrayMethodsAndMetatable
 ArrayMethodsAndMetatable.__metatable = MetaValue
+
+-- By default, check valid names.
+M.CheckNames(true)
 
 -- Cache module members.
 _AddToCurrentEnvironment_ = M.AddToCurrentEnvironment

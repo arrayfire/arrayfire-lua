@@ -16,17 +16,17 @@ function M.Add (into)
 	for k, v in pairs{
 		--
 		info = function()
-			Call(af.af_info)
+			Call("af_info")
 		end,
 
 		--
 		setDevice = function(device)
-			Call(af.af_set_device, device)
+			Call("af_set_device", device)
 		end,
 
 		--
 		sync = function(device)
-			Call(af.af_sync, device or -1)
+			Call("af_sync", device or -1)
 		end
 	} do
 		into[k] = v

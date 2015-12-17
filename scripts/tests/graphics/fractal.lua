@@ -9,71 +9,86 @@
  ********************************************************/
 ]]
 
+-- Standard library imports --
+local abs = math.abs
+local sqrt = math.sqrt
+
 -- Modules --
-local lib = require("lib.af_lib")
+local AF = require("lib.af_lib")
 
-lib.main(function()
-#define WIDTH 400 // Width of image
-#define HEIGHT 400 // Width of image
+-- Shorthands --
+local Comp, WC = AF.CompareResult, AF.WrapConstant
 
-array complex_grid(int width, int height, float zoom, float center[2])
-{
-    // Generate sequences of length width, height
-    array x = (seq(double(height)) - double(height) / 2.0);
-    array y = (seq(double(width )) - double(width)  / 2.0);
-    // Tile the sequences to generate grid of image size
-    array X = tile(x.T(), y.elements(), 1) / zoom + center[0];
-    array Y = tile(y    , 1, x.elements()) / zoom + center[1];
-    // Return the locations as a complex grid
-    return complex(X, Y);
-}
-array mandelbrot(const array &in, int iter, float maxval)
-{
-    array C = in;
-    array Z = C;
-    array mag = constant(0, C.dims());
-    for (int ii = 1; ii < iter; ii++) {
-        // Do the calculation
-        Z = Z * Z + C;
-        // Get indices where abs(Z) crosses maxval
-        array cond = (abs(Z) > maxval).as(f32);
-        mag = af::max(mag, cond * ii);
-        // If abs(Z) cross maxval, turn off those locations
-        C = C * (1 - cond);
-        Z = Z * (1 - cond);
-        // Ensuring the JIT does not become too large
-        C.eval();
-        Z.eval();
-    }
-    // Normalize
-    return mag / maxval;
-}
-array normalize(array a)
-{
-    float mx = af::max<float>(a);
-    float mn = af::min<float>(a);
-    return (a-mn)/(mx-mn);
-}
-    int iter = argc > 2 ? atoi(argv[2]) : 100;
-    bool console = argc > 2 ? argv[2][0] == '-' : false;
+AF.main(function(argc, argv)
+	local WIDTH = 400 -- Width of image
+	local HEIGHT = 400 -- Width of image
 
-	printf("** ArrayFire Fractals Demo **\n");
-	af::Window wnd(WIDTH, HEIGHT, "Fractal Demo");
-	wnd.setColorMap(AF_COLORMAP_SPECTRUM);
-	float center[] = {-0.75, 0.1};
-	// Keep zomming out for each frame
-	for (int i = 10; i < 400; i++) {
-		int zoom = i * i;
-		if(!(i % 10)) printf("iteration: %d zoom: %d\n", i, zoom); fflush(stdout);
-		// Generate the grid at the current zoom factor
-		array c = complex_grid(WIDTH, HEIGHT, zoom, center);
-		iter =sqrt(abs(2*sqrt(abs(1-sqrt(5*zoom)))))*100;
-		// Generate the mandelbrot image
-		array mag = mandelbrot(c, iter, 1000);
-		if(!console) {
-			if (wnd.close()) break;
-			array mag_norm = normalize(mag);
-			wnd.image(mag_norm);
-		}
-	}
+	local function complex_grid (width, height, zoom, center)
+		-- Generate sequences of length width, height
+		local x = AF.array(AF.seq(height) - height / 2.0)
+		local y = AF.array(AF.seq(width ) - width  / 2.0)
+		-- Tile the sequences to generate grid of image size
+		local X = AF.tile(x:T(), y:elements(), 1) / zoom + center[1]
+		local Y = AF.tile(y    , 1, x:elements()) / zoom + center[2]
+		-- Return the locations as a complex grid
+		return AF.complex(X, Y)
+	end
+	local C, Z, mag
+	local function AuxMandelbrot (env, maxval)
+		local ii = env("get_step")
+		-- Do the calculation
+		Z = Z * Z + C
+		-- Get indices where abs(Z) crosses maxval
+		local cond = Comp(AF.abs(Z) > maxval):as("f32")
+		mag = env(AF.max(mag, cond * ii))
+		-- If abs(Z) cross maxval, turn off those locations
+		C = env(C * (1 - cond))
+		Z = env(Z * (1 - cond))
+		-- Ensuring the JIT does not become too large
+		C:eval()
+		Z:eval()
+	end
+	local function mandelbrot (in_arr, iter, maxval)
+		C = in_arr:copy();
+		Z = C:copy()
+		mag = AF.constant(0, C:dims())
+		AF.EnvLoopFromTo_Mode(1, iter - 1, "parent_gc", AuxMandelbrot, maxval)
+		-- Normalize
+		return mag / maxval
+	end
+	local function normalize (a)
+		local mx = AF.max("f32", a)
+		local mn = AF.min("f32", a)
+		return (a-mn)/(mx-mn)
+	end
+    local iter = argc > 2 and tonumber(argv[2]) or 100 -- Seems to never be used...
+    local console = argc > 2 and argv[2][0] == '-'
+
+	print("** ArrayFire Fractals Demo **")
+	local wnd = AF.Window(WIDTH, HEIGHT, "Fractal Demo");
+	wnd:setColorMap("AF_COLORMAP_SPECTRUM")
+	local center = {-0.75, 0.1}
+	-- Keep zooming out for each frame
+	local _1000 = WC(1000)
+	AF.EnvLoopFromTo(10, 399, function(env)
+		local i = env("get_step")
+		local zoom = i * i
+		if i % 10 == 0 then
+			AF.printf("iteration: %d zoom: %d", i, zoom)
+			io.output():flush() -- n.b.: no braces in original
+		end
+		-- Generate the grid at the current zoom factor
+		local c = complex_grid(WIDTH, HEIGHT, zoom, center)
+		iter =sqrt(abs(2*sqrt(abs(1-sqrt(5*zoom)))))*100
+		-- Generate the mandelbrot image
+		local mag = mandelbrot(c, iter, _1000)
+		if not console then
+			if wnd:close() then
+				return "stop_loop"
+			end
+			local mag_norm = normalize(mag)
+			wnd:image(mag_norm)
+		end
+	end)
+	wnd:destroy()
 end)

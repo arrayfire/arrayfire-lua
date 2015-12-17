@@ -1,7 +1,6 @@
 --- Image-related functions.
 
 -- Modules --
-local af = require("arrayfire")
 local array = require("lib.impl.array")
 
 -- Imports --
@@ -14,7 +13,7 @@ local M = {}
 
 --
 local function HistEqual (in_arr, hist)
-	return CallWrap(af.af_hist_equal, in_arr:get(), hist:get())
+	return CallWrap("af_hist_equal", in_arr:get(), hist:get())
 end
 
 --
@@ -31,7 +30,7 @@ function M.Add (into)
 				minval, maxval = lib.min("f64", in_arr), lib.max("f64", in_arr)
 			end
 
-			return CallWrap(af.af_histogram, in_arr:get(), nbins, minval, maxval)
+			return CallWrap("af_histogram", in_arr:get(), nbins, minval, maxval)
 		end
 	} do
 		into[k] = v

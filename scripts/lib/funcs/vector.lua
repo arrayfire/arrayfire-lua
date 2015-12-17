@@ -6,7 +6,6 @@ local select = select
 local type = type
 
 -- Modules --
-local af = require("arrayfire")
 local array = require("lib.impl.array")
 
 -- Imports --
@@ -35,7 +34,7 @@ end
 local function Funcs (name, prefix)
 	name = (prefix or "af_") .. name
 
-	return af[name], af[name .. "_all"]
+	return name, name .. "_all"
 end
 
 --
@@ -66,8 +65,8 @@ local function ReduceMaxMin (name)
 	local arith = name .. "of"
 
 	return function(a, b, c, d)
-		if type(a) == "string" then -- a: type, b: in_arr, c: get_index
-			if c then -- TODO: This is ugly and doesn't resemble the C++ interface... maybe a table as first argument, as compromise?
+		if type(a) == "string" then -- a: type, b: in_arr[, c: "get_index"]
+			if c == "get_index" then -- TODO: This is ugly and doesn't resemble the C++ interface... maybe a table as first argument, as compromise?
 				local r, i, index = Call(ifunc_all, b:get())
 
 				return ToType(a, r, i), index
@@ -79,10 +78,10 @@ local function ReduceMaxMin (name)
 
 			a:set(out)
 			b:set(idx)
-		elseif IsArray(b) then -- a: lhs, b: rhs
-			return GetLib()[arith](a, b)
-		else -- a: arr, b: dim
+		elseif not b or c == "dim" then -- a: arr, b: dim[, c: "dim"] (TODO: Again, ugly but no obvious alternative... IsConstant()?)
 			return HandleDim(func, a, b)
+		else -- a: lhs, b: rhs
+			return GetLib()[arith](a, b)
 		end
 	end
 end
@@ -138,12 +137,12 @@ function M.Add (into)
 
 		--
 		diff1 = function(in_arr, dim)
-			return CallWrap(af.af_diff1, in_arr:get(), dim)
+			return CallWrap("af_diff1", in_arr:get(), dim)
 		end,
 
 		--
 		diff2 = function(in_arr, dim)
-			return CallWrap(af.af_diff2, in_arr:get(), dim)
+			return CallWrap("af_diff2", in_arr:get(), dim)
 		end,
 
 		--
@@ -158,17 +157,17 @@ function M.Add (into)
 		--
 		sort = function(a, b, c, d, e, f)
 			if IsArray(d) then -- four arrays
-				local keys, values = Call(af.af_sort_by_key, c:get(), d:get(), e or 0, Bool(f))
+				local keys, values = Call("af_sort_by_key", c:get(), d:get(), e or 0, Bool(f))
 
 				a:set(keys)
 				b:set(values)
 			elseif IsArray(c) then -- three arrays
-				local arr, indices = Call(af.af_sort_index, c:get(), d or 0, Bool(e))
+				local arr, indices = Call("af_sort_index", c:get(), d or 0, Bool(e))
 
 				a:set(arr)
 				b:set(indices)
 			else -- one array
-				return CallWrap(af.af_sort, a:get(), b or 0, Bool(c))
+				return CallWrap("af_sort", a:get(), b or 0, Bool(c))
 			end
 		end,
 

@@ -29,12 +29,16 @@ end
 local function AuxEnvIter (env_args)
 	local inc, i1, ok = env_args.inc, env_args.step
 
-	i1 = i1 + inc
-
-	if inc > 0 then
-		ok = i1 <= env_args.i2
+	if env_args.stop_loop then
+		env_args.stop_loop = nil
 	else
-		ok = i2 >= env_args.i2
+		i1 = i1 + inc
+
+		if inc > 0 then
+			ok = i1 <= env_args.i2
+		else
+			ok = i2 >= env_args.i2
+		end
 	end
 
 	if ok then
@@ -63,42 +67,42 @@ function M.Add (into)
 		--
 		EnvLoopFromTo = function(i1, i2, func, ...)
 			for args in EnvIter(nil, i1, i2) do
-				CallWithEnvironment_Args(func, args, ...)
+				args.stop_loop = CallWithEnvironment_Args(func, args, ...) == "stop_loop"
 			end
 		end,
 
 		--
 		EnvLoopFromTo_Mode = function(i1, i2, mode, func, ...)
 			for args in EnvIter(mode, i1, i2) do
-				CallWithEnvironment_Args(func, args, ...)
+				args.stop_loop = CallWithEnvironment_Args(func, args, ...) == "stop_loop"
 			end
 		end,
 
 		--
 		EnvLoopFromToStep = function(i1, i2, step, func, ...)
 			for args in EnvIter(nil, i1, i2, step) do
-				CallWithEnvironment_Args(func, args, ...)
+				args.stop_loop = CallWithEnvironment_Args(func, args, ...) == "stop_loop"
 			end
 		end,
 
 		--
 		EnvLoopFromToStep_Mode = function(i1, i2, step, mode, func, ...)
 			for args in EnvIter(mode, i1, i2, step) do
-				CallWithEnvironment_Args(func, args, ...)
+				args.stop_loop = CallWithEnvironment_Args(func, args, ...) == "stop_loop"
 			end
 		end,
 
 		--
 		EnvLoopN = function(n, func, ...)
 			for args in EnvIter(nil, 1, n) do
-				CallWithEnvironment_Args(func, args, ...)
+				args.stop_loop = CallWithEnvironment_Args(func, args, ...) == "stop_loop"
 			end
 		end,
 
 		--
 		EnvLoopN_Mode = function(n, func, mode, ...)
 			for args in EnvIter(mode, 1, n) do
-				CallWithEnvironment_Args(func, args, ...)
+				args.stop_loop = CallWithEnvironment_Args(func, args, ...) == "stop_loop"
 			end
 		end,
 

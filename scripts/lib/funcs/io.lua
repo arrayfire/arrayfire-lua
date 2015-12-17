@@ -14,19 +14,19 @@ local M = {}
 -- See also: https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/imageio.cpp
 
 local function LoadImage (filename, is_color)
-	return CallWrap(af.af_load_image, filename, is_color)
+	return CallWrap("af_load_image", filename, is_color)
 end
 
 --
 local function SaveImage (filename, in_arr)
-    Call(af.af_save_image, filename, in_arr:get())
+    Call("af_save_image", filename, in_arr:get())
 end
 
 --
 function M.Add (into)
 	for k, v in pairs{
 		deleteImageMem = function(ptr)
-			Call(af.af_delete_image_memory, ptr)
+			Call("af_delete_image_memory", ptr)
 		end,
 
 		--
@@ -34,11 +34,11 @@ function M.Add (into)
 
 		--
 		loadImageMem = function(ptr)
-			return CallWrap(af.af_load_image_memory, ptr)
+			return CallWrap("af_load_image_memory", ptr)
 		end,
 
 		loadImageNative = function(filename)
-			return CallWrap(af.af_load_image_native, filename)
+			return CallWrap("af_load_image_native", filename)
 		end,
 
 		--
@@ -46,12 +46,12 @@ function M.Add (into)
 
 		--
 		saveImageMem = function(in_arr, format)
-			return Call(af.af_save_image_memory, in_arr:get(), af[format or "AF_FIF_PNG"])
+			return Call("af_save_image_memory", in_arr:get(), af[format or "AF_FIF_PNG"])
 		end,
 
 		--
 		saveImageNative = function(filename, in_arr)
-			Call(af.af_save_image_native, filename, in_arr:get())
+			Call("af_save_image_native", filename, in_arr:get())
 		end
 	} do
 		into[k] = v
