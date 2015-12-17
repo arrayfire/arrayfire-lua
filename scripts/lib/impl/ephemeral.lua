@@ -55,7 +55,7 @@ local function NewEnv ()
 			assert(env and env(_command, "get_id") == id, "Environment not active") -- is self?
 
 			local lower_env = (mode == "parent" or mode == "parent_gc") and Stack[top - 1]
-
+-- TODO: pingpong, pingpong_gc
 			if lower_env then
 				lower_env(_command, "get_list")[a] = true
 			end
@@ -98,17 +98,18 @@ local function GetResults (env, ok, a, ...)
 	env(_command, "set_mode", nil)
 
 	local nerrs = Purge(env(_command, "get_list"))
-
+-- Pingpong or normal? (How to end?)
 	Cache[#Cache + 1] = env
 	Top, Stack[Top] = Top - 1
 
 	if mode == "normal_gc" or mode == "parent_gc" then
 		collectgarbage()
 	end
-
+-- TODO: pingpong_gc
 	if ok and nerrs == 0 then
 		return a, ...
 	else
+-- Clean up if pingpong
 		error(not ok and a or ("Errors releasing %i arrays"):format(nerrs))
 	end
 end
@@ -126,11 +127,12 @@ function M.Add (array_module)
 			env(_command, "get_list")[arr] = true
 		end
 	end
-
+-- AddOneEnv
+-- AddEnvs
 	--
 	function array_module.CallWithEnvironment (func, ...)
 		local env = remove(Cache) or NewEnv()
-
+-- AddOneEnv()
 		Top = Top + 1
 
 		Stack[Top] = env
@@ -143,7 +145,8 @@ function M.Add (array_module)
 		local env = remove(Cache) or NewEnv()
 
 		Top = Top + 1
-
+-- if pingpong
+	-- AddEnvs
 		env(_command, "set_mode", args.mode)
 		env(_command, "set_step", args.step)
 
