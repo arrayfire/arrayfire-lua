@@ -17,6 +17,7 @@ for _, v in ipairs{
 	"funcs.statistics",
 	"funcs.util",
 	"funcs.vector",
+	"funcs.gfor",
 	"graphics.window",
 	"methods.constructors",
 	"methods.device",

@@ -4,6 +4,7 @@
 local af = require("arrayfire")
 
 -- Forward declarations --
+local GetLib
 local TwoArrays
 
 -- Exports --
@@ -17,9 +18,10 @@ local function Binary (name, cmp)
 	name = "af_" .. name
 
 	return function(a, b)
+-- TODO: disable for proxies?
 		Result = nil
 
-		local arr = TwoArrays(name, a, b, true) -- TODO: gforGet()
+		local arr = TwoArrays(name, a, b, GetLib().gforGet())
 
 		if cmp then
 			Result = arr
@@ -32,6 +34,7 @@ end
 --
 function M.Add (array_module, meta)
 	-- Import these here since the array module is not yet registered.
+	GetLib = array_module.GetLib
 	TwoArrays = array_module.TwoArrays
 
 	--
@@ -55,6 +58,15 @@ function M.Add (array_module, meta)
 		__le = Binary("le", true),
 		__mod = Binary("mod"),
 		__mul = Binary("mul"),
+--[[
+		__newindex = function(arr, k, v)
+			-- TODO: disable for non-proxies?
+
+			if k == "_" then
+				-- lvalue assign of v
+			end
+		end
+]]
 		__pow = Binary("pow"),
 		__sub = Binary("sub"),
 		__unm = function(a)

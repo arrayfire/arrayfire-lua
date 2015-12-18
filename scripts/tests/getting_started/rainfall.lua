@@ -36,11 +36,10 @@ AF.main(function()
 	local site = AF.array(n,site_)
 	local measurement = AF.array(n,measurement_)
 	local rainfall = AF.constant(0, sites)
---[[
-	gfor (seq s, sites) {
-		rainfall(s) = sum(measurement * (site == s));
-	}
-]]
+
+	for s in AF.gfor(sites) do
+	--	rainfall(s) = AF.sum(measurement * COMP(site == AF.array(s)))
+	end
 	print("total rainfall at each site:")
 	AF.print("rainfall", rainfall)
 	local is_between = AF["and"](Comp(WC(1) <= day), Comp(day <= WC(5))) -- days 1 and 5
@@ -48,10 +47,9 @@ AF.main(function()
 	AF.printf("rain between days: %g", rain_between)
 	AF.printf("number of days with rain: %g", AF.sum("f32", Comp(AF.diff1(day) > WC(0))) + 1)
 	local per_day = AF.constant(0, days)
---[[
-	gfor (seq d, days)
-		per_day(d) = sum(measurement * (day == d))
-]]
+	for d in AF.gfor(days) do
+	--	per_day(d) = AF.sum(measurement * COMP(day == AF.array(d)))
+	end
 	print("total rainfall each day:")
 	AF.print("per_day", per_day)
 	AF.printf("number of days over five: %g", AF.sum("f32", Comp(per_day > WC(5))))

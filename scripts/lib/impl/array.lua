@@ -142,6 +142,7 @@ end
 -- @bool remove
 -- @treturn ?|af_array|nil X
 function M.GetHandle (arr, remove)
+-- TODO: If proxy, add reference?
 	local ha = arr.m_handle
 
 	if remove then
@@ -191,6 +192,7 @@ end
 -- @tparam LuaArray arr
 -- @tparam ?|af_array|nil handle
 function M.SetHandle (arr, handle)
+-- TODO: disable for proxies
 	local cur = arr.m_handle
 
 	if cur ~= nil then
@@ -298,6 +300,7 @@ for _, v in ipairs{
 	"lib.impl.ephemeral",
 	"lib.impl.operators",
 	"lib.impl.seq",
+	"lib.impl.index", -- depends on seq
 	"lib.methods.methods"
 } do
 	require(v).Add(M, ArrayMethodsAndMetatable)

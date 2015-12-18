@@ -6,6 +6,7 @@ local array = require("lib.impl.array")
 
 -- Imports --
 local CallWrap = array.CallWrap
+local GetLib = array.GetLib
 local IsArray = array.IsArray
 local TwoArrays = array.TwoArrays
 
@@ -17,7 +18,7 @@ local M = {}
 --
 local function Binary (name)
 	return function(a, b)
-		return TwoArrays(name, a, b--[[TODO: IsArray(a) and IsArray(b) and gfor_get]])
+		return TwoArrays(name, a, b, IsArray(a) and IsArray(b) and GetLib().gforGet())
 	end
 end
 
