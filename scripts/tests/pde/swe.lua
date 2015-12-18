@@ -4,7 +4,7 @@ local floor = math.floor
 -- Modules --
 local AF = require("lib.af_lib")
 
-lib.main(function(argc, arv)
+AF.main(function(argc, arv)
 	local win
 	local function normalize (a, max)
 		local mx = max * 0.5
@@ -14,32 +14,32 @@ lib.main(function(argc, arv)
 	local function swe (console)
 		local time_total = 20 -- run for N seconds
 		-- Grid length, number and spacing
-		local Lx, nx = 512, Lx + 1
-		local Ly, ny = 512, Ly + 1
+		local Lx, Ly = 512, 512
+		local nx, ny = Lx + 1, Ly + 1
 		local dx = Lx / (nx - 1)
 		local dy = Ly / (ny - 1)
 		local ZERO = AF.constant(0, nx, ny)
 		local um, vm = ZERO:copy(), ZERO:copy()
 		local io, jo, k = floor(Lx  / 5.0),	floor(Ly / 5.0), 20
-	--	local x = tile(moddims(AF.seq(nx),nx,1), 1,ny)
-	--	local y = tile(moddims(AF.seq(ny),1,ny), nx,1)
+		local x = AF.tile(AF.moddims(AF.array(AF.seq(nx)),nx,1), 1,ny)
+		local y = AF.tile(AF.moddims(AF.array(AF.seq(ny)),1,ny), nx,1)
 		-- Initial condition
 		local etam = 0.01 * AF.exp((-((x - io) * (x - io) + (y - jo) * (y - jo))) / (k * k))
 		local m_eta = AF.max("f32", etam)
 		local eta = etam:copy()
 		local dt = 0.5
 		-- conv kernels
-		local h_diff_kernel[] = {9.81 * (dt / dx), 0, -9.81 * (dt / dx)}
-		local h_lap_kernel[] = {0, 1, 0, 1, -4, 1, 0, 1, 0}
+		local h_diff_kernel = {9.81 * (dt / dx), 0, -9.81 * (dt / dx)}
+		local h_lap_kernel = {0, 1, 0, 1, -4, 1, 0, 1, 0}
 		local h_diff_kernel_arr = AF.array(3, h_diff_kernel)
 		local h_lap_kernel_arr = AF.array(3, 3, h_lap_kernel)
 		if not console then
 			win = AF.Window(512, 512,"Shallow Water Equations")
 			win:setColorMap("AF_COLORMAP_MOOD")
 		end
---		timer t = timer::start();
+		local t = AF.timer_start()
 		local iter = 0
-		AF.EnvLoopWhile_Args(function(env)
+		AF.EnvLoopWhile_Mode(function(env)
 			-- compute
 			local up = um + AF.convolve(eta, h_diff_kernel_arr)
 			local vp = um + AF.convolve(eta, h_diff_kernel_arr:T())
@@ -55,7 +55,7 @@ lib.main(function(argc, arv)
 			end
 			iter = iter + 1
 		end, function()
-		--	return AF.progress(iter, t, time_total)
+			return AF.progress(iter, t, time_total)
 		end, "normal_gc") -- evict old states every now and then
 	end
 

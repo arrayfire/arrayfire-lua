@@ -51,7 +51,7 @@ static const struct luaL_Reg move_reorder_methods[] = {
 
 			af_array * arr_ud = NewArray(L);// arr, ndims, dims, arr_ud
 
-			af_err err = af_moddims(arr_ud, GetArray(L, 2), dims.GetNDims(), dims.GetDims());
+			af_err err = af_moddims(arr_ud, GetArray(L, 1), dims.GetNDims(), dims.GetDims());
 
 			return PushErr(L, err);	// arr, ndims, dims, err, arr_ud
 		}

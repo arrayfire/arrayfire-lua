@@ -24,10 +24,10 @@ local M = {}
 
 --
 local function Convolve (dim)
-	local func = af["af_convolve" .. dim]
+	local name = "af_convolve" .. dim
 
 	return function(signal, filter, mode, domain)
-		return CallWrap(func, signal:get(), filter:get(), af[mode or "AF_CONV_DEFAULT"], af[domain or "AF_CONV_AUTO"])
+		return CallWrap(name, signal:get(), filter:get(), af[mode or "AF_CONV_DEFAULT"], af[domain or "AF_CONV_AUTO"])
 	end
 end
 

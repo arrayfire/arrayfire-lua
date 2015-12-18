@@ -4,16 +4,25 @@
 local clock = os.clock
 local error = error
 local getenv = os.getenv
+local max = math.max
 local pcall = pcall
 local print = print
 local select = select
 local tonumber = tonumber
 
 -- Modules --
-local af = require("arrayfire")
+local array = require("lib.impl.array")
+
+-- Imports --
+local GetLib = array.GetLib
 
 -- Exports --
 local M = {}
+
+-- --
+local IterPrev = 0
+local TimePrev = 0
+local MaxRate = 0
 
 -- --
 local T0
@@ -106,10 +115,11 @@ void read_idx(std::vector<dim_t> &dims, std::vector<ty> &data, const char *name)
 
 			local ok, err = pcall(function()
 				local device = argc > 1 and tonumber(argv[1]) or 0
+				local Lib = GetLib()
 
 				-- Select a device and display arrayfire info
-				af.af_set_device(device)
-				af.af_info()
+				Lib.setDevice(device)
+				Lib.info()
 
 				func(argc, argv)
 
@@ -133,34 +143,32 @@ void read_idx(std::vector<dim_t> &dims, std::vector<ty> &data, const char *name)
 		-- Are the windows redirecting IO?
 
 		--
-		progress = function()
---[[
-bool progress(unsigned iter_curr, af::timer t, double time_total)
-{
-    static unsigned iter_prev = 0;
-    static double time_prev = 0;
-    static double max_rate = 0;
+		progress = function(iter_curr, t, time_total)
+			local Lib = GetLib()
 
-    af::sync();
-    double time_curr = af::timer::stop(t);
+			Lib.sync()
 
-    if ((time_curr - time_prev) < 1) return true;
+			local time_curr = Lib.timer_stop(t)
 
-    double rate = (iter_curr - iter_prev) / (time_curr - time_prev);
-    printf("  iterations per second: %.0f   (progress %.0f%%)\n",
-            rate, 100.0f * time_curr / time_total);
+			if time_curr - TimePrev < 1 then
+				return true
+			end
 
-    max_rate = std::max(max_rate, rate);
+			local rate = (iter_curr - IterPrev) / (time_curr - TimePrev)
 
-    iter_prev = iter_curr;
-    time_prev = time_curr;
+			Lib.printf("  iterations per second: %.0f   (progress %.0f%%)", rate, 100.0 * time_curr / time_total)
 
+			MaxRate = max(MaxRate, rate)
 
-    if (time_curr < time_total) return true;
+			IterPrev = iter_curr
+			TimePrev = time_curr
 
-    printf(" ### %f iterations per second (max)\n", max_rate);
-    return false;
-]]
+			if time_curr < time_total then
+				return true
+			end
+
+			Lib.printf(" ### %f iterations per second (max)", MaxRate)
+			return false
 		end,
 
 		--
@@ -178,10 +186,53 @@ bool progress(unsigned iter_curr, af::timer t, double time_total)
 		end,
 
 		--
-		timer_stop = function()
-			return clock() - T0
+		timer_stop = function(since)
+			return clock() - (since or T0)
+		end,
+
+		--
+		wait_for_windows = function(how, w1, w2, w3)
+			--
+			local function any_closed ()
+				if w3 then
+					return w1:close() or w2:close() or w3:close()
+				elseif w2 then
+					return w1:close() or w2:close()
+				else
+					return w1:close()
+				end
+			end
+
+			--
+			if how == "until" then
+				return any_closed
+			else
+				return function()
+					return not any_closed()
+				end
+			end
+		end,
+
+		--
+		wait_for_windows_close = function(how, w1, w2, w3)
+			local done = GetLib().wait_for_windows(how, w1, w2, w3)
+
+			return function()
+				if done() then 
+					w1:destroy() -- TODO: Do this right... how?
+
+					if w2 then
+						w2:destroy()
+					end
+
+					if w3 then
+						w3:destroy()
+					end
+				end
+			end
+			--
 		end
-		-- ^^^ TODO: Better stuff? (resolution, instantiable)
+		-- ^^^ TODO: Better stuff? (resolution, instantiable?)
 	} do
 		into[k] = v
 	end

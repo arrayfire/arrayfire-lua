@@ -6,6 +6,7 @@ local getmetatable = getmetatable
 local rawequal = rawequal
 local setmetatable = setmetatable
 local tostring = tostring
+local traceback = debug and debug.traceback
 local type = type
 
 -- Modules --
@@ -36,7 +37,10 @@ local Constants = setmetatable({}, { __mode = "k" })
 --
 local function CallFromName_Checked (name, ...)
 	if type(name) ~= "string" then
-	print(debug.traceback())
+		if traceback then
+			print(traceback())
+		end
+
 		error("Expected string name, got: " .. tostring(name))
 	end
 

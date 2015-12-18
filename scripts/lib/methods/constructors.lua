@@ -190,7 +190,27 @@ function M.Add (into)
 		end,
 
 		--
+		flat = function(in_arr)
+			return CallWrap("af_flat", in_arr:get())
+		end,
+
+		--
 		identity = DimsAndTypeFunc("af_identity"),
+
+		--
+		moddims = function(in_arr, a, b, c, d)
+			local ndims, dims
+
+			if type(a) == "table" then -- a: dims
+				ndims, dims = GetNDims(a), a
+			elseif type(b) == "table" then -- a: ndims, b: dims
+				ndims, dims = a, b
+			else -- a: d0, b: d1, c: d2, d: d3
+				ndims, dims = 4, PrepDims(a, b, c, d)
+			end
+
+			return CallWrap("af_moddims", in_arr:get(), ndims, dims)
+		end,
 
 		--
 		randn = DimsAndTypeFunc("af_randn"),
