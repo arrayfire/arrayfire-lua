@@ -35,8 +35,5 @@ AF.main(function()
 		elseif val < -pi then
 			sign = 1
 		end
-	end, function()
-		return not myWindow:close()
-	end, "normal_gc") -- evict old states every now and then
-	myWindow:destroy()
+	end, AF.wait_for_windows_close("while", myWindow), "normal_gc") -- evict old states every now and then
 end)

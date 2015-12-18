@@ -54,8 +54,5 @@ AF.main(function()
 		local C1 = Comp(nHood == _3)
 		-- Update state
 		state = env(state * C0 + C1)
-	end, function()
-		return not myWindow:close()
-	end, "normal_gc") -- evict old states every now and then
-	myWindow:destroy()
+	end, AF.wait_for_windows_close("while", myWindow), "normal_gc") -- evict old states every now and then
 end)

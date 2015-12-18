@@ -57,6 +57,7 @@ AF.main(function(argc, arv)
 		end, function()
 			return AF.progress(iter, t, time_total)
 		end, "normal_gc") -- evict old states every now and then
+	--	win:destroy() -- err...
 	end
 
 	print("Simulation of shallow water equations")

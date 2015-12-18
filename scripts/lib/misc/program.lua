@@ -193,42 +193,52 @@ void read_idx(std::vector<dim_t> &dims, std::vector<ty> &data, const char *name)
 		--
 		wait_for_windows = function(how, w1, w2, w3)
 			--
-			local function any_closed ()
-				if w3 then
-					return w1:close() or w2:close() or w3:close()
-				elseif w2 then
-					return w1:close() or w2:close()
-				else
-					return w1:close()
-				end
-			end
+			return function()
+				local is_open
 
-			--
-			if how == "until" then
-				return any_closed
-			else
-				return function()
-					return not any_closed()
+				if w3 and w3:close() then
+					is_open = false
+				elseif w2 and w2:close() then
+					is_open = false
+				else
+					is_open = not w1:close()
+				end
+
+				if how == "until" then
+					return not is_open
+				else
+					return is_open
 				end
 			end
 		end,
 
 		--
 		wait_for_windows_close = function(how, w1, w2, w3)
-			local done = GetLib().wait_for_windows(how, w1, w2, w3)
+			local going = GetLib().wait_for_windows(how, w1, w2, w3)
 
 			return function()
-				if done() then 
-					w1:destroy() -- TODO: Do this right... how?
+				local is_going = going()
+				local is_open = is_going
 
-					if w2 then
+				if how == "until" then
+					is_open = not is_open
+				end
+				
+				if not is_open then
+					if not w1:close() then
+						w1:destroy() -- TODO: Do this right... how?
+					end
+
+					if w2 and not w2:close() then
 						w2:destroy()
 					end
 
-					if w3 then
+					if w3 and not w3:close() then
 						w3:destroy()
 					end
 				end
+
+				return is_going
 			end
 			--
 		end

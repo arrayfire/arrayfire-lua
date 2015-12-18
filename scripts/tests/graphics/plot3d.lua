@@ -30,8 +30,5 @@ AF.main(function()
 		--or in the flattened xyz-triplet array with size 3n x 1
 		myWindow:plot3(Pts)
 		t=t+0.01
-	end, function()
-		return myWindow:close()
-	end)
-	myWindow:destroy()
+	end, AF.wait_for_windows_close("until", myWindow))
 end)
