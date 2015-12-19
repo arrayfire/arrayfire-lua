@@ -6,7 +6,7 @@ template<af_err (*func)(void **, const dim_t)> int Alloc (lua_State * L)
 {
 	lua_settop(L, 1);	// bytes
 
-	void * ptr;
+	void * ptr = nullptr;
 
 	af_err err = func(&ptr, Arg<dim_t>(L, 1));
 
@@ -31,7 +31,7 @@ template<typename T, af_err (*func)(T *)> int GetInt (lua_State * L)
 {
 	lua_settop(L, 0);	// (empty)
 
-	T value;
+	T value = 0;
 
 	af_err err = func(&value);
 
@@ -118,7 +118,7 @@ static const struct luaL_Reg device_methods[] = {
 		{
 			lua_settop(L, 1);	// arr
 
-			void * ptr;
+			void * ptr = nullptr;
 
 			af_err err = af_get_device_ptr(&ptr, GetArray(L, 1));
 

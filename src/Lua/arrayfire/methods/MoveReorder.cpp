@@ -47,7 +47,7 @@ static const struct luaL_Reg move_reorder_methods[] = {
 		{
 			lua_settop(L, 3);	// arr, ndims, dims
 
-			LuaDimsAndType dims(L, 2, true);
+			LuaDims dims(L, 2);
 
 			af_array * arr_ud = NewArray(L);// arr, ndims, dims, arr_ud
 

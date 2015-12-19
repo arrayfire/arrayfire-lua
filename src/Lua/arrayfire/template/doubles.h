@@ -8,7 +8,7 @@ template<af_err (*func)(double *, double *, const af_array)> int TwoDoublesIn (l
 {
 	lua_settop(L, 1);	// arr
 
-	double d1, d2;
+	double d1 = 0.0, d2 = 0.0;
 
 	af_err err = func(&d1, &d2, GetArray(L, 1));
 
@@ -23,7 +23,7 @@ template<typename T, af_err (*func)(double *, double *, const af_array, const T)
 {
 	lua_settop(L, 2);	// arr, arg
 
-	double d1, d2;
+	double d1 = 0.0, d2 = 0.0;
 
 	af_err err = func(&d1, &d2, GetArray(L, 1), Arg<T>(L, 2));
 
@@ -38,7 +38,7 @@ template<af_err (*func)(double *, double *, const af_array, const af_array)> int
 {
 	lua_settop(L, 2);	// arr1, arr2
 
-	double d1, d2;
+	double d1 = 0.0, d2 = 0.0;
 
 	af_err err = func(&d1, &d2, GetArray(L, 1), GetArray(L, 2));
 

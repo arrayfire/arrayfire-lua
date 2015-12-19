@@ -9,7 +9,7 @@ static const struct luaL_Reg backend_funcs[] = {
 		{
 			lua_settop(L, 0);	// (clear)
 
-			int backends;
+			int backends = 0;
 
 			af_err err = af_get_available_backends(&backends);
 
@@ -23,7 +23,7 @@ static const struct luaL_Reg backend_funcs[] = {
 		{
 			lua_settop(L, 0);	// (clear)
 
-			unsigned num;
+			unsigned num = 1;
 
 			af_err err = af_get_backend_count(&num);
 
@@ -37,7 +37,7 @@ static const struct luaL_Reg backend_funcs[] = {
 		{
 			lua_settop(L, 1);	// arr
 
-			af_backend backend;
+			af_backend backend = (af_backend)0;
 
 			af_err err = af_get_backend_id(&backend, GetArray(L, 1));
 

@@ -29,7 +29,7 @@ static const struct luaL_Reg linear_algebra_funcs[] = {
 
 			af_array * arr_ud = NewArray(L);// arr, is_upper, arr_ud
 
-			int info;
+			int info = 0;
 
 			af_err err = af_cholesky(arr_ud, &info, GetArray(L, 1), B(L, 2));
 
@@ -42,7 +42,7 @@ static const struct luaL_Reg linear_algebra_funcs[] = {
 		{
 			lua_settop(L, 2);	// arr, is_upper
 
-			int info;
+			int info = 0;
 
 			af_err err = af_cholesky_inplace(&info, GetArray(L, 1), B(L, 2));
 
@@ -63,7 +63,7 @@ static const struct luaL_Reg linear_algebra_funcs[] = {
 		{
 			lua_settop(L, 4);	// arr, type, p, q
 
-			double norm;
+			double norm = 0.0;
 
 			af_err err = af_norm(&norm, GetArray(L, 1), Arg<af_norm_type>(L, 2), D(L, 3), D(L, 4));
 
@@ -80,7 +80,7 @@ static const struct luaL_Reg linear_algebra_funcs[] = {
 		{
 			lua_settop(L, 2);	// arr, tol
 
-			unsigned rank;
+			unsigned rank = 0;
 
 			af_err err = af_rank(&rank, GetArray(L, 1), D(L, 2));
 

@@ -26,72 +26,70 @@ static const struct luaL_Reg array_methods[] = {
 		}
 	},
 #endif
+	{
+		"af_get_dims", [](lua_State * L)
 		{
-			"af_get_dims", [](lua_State * L)
-			{
-				lua_settop(L, 1);	// in
+			lua_settop(L, 1);	// in
 
-				dim_t d1, d2, d3, d4;
+			dim_t d1, d2, d3, d4;
 
-				af_err err = af_get_dims(&d1, &d2, &d3, &d4, GetArray(L, 1));
+			af_err err = af_get_dims(&d1, &d2, &d3, &d4, GetArray(L, 1));
 
-				lua_pushinteger(L, err);// in, err
-				lua_pushinteger(L, d1);	// in, err, d1
-				lua_pushinteger(L, d2);	// in, err, d1, d2
-				lua_pushinteger(L, d3);	// in, err, d1, d2, d3
-				lua_pushinteger(L, d4);	// in, err, d1, d2, d3, d4
+			lua_pushinteger(L, err);// in, err
+			lua_pushinteger(L, d1);	// in, err, d1
+			lua_pushinteger(L, d2);	// in, err, d1, d2
+			lua_pushinteger(L, d3);	// in, err, d1, d2, d3
+			lua_pushinteger(L, d4);	// in, err, d1, d2, d3, d4
 
-				return 5;
-			}
-		},
-		FROM_NONE(get_elements, dim_t),
-		FROM_NONE(get_numdims, unsigned),
-		FROM_NONE(get_type, af_dtype),
-		PRED_REG(empty),
-		PRED_REG(scalar),
-		PRED_REG(vector),
-		PRED_REG(row),
-		PRED_REG(column),
-		PRED_REG(complex),
-		PRED_REG(real),
-		PRED_REG(double),
-		PRED_REG(single),
-		PRED_REG(realfloating),
-		PRED_REG(floating),
-		PRED_REG(integer),
-		PRED_REG(bool),
+			return 5;
+		}
+	},
+	FROM_NONE(get_elements, dim_t),
+	FROM_NONE(get_numdims, unsigned),
+	FROM_NONE(get_type, af_dtype),
+	PRED_REG(empty),
+	PRED_REG(scalar),
+	PRED_REG(vector),
+	PRED_REG(row),
+	PRED_REG(column),
+	PRED_REG(complex),
+	PRED_REG(real),
+	PRED_REG(double),
+	PRED_REG(single),
+	PRED_REG(realfloating),
+	PRED_REG(floating),
+	PRED_REG(integer),
+	PRED_REG(bool),
+	{
+		"af_release_array", [](lua_State * L)
 		{
-			"af_release_array", [](lua_State * L)
-			{
-				lua_settop(L, 1);	// arr
+			lua_settop(L, 1);	// arr
 
-				af_err err = af_release_array(GetArray(L, 1));
+			af_err err = af_release_array(GetArray(L, 1));
 
-				ClearArray(L, 1);
+			ClearArray(L, 1);
 
-				lua_pushinteger(L, err);// arr, err
+			lua_pushinteger(L, err);// arr, err
 
-				return 1;
-			}
-		},
-		OUTIN(retain_array),
+			return 1;
+		}
+	},
+	OUTIN(retain_array),
+	{
+		"af_write_array", [](lua_State * L)
 		{
-			"af_write_array", [](lua_State * L)
-			{
-				lua_settop(L, 4);	// arr, data, bytes, src
+			lua_settop(L, 4);	// arr, data, bytes, src
 
-				af_err err = af_write_array(GetArray(L, 1), GetMemory(L, 2), Arg<size_t>(L, 3), Arg<af_source>(L, 4));
+			af_err err = af_write_array(GetArray(L, 1), GetMemory(L, 2), Arg<size_t>(L, 3), Arg<af_source>(L, 4));
 
-				lua_pushinteger(L, err);// arr, data, bytes, src, err
+			lua_pushinteger(L, err);// arr, data, bytes, src, err
 
-				return 1;
-			}
-		},
+			return 1;
+		}
+	},
 
-		{ NULL, NULL }
+	{ NULL, NULL }
 };
-
-// ^^^ TODO: replace, select, etc.
 
 #undef PRED_REG
 

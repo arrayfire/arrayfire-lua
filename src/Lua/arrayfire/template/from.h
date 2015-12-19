@@ -8,7 +8,7 @@ template<typename O, af_err (*func)(O *, const af_array)> int From (lua_State * 
 {
 	lua_settop(L, 1);	// arr
 
-	O out;
+	O out; // TODO: Declare...
 
 	af_err err = func(&out, GetArray(L, 1));
 

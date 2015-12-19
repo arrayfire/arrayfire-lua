@@ -94,6 +94,17 @@ af_features GetFeatures (lua_State * L, int index)
 	return *ptr_to;
 }
 
+af_index_t * GetIndexer (lua_State * L, int index)
+{
+	af_index_t ** ptr_to = (af_index_t **)lua_touserdata(L, index);
+
+#ifndef NDEBUG
+	// Assert? (error to access after Clear...)
+#endif
+
+	return *ptr_to;
+}
+
 static void AddMetatable (lua_State * L, const char * name, lua_CFunction func)
 {
 	if (luaL_newmetatable(L, name))	// ..., object, mt
@@ -122,6 +133,8 @@ af_array * NewArray (lua_State * L)
 		return 0;
 	});
 
+	*(af_array*)ptr = nullptr;
+
 	return (af_array *)ptr;
 }
 
@@ -142,26 +155,51 @@ af_features * NewFeatures (lua_State * L)
 		return 0;
 	});
 
+	*(af_features*)ptr = nullptr;
+
 	return (af_features *)ptr;
+}
+
+af_index_t ** NewIndexer (lua_State * L)
+{
+	void * ptr = lua_newuserdata(L, sizeof(af_index_t *));	// ..., indexer
+
+	AddMetatable(L, "af_index_t", [](lua_State * L)
+	{
+		lua_settop(L, 1);	// indexer
+
+		af_index_t * ptr = GetIndexer(L, 1);
+
+		if (ptr) af_release_indexers(ptr);
+
+		ClearIndexer(L, 1);
+
+		return 0;
+	});
+
+	*(af_index_t **)ptr = nullptr;
+
+	return (af_index_t **)ptr;
 }
 
 void ClearArray (lua_State * L, int index)
 {
-	*(af_array *)lua_touserdata(L, index) = NULL;
+	*(af_array *)lua_touserdata(L, index) = nullptr;
 }
 
 void ClearFeatures (lua_State * L, int index)
 {
-	*(af_features *)lua_touserdata(L, index) = NULL;
+	*(af_features *)lua_touserdata(L, index) = nullptr;
 }
 
-// ^^^ TODO: Indexers
+void ClearIndexer (lua_State * L, int index)
+{
+	*(af_index_t **)lua_touserdata(L, index) = nullptr;
+}
 
-LuaDimsAndType::LuaDimsAndType (lua_State * L, int first, bool def_type)
+LuaDims::LuaDims (lua_State * L, int first)
 {
 	luaL_checktype(L, first + 1, LUA_TTABLE);
-
-	mType = def_type ? f32 : (af_dtype)luaL_checkinteger(L, first + 2);
 
 	int n = luaL_checkint(L, first);
 
@@ -213,14 +251,16 @@ template<typename T, typename C> void AddComplex (std::vector<char> & arr, lua_S
 	lua_pop(L, 3);	// ..., arr, ...
 }
 
-LuaData::LuaData (lua_State * L, int index, af_dtype type, bool copy) : mDataPtr(0), mType(type)
+LuaData::LuaData (lua_State * L, int index, int type_index, bool copy) : mDataPtr(0)
 {
+	mType = Arg<af_dtype>(L, type_index);
+
 	// Non-string: build up from Lua array.
 	if (!lua_isstring(L, index))
 	{
 		int count = lua_objlen(L, index);
 
-		switch (type)
+		switch (mType)
 		{
 		case b8:
 		case u8:
@@ -250,7 +290,7 @@ LuaData::LuaData (lua_State * L, int index, af_dtype type, bool copy) : mDataPtr
 
 		for (int i = 0; i < count; ++i)
 		{
-			switch (type)
+			switch (mType)
 			{
 			case f32:
 				AddFloat<float>(mData, L, index, i);

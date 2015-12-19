@@ -87,22 +87,77 @@ static const struct luaL_Reg assign_index_methods[] = {
 	ASSIGN(assign_gen, dim_t, af_index_t),
 	ASSIGN(assign_seq, unsigned, af_seq),
 #if AF_API_VERSION >= 32
-// 	AFAPI af_err af_create_indexers(af_index_t** indexers);
+	{
+		"af_create_indexers", [](lua_State * L)
+		{
+			lua_settop(L, 0);	// (empty)
+
+			af_index_t ** indexer_ud = NewIndexer(L);	// indexer_ud
+
+			af_err err = af_create_indexers(indexer_ud);
+
+			return PushErr(L, err);	// err, indexer_ud
+		}
+	},
 #endif
 	INDEX(index, unsigned, af_seq),
 	INDEX(index_gen, dim_t, af_index_t),
 	OUTIN2_ARG(lookup, unsigned),
 #if AF_API_VERSION >= 32
-//	AFAPI af_err af_release_indexers(af_index_t* indexers);
-//	AFAPI af_err af_set_array_indexer(af_index_t* indexer, const af_array idx, const dim_t dim);
-//	AFAPI af_err af_set_seq_indexer(af_index_t* indexer, const af_seq* idx, const dim_t dim, const bool is_batch);
-//	AFAPI af_err af_set_seq_param_indexer(af_index_t* indexer, const double begin, const double end, const double step, const dim_t dim, const bool is_batch);
+	{
+		"af_release_indexers", [](lua_State * L)
+		{
+			lua_settop(L, 1);	// indexer
+
+			af_err err = af_release_indexers(GetIndexer(L, 1));
+
+			ClearIndexer(L, 1);
+
+			lua_pushinteger(L, err);// indexer, err
+
+			return 1;
+		}
+	}, {
+		"af_set_array_indexer", [](lua_State * L)
+		{
+			lua_settop(L, 3);	// indexer, idx, dim
+
+			af_err err = af_set_array_indexer(GetIndexer(L, 1), GetArray(L, 2), Arg<dim_t>(L, 3));
+
+			lua_pushinteger(L, err);// indexer, idx, dim, err
+
+			return 1;
+		}
+	}, {
+		"af_set_seq_indexer", [](lua_State * L)
+		{
+			lua_settop(L, 4);	// indexer, idx, dim, is_batch
+			lua_pushvalue(L, 2);// indexer, idx, dim, is_batch, idx
+
+			af_seq seq;
+
+			Load(L, seq);
+
+			af_err err = af_set_seq_indexer(GetIndexer(L, 1), &seq, Arg<dim_t>(L, 3), B(L, 4));
+
+			lua_pushinteger(L, err);// indexer, idx, dim, is_batch, idx, err
+
+			return 1;
+		}
+	}, {
+		"af_set_seq_param_indexer", [](lua_State * L)
+		{
+			lua_settop(L, 6);	// indexer, begin, end, step, dim, is_batch
+
+			af_err err = af_set_seq_param_indexer(GetIndexer(L, 1), D(L, 2), D(L, 3), D(L, 4), Arg<dim_t>(L, 5), B(L, 6));
+
+			lua_pushinteger(L, err);// indexer, begin, end, step, dim, is_batch, err
+
+			return 1;
+		}
+	},
 #endif
 
-#if 0
-	AFAPI af_seq af_make_seq(double begin, double end, double step);
-#endif
-	// TODO^^^^
 	{ NULL, NULL }
 };
 

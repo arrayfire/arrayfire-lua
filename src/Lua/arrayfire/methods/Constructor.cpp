@@ -8,7 +8,7 @@ template<typename T, af_err(*func)(af_array *, const T, const unsigned, const di
 {
 	lua_settop(L, 3);	// val, ndims, dims
 
-	LuaDimsAndType dims(L, 2, true);// Just dims, no type
+	LuaDims dims(L, 2);
 
 	af_array * arr_ud = NewArray(L);// val, ndims, dims, arr_ud
 
@@ -26,7 +26,7 @@ static const struct luaL_Reg constructor_funcs[] = {
 		{
 			lua_settop(L, 4);	// val, ndims, dims, type
 
-			LuaDimsAndType dt(L, 2);
+			LuaDims dt(L, 2);
 
 			af_array * arr_ud = NewArray(L);// val, ndims, dims, type, arr_ud
 
@@ -39,7 +39,7 @@ static const struct luaL_Reg constructor_funcs[] = {
 		{
 			lua_settop(L, 5);	// real, imag, ndims, dims, type
 
-			LuaDimsAndType dt(L, 3);
+			LuaDims dt(L, 3);
 
 			af_array * arr_ud = NewArray(L);// real, imag, ndims, dims, type, arr_ud
 
@@ -57,7 +57,7 @@ static const struct luaL_Reg constructor_funcs[] = {
 		{
 			lua_settop(L, 0);	// (empty)
 
-			uintl seed;
+			uintl seed = 0;
 
 			af_err err = af_get_seed(&seed);
 
@@ -72,8 +72,8 @@ static const struct luaL_Reg constructor_funcs[] = {
 		{
 			lua_settop(L, 5);	// ndims, dims, t_ndims, tdims, type
 
-			LuaDimsAndType dims(L, 1, false);	// Just dims, no type
-			LuaDimsAndType t_dt(L, 3);
+			LuaDims dims(L, 1);
+			LuaDims t_dt(L, 3);
 
 			af_array * arr_ud = NewArray(L);// ndims, dims, t_ndims, tdims, type, arr_ud
 
@@ -89,15 +89,14 @@ static const struct luaL_Reg constructor_funcs[] = {
 		"af_range", [](lua_State * L)
 		{
 			lua_settop(L, 4);	// ndims, dims, seq_dim, type
-			lua_insert(L, 3);	// ndims, dims, type, seq_dim
 
-			LuaDimsAndType dt(L, 1);
+			LuaDims dt(L, 1);
 
-			af_array * arr_ud = NewArray(L);// data, ndims, dims, type, arr_ud
+			af_array * arr_ud = NewArray(L);// ndims, dims, seq_dim, type, arr_ud
 
-			af_err err = af_range(arr_ud, dt.GetNDims(), dt.GetDims(), lua_tointeger(L, 4), dt.GetType());
+			af_err err = af_range(arr_ud, dt.GetNDims(), dt.GetDims(), I(L, 3), Arg<af_dtype>(L, 4));
 
-			return PushErr(L, err);	// data, ndims, dims, type, err, arr_ud
+			return PushErr(L, err);	// ndims, dims, seq_dim, type, err, arr_ud
 		}
 	}, {
 		"af_set_seed", [](lua_State * L)

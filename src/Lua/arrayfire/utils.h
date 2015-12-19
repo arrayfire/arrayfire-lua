@@ -19,25 +19,24 @@ void * GetMemory (lua_State * L, int index);
 
 af_array GetArray (lua_State * L, int index);
 af_features GetFeatures (lua_State * L, int index);
+af_index_t * GetIndexer (lua_State * L, int index);
 
 af_array * NewArray (lua_State * L);
 af_features * NewFeatures (lua_State * L);
+af_index_t ** NewIndexer (lua_State * L);
 
 void ClearArray (lua_State * L, int index);
 void ClearFeatures (lua_State * L, int index);
+void ClearIndexer (lua_State * L, int index);
 
-// ^^^ TODO: indexers...
-
-class LuaDimsAndType {
-	af_dtype mType;
+class LuaDims {
 	std::vector<dim_t> mDims;
 
 public:
-	LuaDimsAndType (lua_State * L, int first, bool def_type = false);
+	LuaDims (lua_State * L, int first);
 
 	int GetNDims (void) const { return mDims.size(); }
 	const dim_t * GetDims (void) const { return &mDims.front(); }
-	af_dtype GetType (void) const { return mType; }
 };
 
 class LuaData {
@@ -46,7 +45,7 @@ class LuaData {
 	const char * mDataPtr;
 
 public:
-	LuaData (lua_State * L, int index, af_dtype type, bool copy = false);
+	LuaData (lua_State * L, int index, int type_index, bool copy = false);
 
 	const char * GetData (void) const { return mDataPtr; }
 	af_dtype GetType (void) const { return mType; }
@@ -56,7 +55,7 @@ template<af_err (*func)(af_array *, const unsigned, const dim_t *, const af_dtyp
 {
 	lua_settop(L, 3);	// ndims, dims, type
 
-	LuaDimsAndType dt(L, 1);
+	LuaDims dt(L, 1);
 
 	af_array * arr_ud = NewArray(L);// ndims, dims, type, arr_ud
 

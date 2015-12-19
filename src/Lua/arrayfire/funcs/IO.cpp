@@ -53,7 +53,7 @@ static const struct luaL_Reg io_funcs[] = {
 		{
 			lua_settop(L, 2);	// filename, key
 
-			int index;
+			int index = -1;
 
 			af_err err = af_read_array_key_check(&index, S(L, 1), S(L, 2));
 
@@ -67,7 +67,7 @@ static const struct luaL_Reg io_funcs[] = {
 		{
 			lua_settop(L, 4);	// key, arr, filename, append
 
-			int index;
+			int index = -1;
 
 			af_err err = af_save_array(&index, S(L, 1), GetArray(L, 2), S(L, 3), B(L, 4));
 

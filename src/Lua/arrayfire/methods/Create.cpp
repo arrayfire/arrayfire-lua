@@ -7,13 +7,13 @@ template<af_err (*func)(af_array *, const void *, unsigned int, const dim_t *, a
 {
 	lua_settop(L, 4);	// data, ndims, dims, type
 
-	LuaDimsAndType dt(L, 2);
+	LuaDims dt(L, 2);
 
 	af_array * arr_ud = NewArray(L);// data, ndims, dims, type, arr_ud
 
-	LuaData arr(L, 1, dt.GetType());
+	LuaData arr(L, 1, 4);
 
-	af_err err = func(arr_ud, arr.GetData(), dt.GetNDims(), dt.GetDims(), Arg<af_dtype>(L, 4));
+	af_err err = func(arr_ud, arr.GetData(), dt.GetNDims(), dt.GetDims(), arr.GetType());
 
 	return PushErr(L, err);	// data, ndims, dims, type, err, arr_ud
 }
