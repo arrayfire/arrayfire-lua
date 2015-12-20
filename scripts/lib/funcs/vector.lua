@@ -1,6 +1,7 @@
 --- Vector functions.
 
 -- Standard library imports --
+local assert = assert
 local min = math.min
 local select = select
 local type = type
@@ -20,6 +21,7 @@ local ToType = array.ToType
 local M = {}
 
 -- See also: https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/reduce.cpp
+-- https://github.com/arrayfire/arrayfire/blob/devel/src/api/cpp/where.cpp
 
 --
 local function Bool (value)
@@ -172,7 +174,14 @@ function M.Add (into)
 		end,
 
 		--
-		sum = ReduceNaN("sum")
+		sum = ReduceNaN("sum"),
+
+		--
+		where = function(in_arr)
+			assert(not GetLib().gforGet(), "WHERE can not be used inside GFOR") -- TODO: AF_ERR_RUNTIME);
+	
+			return CallWrap("af_where", in_arr:get())
+		end
 	} do
 		into[k] = v
 	end

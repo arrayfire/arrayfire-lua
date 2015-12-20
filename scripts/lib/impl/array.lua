@@ -139,17 +139,10 @@ end
 
 --- DOCME
 -- @tparam LuaArray arr
--- @bool remove
 -- @treturn ?|af_array|nil X
-function M.GetHandle (arr, remove)
+function M.GetHandle (arr)
 -- TODO: If proxy, add reference?
-	local ha = arr.m_handle
-
-	if remove then
-		arr.m_handle = nil
-	end
-
-	return ha
+	return arr.m_handle
 end
 
 -- --
@@ -187,6 +180,8 @@ end
 function M.IsConstant (item)
 	return not not Constants[item] -- metatable redundant; coerce to false if missing
 end
+
+-- TODO: IsProxy(), MakeProxy()...
 
 --- DOCME
 -- @tparam LuaArray arr
@@ -237,9 +232,8 @@ function M.ToType (ret_type, real, imag)
 	if rtype == "c32" or rtype == "c64" then
 		return { real = real, imag = imag }
 	else
-		return real
+		return real -- TODO: Improve this!
 	end
-	-- TODO: Improve these a bit
 end
 
 --- DOCME
@@ -279,7 +273,7 @@ end
 function M.WrapArray (arr)
 	local wrapped = setmetatable({ m_handle = arr }, ArrayMethodsAndMetatable)
 
-	_AddToCurrentEnvironment_(wrapped)
+	_AddToCurrentEnvironment_("array", wrapped)
 
 	return wrapped
 end
@@ -299,8 +293,8 @@ end
 for _, v in ipairs{
 	"lib.impl.ephemeral",
 	"lib.impl.operators",
-	"lib.impl.seq",
-	"lib.impl.index", -- depends on seq
+	"lib.impl.seq", -- depends on ephemeral
+	"lib.impl.index", -- depends on ephemeral, seq
 	"lib.methods.methods"
 } do
 	require(v).Add(M, ArrayMethodsAndMetatable)
@@ -308,6 +302,17 @@ end
 
 ArrayMethodsAndMetatable.__index = ArrayMethodsAndMetatable
 ArrayMethodsAndMetatable.__metatable = MetaValue
+
+-- Register array environment type.
+M.RegisterEnvironmentCleanup("array", function(arr)
+	local ha = arr:get()
+
+	arr.m_handle = nil -- set() can error out
+
+	return not ha or af.af_release_array(ha) == SUCCESS
+	-- TODO: pooling?
+end, "Errors releasing %i arrays")
+-- TODO: Register "array_proxy"?
 
 -- By default, check valid names.
 M.CheckNames(true)

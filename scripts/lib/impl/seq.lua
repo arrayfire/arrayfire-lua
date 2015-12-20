@@ -164,5 +164,7 @@ end
 SeqMT.__index = SeqMT
 SeqMT.__metatable = MetaValue
 
+-- TODO: Add "seq" environment type?
+
 -- Export the module.
 return M
