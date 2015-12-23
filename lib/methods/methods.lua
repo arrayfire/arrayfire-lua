@@ -18,11 +18,11 @@ function M.Add (array_module, meta)
 	local GetLib = array_module.GetLib
 
 	--
-	local function Wrap (name)
+	local function Get (name)
 		name = "af_" .. name
 
 		return function(arr)
-			return CallWrap(name, arr:get())
+			return Call(name, arr:get())
 		end
 	end
 
@@ -53,7 +53,9 @@ function M.Add (array_module, meta)
 		end,
 
 		--
-		copy = Wrap("copy_array"),
+		copy = function(arr)
+			return CallWrap("af_copy_array", arr:get())
+		end,
 
 		--
 		dims = function(arr, i)
@@ -65,51 +67,51 @@ function M.Add (array_module, meta)
 		end,
 
 		--
-		elements = function(arr)
-			return Call("af_get_elements", arr:get())
-		end,
+		elements = Get("get_elements"),
 
 		--
-		eval = Wrap("eval"),
+		eval = function(arr)
+			Call("af_eval", arr:get())
+		end,
 
 		--
 		get = array_module.GetHandle,
 
 		--
-		isbool = Wrap("is_bool"),
+		isbool = Get("is_bool"),
 
 		--
-		iscolumn = Wrap("is_column"),
+		iscolumn = Get("is_column"),
 
 		--
-		iscomplex = Wrap("is_complex"),
+		iscomplex = Get("is_complex"),
 
 		--
-		isdouble = Wrap("is_double"),
+		isdouble = Get("is_double"),
 
 		--
-		isempty = Wrap("is_empty"),
+		isempty = Get("is_empty"),
 
 		--
-		isfloating = Wrap("is_floating"),
+		isfloating = Get("is_floating"),
 
 		--
-		isinteger = Wrap("is_integer"),
+		isinteger = Get("is_integer"),
 
 		--
-		isrealfloating = Wrap("is_real_floating"),
+		isrealfloating = Get("is_real_floating"),
 
 		--
-		isrow = Wrap("is_row"),
+		isrow = Get("is_row"),
 
 		--
-		isscalar = Wrap("is_scalar"),
+		isscalar = Get("is_scalar"),
 
 		--
-		issingle = Wrap("is_single"),
+		issingle = Get("is_single"),
 
 		--
-		isvector = Wrap("is_vector"),
+		isvector = Get("is_vector"),
 
 		--
 		H = function(arr)
@@ -129,7 +131,7 @@ function M.Add (array_module, meta)
 			return GetLib().transpose(arr)
 		end,
 
-		type = Wrap("get_type")
+		type = Get("get_type")
 	} do
 		meta[k] = v
 	end

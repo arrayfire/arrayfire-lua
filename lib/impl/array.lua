@@ -35,18 +35,29 @@ local MetaValue = {}
 local Constants = setmetatable({}, { __mode = "k" })
 
 --
-local function CallFromName_Checked (name, ...)
-	if type(name) ~= "string" then
-		if traceback then
-			print(traceback())
-		end
+local function ErrorOut (what)
+	if traceback then
+		print(traceback())
+	end
 
-		error("Expected string name, got: " .. tostring(name))
+	error(what)
+end
+
+--
+local function CallFromName_Checked (name, ...)
+	local func = af[name]
+
+	if type(func) ~= "function" then
+		if type(name) ~= "string" then
+			ErrorOut("Expected string name, got: " .. tostring(name))
+		else
+			ErrorOut(name .. " is not a function")
+		end
 	end
 
 	Name = name
 
-	return _CheckError_(af[name](...))
+	return _CheckError_(func(...))
 end
 
 --

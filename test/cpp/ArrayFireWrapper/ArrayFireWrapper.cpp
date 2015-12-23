@@ -138,7 +138,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
 			path_strip_filename(dir);
 		}
-		wprintf(L"DIR: %s\n", dir);
+
 #endif
 		int n = 0;
 
