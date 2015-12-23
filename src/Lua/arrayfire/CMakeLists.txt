@@ -34,13 +34,13 @@ FILE(GLOB template_src
   "template/*.cpp")
 
 SOURCE_GROUP(template FILES ${template_src})
+ADD_DEFINITIONS(-DLUA_COMPAT_MODULE)
 
 # OS Definitions
 IF(UNIX)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -pthread -Wno-comment")
     ADD_DEFINITIONS(-Wall -std=c++11 -fvisibility=hidden)
 ELSE(${UNIX}) #Windows
-    ADD_DEFINITIONS(-DAFDLL)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
     SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /bigobj")
