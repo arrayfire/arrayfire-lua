@@ -14,7 +14,7 @@ local abs = math.abs
 local sqrt = math.sqrt
 
 -- Modules --
-local AF = require("af_lib")
+local AF = require("arrayfire")
 
 -- Shorthands --
 local Comp, WC = AF.CompareResult, AF.WrapConstant

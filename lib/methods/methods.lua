@@ -1,7 +1,7 @@
 --- Array methods.
 
 -- Modules --
-local af = require("arrayfire")
+local af = require("arrayfire_lib")
 
 -- Exports --
 local M = {}

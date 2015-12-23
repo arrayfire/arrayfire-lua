@@ -10,7 +10,7 @@
 ]]
 
 -- Modules --
-local AF = require("af_lib")
+local AF = require("arrayfire")
 
 -- create a small wrapper to benchmark
 local A -- populated before each timing

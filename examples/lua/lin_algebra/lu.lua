@@ -10,7 +10,7 @@
 ]]
  
  -- Modules --
-local AF = require("af_lib")
+local AF = require("arrayfire")
 
 AF.main(function()
 	local in_arr = AF.randu(5, 8)

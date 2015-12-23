@@ -11,7 +11,7 @@
  
 -- Modules --
 local input = require("financial.input")
-local AF = require("af_lib")
+local AF = require("arrayfire")
 
 -- --
 local sqrt2 = math.sqrt(2)

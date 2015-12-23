@@ -10,7 +10,7 @@
 ]]
 
 -- Modules --
-local AF = require("af_lib")
+local AF = require("arrayfire")
 
 local ITERATIONS = 200
 local PRECISION = 1.0/ITERATIONS

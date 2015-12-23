@@ -10,7 +10,7 @@ local traceback = debug and debug.traceback
 local type = type
 
 -- Modules --
-local af = require("arrayfire")
+local af = require("arrayfire_lib")
 
 -- Cached module references --
 local _AddToCurrentEnvironment_
@@ -150,8 +150,7 @@ local Lib
 
 --- DOCME
 function M.GetLib ()
-	Lib = Lib or require("af_lib")
-
+	Lib = Lib or require("arrayfire")
 	return Lib
 end
 
@@ -212,7 +211,7 @@ function M.ToArray (value, other)
 	local btype, hother = type(value), other:get()
 	local ndims = _Call_("af_get_numdims", hother)
 
-	Args[1], Args[2], Args[3], Args[4] = _Call_("af_get_dims", hother)				
+	Args[1], Args[2], Args[3], Args[4] = _Call_("af_get_dims", hother)
 
 	if btype == "table" then
 		-- Complex...

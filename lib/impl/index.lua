@@ -1,7 +1,7 @@
 --- Core index module.
 
 -- Modules --
-local af = require("arrayfire")
+local af = require("arrayfire_lib")
 
 -- Forward declarations --
 

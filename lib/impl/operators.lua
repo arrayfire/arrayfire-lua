@@ -1,7 +1,7 @@
 --- Operator overloads.
 
 -- Modules --
-local af = require("arrayfire")
+local af = require("arrayfire_lib")
 
 -- Forward declarations --
 local CallWrap

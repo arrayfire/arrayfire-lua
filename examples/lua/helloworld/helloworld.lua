@@ -10,7 +10,7 @@
  --]]
 
 -- Modules --
-local AF = require("af_lib")
+local AF = require("arrayfire")
 
 AF.main(function()
     print("Create a 5-by-3 matrix of random floats on the GPU")

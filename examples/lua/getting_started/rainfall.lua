@@ -25,7 +25,7 @@ print("")
 -- note: example adapted from
 --  "Rapid Problem Solving Using Thrust", Nathan Bell, NVIDIA
  -- Modules --
-local AF = require("af_lib")
+local AF = require("arrayfire")
 
 -- Shorthands --
 local Comp, WC = AF.CompareResult, AF.WrapConstant

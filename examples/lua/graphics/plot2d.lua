@@ -13,7 +13,7 @@
 local pi = math.pi
 
 -- Modules --
-local AF = require("af_lib")
+local AF = require("arrayfire")
 
 --
 local ITERATIONS = 100

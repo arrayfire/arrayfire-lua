@@ -7,7 +7,7 @@ The wrapper is currently compliant with ArrayFire 3.2 API (and higher). If you f
 ## Example
 
 ```lua
-local AF = require("af_lib")
+local AF = require("arrayfire")
 
 AF.main(function()
       local x = AF.randu(5, "f32")

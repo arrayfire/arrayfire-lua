@@ -10,7 +10,7 @@
 ]]
  
  -- Modules --
-local lib = require("af_lib")
+local lib = require("arrayfire")
 
 lib.main(function()
 	-- 5x5 derivative with separable kernels

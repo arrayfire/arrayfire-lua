@@ -10,7 +10,7 @@
 ]]
  
  -- Modules --
-local AF = require("af_lib")
+local AF = require("arrayfire")
 
 AF.main(function()
 	print("Running QR InPlace")

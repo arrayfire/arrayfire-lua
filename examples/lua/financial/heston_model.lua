@@ -36,7 +36,7 @@ local exp = math.exp
 local sqrt = math.sqrt
 
 -- Modules --
-local AF = require("af_lib")
+local AF = require("arrayfire")
 
 print("")
 print("N.B. THIS IS A WIP")

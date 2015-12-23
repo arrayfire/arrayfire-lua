@@ -2,7 +2,7 @@
 local floor = math.floor
 
 -- Modules --
-local AF = require("af_lib")
+local AF = require("arrayfire")
 
 AF.main(function(argc, arv)
 	local win

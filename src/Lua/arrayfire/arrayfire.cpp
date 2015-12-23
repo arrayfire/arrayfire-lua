@@ -18,7 +18,7 @@ void Register (lua_State * L, lua_CFunction func)
 	}
 }
 
-__EXPORT__  int luaopen_arrayfire (lua_State * L)
+__EXPORT__  int luaopen_arrayfire_lib (lua_State * L)
 {
 	lua_createtable(L, 0, 0);	// af
 

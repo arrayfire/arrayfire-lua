@@ -9,7 +9,7 @@
  ********************************************************/
  --]]
 
-local AF = require("af_lib")
+local AF = require("arrayfire")
 
 AF.main(function()
       local x = AF.randu(5, "f32")

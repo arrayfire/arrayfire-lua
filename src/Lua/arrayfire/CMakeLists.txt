@@ -49,16 +49,16 @@ ENDIF()
 INCLUDE_DIRECTORIES(${ArrayFire_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${LUA_INCLUDE_DIR})
 
-ADD_LIBRARY(arrayfire SHARED
+ADD_LIBRARY(arrayfire_lib SHARED
            ${src}
            ${funcs_src}
            ${graphics_src}
            ${methods_src})
 
-TARGET_LINK_LIBRARIES(arrayfire
+TARGET_LINK_LIBRARIES(arrayfire_lib
   ${ArrayFire_Unified_LIBRARIES}
   ${LUA_LIBRARIES}
   )
 
-SET_TARGET_PROPERTIES(arrayfire PROPERTIES
+SET_TARGET_PROPERTIES(arrayfire_lib PROPERTIES
                       PREFIX "")

@@ -8,7 +8,7 @@ local type = type
 local unpack = unpack
 
 -- Modules --
-local af = require("arrayfire")
+local af = require("arrayfire_lib")
 local array = require("impl.array")
 
 -- Imports --
