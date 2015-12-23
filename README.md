@@ -82,7 +82,7 @@ You can install ArrayFire using one of the following two ways.
 3. Run `cmake /path/to/arrayfire-lua/ -DCMAKE_INSTALL_PREFIX=package`.
 4. Run `make`
 
-### Setting up the
+### Setting up Lua paths
 
 **Windows**
 
@@ -95,6 +95,9 @@ You can install ArrayFire using one of the following two ways.
     $ export LUA_PATH="/path/to/install/location/arrayfire/?.lua;;"
     $ export LUA_CPATH="/path/to/install/location/?.so;;"
     $ lua helloworld/helloworld.lua
+
+
+You should now be good to go!
 
 ## Issues
 
