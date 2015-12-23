@@ -1,6 +1,45 @@
 # Arrayfire Lua Bindings
 
-[ArrayFire](https://github.com/arrayfire/arrayfire) is a high performance library for parallel computing with an easy-to-use API. It enables users to write scientific computing code that is portable across CUDA, OpenCL and CPU devices. This project provides Lua bindings for the ArrayFire library. The wrapper is currently compliant with ArrayFire 3.2 API (and higher).  If you find any bugs, please report them [here](https://github.com/arrayfire/arrayfire-lua/issues).
+[ArrayFire](https://github.com/arrayfire/arrayfire) is a high performance library for parallel computing with an easy-to-use API. It enables users to write scientific computing code that is portable across CUDA, OpenCL and CPU devices. This project provides Lua bindings for the ArrayFire library.
+
+The wrapper is currently compliant with ArrayFire 3.2 API (and higher). If you find any bugs, please report them [here](https://github.com/arrayfire/arrayfire-lua/issues).
+
+## Example
+
+```lua
+local AF = require("af_lib")
+
+AF.main(function()
+      local x = AF.randu(5, "f32")
+      AF.print("x", x)
+      AF.print("min of x", AF.min(x))
+      AF.print("max of x", AF.max(x))
+end)
+```
+
+```
+$ lua examples/lua/helloworld/intro.lua
+ArrayFire v3.2.1 (CUDA, 64-bit Linux, build f263db0)
+Platform: CUDA Toolkit 7.5, Driver: 358.16
+[0] GeForce GTX 690, 2047 MB, CUDA Compute 3.0
+-1- GeForce GTX 690, 2048 MB, CUDA Compute 3.0
+
+x
+[5 1 1 1]
+0.7402
+0.9210
+0.0390
+0.9690
+0.9251
+
+min of x
+[1 1 1 1]
+0.0390
+max of x
+[1 1 1 1]
+0.9690
+
+```
 
 ## Documentation
 
@@ -46,7 +85,7 @@ Use the `cmake` file in `src/Lua/arrayfire` to build the library.
 
 - Ensure `ArrayFire_DIR` points to `/path/to/arrayfire/share/ArrayFire/cmake`
 
-## Running the example
+## Setting up the environment
 
 ### Linux / OSX
 
@@ -55,10 +94,6 @@ Use the `cmake` file in `src/Lua/arrayfire` to build the library.
     $ lua helloworld/helloworld.lua
 
 ## Issues
-
-Currently segfaults on Linux. Untested on OSX.
-
-## Note
 
 This is a work in progress and is not intended for production use.
 
