@@ -1,6 +1,7 @@
 INCLUDE(ExternalProject)
 
 SET(prefix ${CMAKE_BINARY_DIR}/third_party/lua)
+SET(lua_lib_prefix "${prefix}/lib")
 
 SET(lua_location "${prefix}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}lua${CMAKE_SHARED_LIBRARY_SUFFIX}")
 IF(CMAKE_VERSION VERSION_LESS 3.2)
@@ -44,9 +45,15 @@ ExternalProject_Add(
     ${byproducts}
     )
 
+ExternalProject_Get_Property(lua-ext binary_dir)
 ExternalProject_Get_Property(lua-ext install_dir)
+
 ADD_LIBRARY(lua IMPORTED SHARED)
 SET_TARGET_PROPERTIES(lua PROPERTIES IMPORTED_LOCATION ${lua_location})
+IF(WIN32)
+    SET_TARGET_PROPERTIES(lua PROPERTIES IMPORTED_IMPLIB ${lua_lib_prefix}/lua.lib)
+ENDIF(WIN32)
+
 ADD_DEPENDENCIES(lua lua-ext)
 SET(LUA_INCLUDE_DIR ${install_dir}/include)
 SET(LUA_LIBRARIES lua)
