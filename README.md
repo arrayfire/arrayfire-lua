@@ -1,53 +1,62 @@
-(Pilfered from [Rust's README](https://github.com/arrayfire/arrayfire-rust), adapting...)
-
 # Arrayfire Lua Bindings
 
-[ArrayFire](https://github.com/arrayfire/arrayfire) is a high performance library for parallel computing with an easy-to-use API. It enables users to write scientific computing code that is portable across CUDA, OpenCL and CPU devices. This project provides Lua bindings for the ArrayFire library. The wrapper is currently compliant with ArrayFire 3.2 API (and lower).  If you find any bugs, please report them [here](https://github.com/arrayfire/arrayfire-lua/issues).
+[ArrayFire](https://github.com/arrayfire/arrayfire) is a high performance library for parallel computing with an easy-to-use API. It enables users to write scientific computing code that is portable across CUDA, OpenCL and CPU devices. This project provides Lua bindings for the ArrayFire library. The wrapper is currently compliant with ArrayFire 3.2 API (and higher).  If you find any bugs, please report them [here](https://github.com/arrayfire/arrayfire-lua/issues).
 
 ## Documentation
 
-You can find the most recent updated documentation TODO.
+TODO
 
 ## Supported platforms
 
-Currently, only Windows. So far, compiles with [Lua 5.1](http://www.lua.org/ftp/lua-5.1.5.tar.gz).
+Currently, tested only Windows with [Lua 5.1](http://www.lua.org/ftp/lua-5.1.5.tar.gz).
 
-## Build from Source
+- Progress being made on Linux and OSX with Lua 5.2 and 5.3
+
+## Installing the dependencies
+
+### Get ArrayFire libraries
 
 You can install ArrayFire using one of the following two ways.
 
 - [Download and install binaries](https://arrayfire.com/download)
 - [Build and install from source](https://github.com/arrayfire/arrayfire)
 
-- Build Lua, e.g. from above source
-- arrayfire depends on Lua (TODO: probably should add -lua suffix...)
-- (Windows) client depends on both of these
-- In these latter two, linkage required for appropriate ArrayFire library
+**Post Installation Instructions**
 
-TODO: [5.2](http://www.lua.org/ftp/lua-5.2.4.tar.gz), [5.3](http://www.lua.org/ftp/lua-5.3.2.tar.gz)... [LuaJIT source](http://luajit.org/download.html). 
-Alternatives such as [Ravi](https://github.com/dibyendumajumdar/ravi) and [Terra](https://github.com/zdevito/terra)?
+- Please read [the wiki page](https://github.com/arrayfire/arrayfire-lua/wiki) for setting up the proper environment variables.
 
-Preprocessor stuff:
+### Get Lua libraries and header files
 
-	For Lua: LUA_BUILD_AS_DLL; Windows-specific: _CRT_SECURE_NO_WARNINGS
-	For arrayfire: AFDLL
+If you do not have the pre-installed library, use the source in `arrayfire-lua/lua` folder for building the libraries.
 
-	Not implemented: WANT_CUDA, WANT_OPENCL to include interface bindings (are there already alternatives?)
+The following pre-processors need to be set when building lua.
 
-Setup:
+    - LUA_BUILD_AS_DLL
+    - CRT_SECURE_NO_WARNINGS
 
-	Configuring package.path, package.cpath (ArrayFireWrapper/ArrayFireWrapper.cpp doing this, for Windows anyhow)
-	LuaJIT FFI looking for some variables (TODO: explain)
-	
-## Example
+## Building the arrayfire module
 
+### Windows
 
+Use the visual studio project file present in `src/Lua/arrayfire` to build the library.
 
-### Sample output
+### Linux / OSX
 
+Use the `cmake` file in `src/Lua/arrayfire` to build the library.
+
+- Ensure `ArrayFire_DIR` points to `/path/to/arrayfire/share/ArrayFire/cmake`
+
+## Running the example
+
+### Linux / OSX
+
+    $ export LUA_PATH="/path/to/arrayfire-lua/lib/?.lua;;"
+    $ export LUA_CPATH="/path/to/arrayfire-lua/src/Lua/arrayfire/build/?.so;;"
+    $ lua helloworld/helloworld.lua
 
 ## Issues
 
+Currently segfaults on Linux. Untested on OSX.
 
 ## Note
 
@@ -55,13 +64,4 @@ This is a work in progress and is not intended for production use.
 
 ## Acknowledgements
 
-The ArrayFire library is written by developers at [ArrayFire](http://arrayfire.com) LLC
-with (TODO: contributions)?
-
-The developers at ArrayFire LLC have received partial financial support
-from several grants and institutions. Those that wish to receive public
-acknowledgement are listed below:
-
-### Grants
-
-(Not sure if this was for Rust or ArrayFire... if the latter, add back in)
+This project began with significant contributions from [Steven Johnson](https://github.com/ggcrunchy). It is currently being maintained by `@arrayfire/lua-devel` team.
