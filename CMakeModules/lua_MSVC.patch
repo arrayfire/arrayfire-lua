@@ -1,0 +1,21 @@
+commit 4b61e31e44bac6b09bb70d3dbcd1b470b754bb71
+Author: Shehzan Mohammed <shehzan@arrayfire.com>
+Date:   Wed Dec 23 15:01:27 2015 -0500
+
+    Lua MSVC snprintf patch
+
+diff --git a/src/lprefix.h b/src/lprefix.h
+index 02daa83..b56f8f6 100644
+--- a/src/lprefix.h
++++ b/src/lprefix.h
+@@ -39,6 +39,10 @@
+ #define _CRT_SECURE_NO_WARNINGS  /* avoid warnings about ISO C functions */
+ #endif
+ 
++#if _MSC_VER < 1900
++#define snprintf sprintf_s
++#endif
++
+ #endif			/* } */
+ 
+ #endif
