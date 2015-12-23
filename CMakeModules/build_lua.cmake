@@ -12,6 +12,10 @@ ELSE()
     SET(byproducts BYPRODUCTS ${lua_location})
 ENDIF()
 
+IF(WIN32)
+    ADD_DEFINITIONS("-DLUA_DL_DLL")
+ENDIF()
+
 # FIXME Tag forge correctly during release
 ExternalProject_Add(
     lua-ext
