@@ -45,13 +45,12 @@ max of x
 
 TODO
 
-## Supported platforms
+## Getting Started
 
-Currently, tested only Windows with [Lua 5.1](http://www.lua.org/ftp/lua-5.1.5.tar.gz).
+### Requirements
 
-- Progress being made on Linux and OSX with Lua 5.2 and 5.3
-
-## Installing the dependencies
+- `cmake`
+- `Visual Studio` on Windows, `clang` / `gcc` on Linux / OSX.
 
 ### Get ArrayFire libraries
 
@@ -64,33 +63,37 @@ You can install ArrayFire using one of the following two ways.
 
 - Please read [the wiki page](https://github.com/arrayfire/arrayfire-lua/wiki) for setting up the proper environment variables.
 
-### Get Lua libraries and header files
+### Building the Lua module
 
-If you do not have the pre-installed library, use the source in `arrayfire-lua/lua` folder for building the libraries.
+**Windows**
 
-The following pre-processors need to be set when building lua.
+1. Launch `cmake-gui`. Set source and build directories.
+2. Press configure.
+3. Select `generator` as `Visual Studio 12 2013 Win64`.
+   - You can choose a different generator as long as it is Win64.
+4. Set `CMAKE_INSTALL_PREFIX` to a location of choice.
+5. Press generate. The generated visual studio solution file will be present in the build directory.
+6. Open the VS solution file and build the `INSTALL` project.
 
-    - LUA_BUILD_AS_DLL
-    - CRT_SECURE_NO_WARNINGS
+**Linux / OSX**
 
-## Building the arrayfire module
+1. Make sure the environment variable `ArrayFire_DIR` is set to `/path/to/arrayfire/share/ArrayFire/cmake`.
+2. Create a build directory and `cd` into it.
+3. Run `cmake /path/to/arrayfire-lua/ -DCMAKE_INSTALL_PREFIX=package`.
+4. Run `make`
 
-### Windows
+### Setting up the
 
-Use the visual studio project file present in `src/Lua/arrayfire` to build the library.
+**Windows**
 
-### Linux / OSX
+    > SET LUA_PATH=C:\path\to\install\location\arrayfire\?.lua;;
+    > SET LUA_CPATH=C:\path\to\install\location\?.dll;;
+    > lua.exe helloworld/helloworld.lua
 
-Use the `cmake` file in `src/Lua/arrayfire` to build the library.
+**Linux**
 
-- Ensure `ArrayFire_DIR` points to `/path/to/arrayfire/share/ArrayFire/cmake`
-
-## Setting up the environment
-
-### Linux / OSX
-
-    $ export LUA_PATH="/path/to/arrayfire-lua/lib/?.lua;;"
-    $ export LUA_CPATH="/path/to/arrayfire-lua/src/Lua/arrayfire/build/?.so;;"
+    $ export LUA_PATH="/path/to/install/location/arrayfire/?.lua;;"
+    $ export LUA_CPATH="/path/to/install/location/?.so;;"
     $ lua helloworld/helloworld.lua
 
 ## Issues
