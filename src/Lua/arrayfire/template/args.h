@@ -1,6 +1,11 @@
 #ifndef ARGS_TEMPLATE_H
 #define ARGS_TEMPLATE_H
 
+extern "C" {
+	#include <lua.h>
+	#include <lauxlib.h>
+}
+
 #include <arrayfire.h>
 
 template<class T>

@@ -6,6 +6,8 @@ extern "C" {
 	#include <lauxlib.h>
 }
 
+#include "lua_compat.h"
+
 int AssignIndex (lua_State * L);
 int Create (lua_State * L);
 int Constructor (lua_State * L);

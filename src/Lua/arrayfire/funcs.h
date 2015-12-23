@@ -6,6 +6,8 @@ extern "C" {
 	#include <lauxlib.h>
 }
 
+#include "lua_compat.h"
+
 int AddEnums (lua_State * L);
 int CreateArrayFuncs (lua_State * L);
 int Backends (lua_State * L);

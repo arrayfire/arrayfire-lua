@@ -1,3 +1,4 @@
+#include "export.h"
 #include "funcs.h"
 #include "graphics.h"
 #include "methods.h"
@@ -17,7 +18,7 @@ void Register (lua_State * L, lua_CFunction func)
 	}
 }
 
-extern "C" __declspec(dllexport) int luaopen_arrayfire (lua_State * L)
+__EXPORT__  int luaopen_arrayfire (lua_State * L)
 {
 	lua_createtable(L, 0, 0);	// af
 

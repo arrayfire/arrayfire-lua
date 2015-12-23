@@ -6,6 +6,8 @@ extern "C" {
 	#include <lauxlib.h>
 }
 
+#include "lua_compat.h"
+
 int Draw (lua_State * L);
 int Window (lua_State * L);
 

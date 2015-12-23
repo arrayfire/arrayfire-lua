@@ -1,5 +1,5 @@
 #include "utils.h"
-#include "template/args.h"
+#include "lua_compat.h"
 
 af_dtype GetDataType (lua_State * L, int index)
 {
@@ -201,7 +201,7 @@ LuaDims::LuaDims (lua_State * L, int first)
 {
 	luaL_checktype(L, first + 1, LUA_TTABLE);
 
-	int n = luaL_checkint(L, first);
+	int n = (int)luaL_checkinteger(L, first);
 
 	for (int i = 0; i < n; ++i)
 	{
