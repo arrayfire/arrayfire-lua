@@ -1,9 +1,9 @@
 package = "arrayfire"
-version = "3.4-0"
+version = "scm-1"
 source = {
-   url = "git://github.com/arrayfire/arrayfire-lua",
-   tag = "master",
-   dir = "."
+   url = "git://github.com/pavanky/arrayfire-lua",
+   tag = "devel",
+   dir = "arrayfire-lua"
 }
 description = {
    summary = "Lua Bindings for ArrayFire",
@@ -18,6 +18,8 @@ build = {
    modules = {
       arrayfire = "arrayfire.lua",
       ["arrayfire.lib"]    = "arrayfire/lib.lua",
+      ["arrayfire.util"]   = "arrayfire/util.lua",
+      ["arrayfire.array"]  = "arrayfire/array.lua",
       ["arrayfire.device"] = "arrayfire/device.lua",
    },
 }
