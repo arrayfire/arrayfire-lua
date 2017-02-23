@@ -6,7 +6,30 @@ The wrapper is currently compliant with ArrayFire 3.4 API (and higher). If you f
 
 ## Example
 
-TODO
+Sample code:
+
+```
+local af = require('arrayfire')
+af.info()
+a = af.Array{1, 2, 3, 4}
+af.print(a)
+```
+
+Sample output:
+
+```
+ArrayFire v3.5.0 (CUDA, 64-bit Linux, build 06e605b0)
+Platform: CUDA Toolkit 8, Driver: 378.13
+[0] GeForce GTX 950, 1996 MB, CUDA Compute 5.2
+
+ArrayFire Array
+[4 1 1 1]
+1.0000
+2.0000
+3.0000
+4.0000
+
+```
 
 ## Documentation
 
