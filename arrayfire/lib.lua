@@ -24,12 +24,24 @@ if ffi.abi('32bit') then
 else
    ffi.cdef[[typedef long long dim_t;]]
 end
+
 ffi.cdef[[
-    typedef void * af_array;
-    typedef int af_dtype;
-    typedef int af_err;
-    typedef int af_source;
-    af_err af_get_version (int *, int *, int *);
+typedef void * af_array;
+typedef int af_dtype;
+typedef int af_err;
+typedef int af_source;
+
+typedef struct af_cfloat {
+    float real;
+    float imag;
+} af_cfloat;
+
+typedef struct af_cdouble {
+    double real;
+    double imag;
+} af_cdouble;
+
+af_err af_get_version (int *, int *, int *);
 ]]
 
 local major, minor, patch = ffi.new("int[1]"), ffi.new("int[1]"), ffi.new("int[1]")
@@ -45,4 +57,35 @@ af.lib.cdef = function(funcs)
          ffi.cdef(v)
       end
    end
+end
+
+
+af.isnumber = function(val)
+   return type(val) == "number"
+end
+
+af.istable = function(val)
+   return type(val) == "table"
+end
+
+af.ffi = {}
+
+af.ffi.c_void_p = function()
+   return ffi.new('void *')
+end
+
+af.ffi.c_array_p = function(ptr)
+   return ffi.new('void *[1]', ptr)
+end
+
+af.ffi.c_dim_t = function(number)
+   return ffi.new('dim_t', number)
+end
+
+af.ffi.c_uint_t = function(number)
+   return ffi.new('unsigned int', number)
+end
+
+af.ffi.c_dim4_t = function(dims)
+   return ffi.new('dim_t[4]', dims or {1, 1, 1, 1})
 end

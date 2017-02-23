@@ -27,3 +27,7 @@ funcs[34] = [[
 ]]
 
 af.lib.cdef(funcs)
+
+af.print = function(arr)
+   af.clib.af_print_array(arr:get())
+end
