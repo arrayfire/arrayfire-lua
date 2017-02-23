@@ -20,6 +20,7 @@ build = {
       ["arrayfire.lib"]    = "arrayfire/lib.lua",
       ["arrayfire.util"]   = "arrayfire/util.lua",
       ["arrayfire.array"]  = "arrayfire/array.lua",
+      ["arrayfire.defines"] = "arrayfire/defines.lua",
       ["arrayfire.device"] = "arrayfire/device.lua",
    },
 }
