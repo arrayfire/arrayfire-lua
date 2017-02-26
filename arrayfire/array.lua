@@ -1,5 +1,6 @@
 require('arrayfire.lib')
 require('arrayfire.defines')
+require('arrayfire.dim4')
 local ffi  = require( "ffi" )
 
 local funcs = {}
@@ -67,15 +68,22 @@ Array.__index = Array
 
 local c_dim4_t = af.ffi.c_dim4_t
 local c_uint_t = af.ffi.c_uint_t
-local c_array_p = af.ffi.c_array_p
+local c_ptr_t = af.ffi.c_ptr_t
+local Dim4 = af.Dim4
 
-local add_finalizer = function(arr_ptr)
-   return ffi.gc(arr_ptr[0], af.clib.af_release_array)
+local c_array_p = function(ptr)
+   local arr_ptr = ffi.new('void *[1]', ptr)
+   arr_ptr[0] = ffi.gc(arr_ptr[0], af.clib.af_release_array)
+   return arr_ptr
+end
+
+local init = function(ptr)
+   local self = setmetatable({}, Array)
+   self._array = ptr
+   return self
 end
 
 Array.__init = function(data, dims, dtype, source)
-   local self = setmetatable({}, Array)
-
    if data then
       assert(af.istable(data))
    end
@@ -87,22 +95,21 @@ Array.__init = function(data, dims, dtype, source)
    c_dims = c_dim4_t(dims or (data and {#data} or {}))
    c_ndims = c_uint_t(dims and #dims or (data and 1 or 0))
 
-   nelement = 1
+   count = 1
    for i = 1,tonumber(c_ndims) do
-      nelement = nelement * c_dims[i - 1]
+      count = count * c_dims[i - 1]
    end
-   nelement = tonumber(nelement)
+   count = tonumber(count)
 
    local atype = dtype or af.dtype.f32
    local res = c_array_p()
    if not data then
       af.clib.af_create_handle(res, c_ndims, c_dims, atype)
    else
-      c_data = ffi.new(af.dtype_names[atype + 1] .. '[?]', nelement, data)
+      c_data = c_ptr_t(af.dtype_names[atype + 1], count, data)
       af.clib.af_create_array(res, c_data, c_ndims, c_dims, atype)
    end
-   self.__arr = add_finalizer(res)
-   return self
+   return Array.init(res[0])
 end
 
 Array.__tostring = function(self)
@@ -110,8 +117,86 @@ Array.__tostring = function(self)
 end
 
 Array.get = function(self)
-   return self.__arr
+   return self._array
 end
+
+-- TODO: implement Array.write
+
+Array.copy = function(self)
+   local res = c_array_p()
+   af.clib.af_copy_array(res, self._array)
+   return Array.init(res[0])
+end
+
+Array.softCopy = function(self)
+   local res = c_array_p()
+   af.clib.af_copy_array(res, self._array)
+   return Array.init(res[0])
+end
+
+Array.elements = function(self)
+   local res = c_ptr_t('dim_t')
+   af.clib.af_get_elements(res, self._array)
+   return tonumber(res[0])
+end
+
+Array.type = function(self)
+   local res = c_ptr_t('af_dtype')
+   af.clib.af_get_type(res, self._array)
+   return tonumber(res[0])
+end
+
+Array.typeName = function(self)
+   local res = c_ptr_t('af_dtype')
+   af.clib.af_get_type(res, self._array)
+   return af.dtype_names[tonumber(res[0])]
+end
+
+Array.dims = function(self)
+   local res = c_dim4_t()
+   af.clib.af_get_dims(res + 0, res + 1, res + 2, res + 3, self._array)
+   return Dim4(tonumber(res[0]), tonumber(res[1]),
+               tonumber(res[2]), tonumber(res[3]))
+end
+
+Array.numdims = function(self)
+   local res = c_ptr_t('unsigned int')
+   af.clib.af_get_numdims(res, self._array)
+   return tonumber(res[0])
+end
+
+local funcs = {
+   isEmpty        = 'is_empty',
+   isScalar       = 'is_scalar',
+   isRow          = 'is_row',
+   isColumn       = 'is_column',
+   isVector       = 'is_vector',
+   isComplex      = 'is_complex',
+   isReal         = 'is_real',
+   isDouble       = 'is_double',
+   isSingle       = 'is_single',
+   isRealFloating = 'is_realfloating',
+   isFloating     = 'is_floating',
+   isInteger      = 'is_integer',
+   isBool         = 'is_bool',
+}
+
+for name, cname in pairs(funcs) do
+   Array[name] = function(self)
+      local res = c_ptr_t('bool')
+      af.clib['af_' .. cname](res, self._array)
+      return res[0]
+   end
+end
+
+Array.eval = function(self)
+   af.clib.af_eval(self._array)
+end
+
+-- Useful aliases
+Array.ndims = Array.numdims
+Array.nElement = Array.elements
+Array.clone = Array.copy
 
 setmetatable(
    Array,
@@ -124,3 +209,5 @@ setmetatable(
 
 af.Array = Array
 af.ffi.add_finalizer = add_finalizer
+af.ffi.c_array_p = c_array_p
+af.Array.init = init

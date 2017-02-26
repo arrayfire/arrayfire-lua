@@ -59,7 +59,6 @@ af.lib.cdef = function(funcs)
    end
 end
 
-
 af.isnumber = function(val)
    return type(val) == "number"
 end
@@ -74,12 +73,12 @@ af.ffi.c_void_p = function()
    return ffi.new('void *')
 end
 
-af.ffi.c_array_p = function(ptr)
-   return ffi.new('void *[1]', ptr)
-end
-
 af.ffi.c_dim_t = function(number)
    return ffi.new('dim_t', number)
+end
+
+af.ffi.c_ptr_t = function(ptr_type, count, values)
+   return ffi.new(ptr_type .. ' [?]', count or 1, values)
 end
 
 af.ffi.c_uint_t = function(number)
