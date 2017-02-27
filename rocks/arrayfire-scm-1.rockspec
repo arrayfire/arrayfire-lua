@@ -25,5 +25,6 @@ build = {
       ["arrayfire.dim4"]      = "arrayfire/dim4.lua",
       ["arrayfire.arith"]     = "arrayfire/arith.lua",
       ["arrayfire.algorithm"] = "arrayfire/algorithm.lua",
+      ["arrayfire.blas"]      = "arrayfire/blas.lua",
    },
 }
