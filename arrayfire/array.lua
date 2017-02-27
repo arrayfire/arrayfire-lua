@@ -71,15 +71,19 @@ local c_uint_t = af.ffi.c_uint_t
 local c_ptr_t = af.ffi.c_ptr_t
 local Dim4 = af.Dim4
 
+function release_array(ptr)
+   local res = af.clib.af_release_array(ptr)
+   -- TODO: Error handling logic
+end
+
 local c_array_p = function(ptr)
    local arr_ptr = ffi.new('void *[1]', ptr)
-   arr_ptr[0] = ffi.gc(arr_ptr[0], af.clib.af_release_array)
    return arr_ptr
 end
 
 local init = function(ptr)
    local self = setmetatable({}, Array)
-   self._array = ptr
+   self._ptr = ffi.gc(ptr, release_array)
    return self
 end
 
@@ -117,51 +121,51 @@ Array.__tostring = function(self)
 end
 
 Array.get = function(self)
-   return self._array
+   return self._ptr
 end
 
 -- TODO: implement Array.write
 
 Array.copy = function(self)
    local res = c_array_p()
-   af.clib.af_copy_array(res, self._array)
+   af.clib.af_copy_array(res, self:get())
    return Array.init(res[0])
 end
 
 Array.softCopy = function(self)
    local res = c_array_p()
-   af.clib.af_copy_array(res, self._array)
+   af.clib.af_copy_array(res, self:get())
    return Array.init(res[0])
 end
 
 Array.elements = function(self)
    local res = c_ptr_t('dim_t')
-   af.clib.af_get_elements(res, self._array)
+   af.clib.af_get_elements(res, self:get())
    return tonumber(res[0])
 end
 
 Array.type = function(self)
    local res = c_ptr_t('af_dtype')
-   af.clib.af_get_type(res, self._array)
+   af.clib.af_get_type(res, self:get())
    return tonumber(res[0])
 end
 
 Array.typeName = function(self)
    local res = c_ptr_t('af_dtype')
-   af.clib.af_get_type(res, self._array)
+   af.clib.af_get_type(res, self:get())
    return af.dtype_names[tonumber(res[0])]
 end
 
 Array.dims = function(self)
    local res = c_dim4_t()
-   af.clib.af_get_dims(res + 0, res + 1, res + 2, res + 3, self._array)
+   af.clib.af_get_dims(res + 0, res + 1, res + 2, res + 3, self:get())
    return Dim4(tonumber(res[0]), tonumber(res[1]),
                tonumber(res[2]), tonumber(res[3]))
 end
 
 Array.numdims = function(self)
    local res = c_ptr_t('unsigned int')
-   af.clib.af_get_numdims(res, self._array)
+   af.clib.af_get_numdims(res, self:get())
    return tonumber(res[0])
 end
 
@@ -184,13 +188,13 @@ local funcs = {
 for name, cname in pairs(funcs) do
    Array[name] = function(self)
       local res = c_ptr_t('bool')
-      af.clib['af_' .. cname](res, self._array)
+      af.clib['af_' .. cname](res, self:get())
       return res[0]
    end
 end
 
 Array.eval = function(self)
-   af.clib.af_eval(self._array)
+   af.clib.af_eval(self:get())
 end
 
 -- Useful aliases

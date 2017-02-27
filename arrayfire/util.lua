@@ -29,5 +29,5 @@ funcs[34] = [[
 af.lib.cdef(funcs)
 
 af.print = function(arr)
-   af.clib.af_print_array_gen(ffi.cast("char *", "ArrayFire Array"), arr._array, 4)
+   af.clib.af_print_array_gen(ffi.cast("char *", "ArrayFire Array"), arr:get(), 4)
 end
