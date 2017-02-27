@@ -29,5 +29,9 @@ funcs[34] = [[
 af.lib.cdef(funcs)
 
 af.print = function(arr)
-   af.clib.af_print_array_gen(ffi.cast("char *", "ArrayFire Array"), arr:get(), 4)
+   if type(arr) == 'table' and arr.isArray then
+      af.clib.af_print_array_gen(ffi.cast("char *", "ArrayFire Array"), arr:get(), 4)
+   else
+      print(arr)
+   end
 end

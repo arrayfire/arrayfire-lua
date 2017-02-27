@@ -27,9 +27,28 @@ end
 
 ffi.cdef[[
 typedef void * af_array;
-typedef int af_dtype;
 typedef int af_err;
+typedef int af_dtype;
 typedef int af_source;
+typedef int af_interp_type;
+typedef int af_border_type;
+typedef int af_connectivity;
+typedef int af_match_type;
+typedef int af_cspace_t;
+typedef int af_mat_prop;
+typedef int af_conv_mode;
+typedef int af_conv_domain;
+typedef int af_mat_prop;
+typedef int af_colormap;
+typedef int af_norm_type;
+typedef int af_ycc_std;
+typedef int af_image_format;
+typedef int af_backend;
+typedef int af_marker_type;
+typedef int af_moment_type;
+typedef int af_storage;
+typedef int af_binary_op;
+typedef int af_random_engine_type;
 
 typedef struct af_cfloat {
     float real;

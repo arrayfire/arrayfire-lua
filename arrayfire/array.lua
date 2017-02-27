@@ -84,6 +84,7 @@ end
 local init = function(ptr)
    local self = setmetatable({}, Array)
    self._ptr = ffi.gc(ptr, release_array)
+   self.isArray = true
    return self
 end
 
